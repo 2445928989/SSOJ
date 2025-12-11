@@ -23,21 +23,21 @@ namespace judger {
             return false;
         }
 
-        // 2. 地址空间限制（内存，需要转换 MB -> 字节）
-        rl.rlim_cur = rl.rlim_max = (rlim_t)limits.memoryLimitMB * 1024 * 1024;
+        // 2. 地址空间限制（内存，需要转换 KB -> 字节）
+        rl.rlim_cur = rl.rlim_max = (rlim_t)limits.memoryLimitKB * 1024;
         if (setrlimit(RLIMIT_AS, &rl) != 0) {
             log("WARN", "Failed to set RLIMIT_AS (may not be critical)");
             // 某些系统可能失败，不是致命错误
         }
 
-        // 3. 栈大小限制（MB -> 字节）
-        rl.rlim_cur = rl.rlim_max = (rlim_t)limits.stackLimitMB * 1024 * 1024;
+        // 3. 栈大小限制（KB -> 字节）
+        rl.rlim_cur = rl.rlim_max = (rlim_t)limits.stackLimitKB * 1024;
         if (setrlimit(RLIMIT_STACK, &rl) != 0) {
             log("WARN", "Failed to set RLIMIT_STACK");
         }
 
-        // 4. 输出文件大小限制（MB -> 字节）
-        rl.rlim_cur = rl.rlim_max = (rlim_t)limits.outputLimitMB * 1024 * 1024;
+        // 4. 输出文件大小限制（KB -> 字节）
+        rl.rlim_cur = rl.rlim_max = (rlim_t)limits.outputLimitKB * 1024;
         if (setrlimit(RLIMIT_FSIZE, &rl) != 0) {
             log("WARN", "Failed to set RLIMIT_FSIZE");
         }

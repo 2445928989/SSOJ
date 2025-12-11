@@ -9,11 +9,11 @@ namespace judger {
      * @brief 资源限制配置
      */
     struct ResourceLimit {
-        int cpuTimeLimitSec;  // CPU时间限制（秒）
-        int realTimeLimitSec; // 实际运行时间限制（秒，wallclock）
-        int memoryLimitMB;    // 内存限制（MB）
-        int outputLimitMB;    // 输出限制（MB）
-        int stackLimitMB;     // 栈空间限制（MB）
+        double cpuTimeLimitSec;  // CPU时间限制（秒，支持小数）
+        double realTimeLimitSec; // 实际运行时间限制（秒，wallclock，支持小数）
+        int memoryLimitKB;       // 内存限制（KB）
+        int outputLimitKB;       // 输出限制（KB）
+        int stackLimitKB;        // 栈空间限制（KB）
     };
 
     /**

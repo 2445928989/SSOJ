@@ -133,8 +133,8 @@ int main(int argc, char *argv[]) {
     // 格式：judger --src source.cpp --lang cpp --input input.txt --output output.txt --time 1 --mem 256
 
     std::string sourcePath, language, inputPath, outputPath;
-    int timeLimit = 1;
-    int memLimit = 256;
+    double timeLimit = 1.0;
+    int memLimit = 262144; // 256MB = 262144KB
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--src") == 0 && i + 1 < argc) {
@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "--output") == 0 && i + 1 < argc) {
             outputPath = argv[++i];
         } else if (strcmp(argv[i], "--time") == 0 && i + 1 < argc) {
-            timeLimit = std::atoi(argv[++i]);
+            timeLimit = std::atof(argv[++i]);
         } else if (strcmp(argv[i], "--mem") == 0 && i + 1 < argc) {
             memLimit = std::atoi(argv[++i]);
         }
@@ -154,17 +154,17 @@ int main(int argc, char *argv[]) {
 
     // 验证参数
     if (sourcePath.empty() || language.empty() || inputPath.empty() || outputPath.empty()) {
-        std::cerr << "Usage: judger --src <source> --lang <language> --input <input> --output <expected_output> [--time <sec>] [--mem <MB>]" << std::endl;
+        std::cerr << "Usage: judger --src <source> --lang <language> --input <input> --output <expected_output> [--time <sec>] [--mem <KB>]" << std::endl;
         return 1;
     }
 
     // 设置资源限制
     ResourceLimit limits;
     limits.cpuTimeLimitSec = timeLimit;
-    limits.realTimeLimitSec = timeLimit + 2;
-    limits.memoryLimitMB = memLimit;
-    limits.outputLimitMB = 32;
-    limits.stackLimitMB = 128;
+    limits.realTimeLimitSec = timeLimit + 2.0;
+    limits.memoryLimitKB = memLimit;
+    limits.outputLimitKB = 32768; // 32MB
+    limits.stackLimitKB = 131072; // 128MB
 
     // 执行判题
     JudgeResult result = judge(sourcePath, language, inputPath, outputPath, limits);

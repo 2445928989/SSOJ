@@ -236,7 +236,7 @@ namespace judger {
         }
 
         // 检查内存限制
-        if (memoryKB > limits.memoryLimitMB * 1024) {
+        if (memoryKB > limits.memoryLimitKB) {
             result.status = RunStatus::MLE;
             result.errorMessage = "Memory limit exceeded";
             return result;
