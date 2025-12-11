@@ -1,0 +1,85 @@
+{
+    "description": "系统调用白名单配置 - 用于 seccomp 沙箱",
+    "languages": {
+        "cpp": {
+            "allowed_syscalls": [
+                "read",
+                "write",
+                "open",
+                "close",
+                "fstat",
+                "lseek",
+                "mmap",
+                "mprotect",
+                "munmap",
+                "brk",
+                "rt_sigaction",
+                "rt_sigprocmask",
+                "ioctl",
+                "access",
+                "exit",
+                "exit_group",
+                "arch_prctl",
+                "readlink",
+                "getcwd",
+                "stat",
+                "lstat"
+            ],
+            "blocked_syscalls": [
+                "socket",
+                "connect",
+                "bind",
+                "listen",
+                "accept",
+                "fork",
+                "vfork",
+                "clone",
+                "execve",
+                "kill",
+                "ptrace"
+            ]
+        },
+        "c": {
+            "allowed_syscalls": [
+                "read",
+                "write",
+                "open",
+                "close",
+                "fstat",
+                "brk",
+                "mmap",
+                "munmap",
+                "exit",
+                "exit_group"
+            ]
+        },
+        "python": {
+            "allowed_syscalls": [
+                "read",
+                "write",
+                "open",
+                "close",
+                "stat",
+                "fstat",
+                "lstat",
+                "poll",
+                "lseek",
+                "mmap",
+                "mprotect",
+                "munmap",
+                "brk",
+                "rt_sigaction",
+                "rt_sigprocmask",
+                "ioctl",
+                "access",
+                "pipe",
+                "select",
+                "dup",
+                "dup2",
+                "getpid",
+                "exit",
+                "exit_group"
+            ]
+        }
+    }
+}

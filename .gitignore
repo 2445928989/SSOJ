@@ -1,0 +1,37 @@
+# IDE
+.vscode/
+.idea/
+
+# Build artifacts
+*.o
+*.out
+*.exe
+build/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+
+# Compiled binaries
+judger/judger
+judger/tests/test_*
+!judger/tests/test_*.cpp
+judger/tests/benchmark_*
+!judger/tests/benchmark_*.cpp
+
+# Test files
+judger/tests/*.txt
+judger/tests/*.cpp.tmp
+judger/tests/temp_*
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+
+# docs
+docs/

@@ -1,0 +1,46 @@
+{
+    "description": "编程语言编译运行配置",
+    "languages": {
+        "cpp": {
+            "name": "C++",
+            "compiler": "g++",
+            "compile_command": "g++ -O2 -std=c++17 -o {output} {source} 2>&1",
+            "run_command": "{executable}",
+            "source_extension": ".cpp",
+            "is_compiled": true,
+            "default_time_limit": 1,
+            "default_memory_limit": 256
+        },
+        "c": {
+            "name": "C",
+            "compiler": "gcc",
+            "compile_command": "gcc -O2 -std=c11 -o {output} {source} 2>&1",
+            "run_command": "{executable}",
+            "source_extension": ".c",
+            "is_compiled": true,
+            "default_time_limit": 1,
+            "default_memory_limit": 256
+        },
+        "python": {
+            "name": "Python 3",
+            "interpreter": "/usr/bin/python3",
+            "compile_command": "",
+            "run_command": "/usr/bin/python3 {source}",
+            "source_extension": ".py",
+            "is_compiled": false,
+            "default_time_limit": 3,
+            "default_memory_limit": 512
+        },
+        "java": {
+            "name": "Java",
+            "compiler": "javac",
+            "compile_command": "javac {source} 2>&1",
+            "run_command": "java -cp {classpath} {classname}",
+            "source_extension": ".java",
+            "is_compiled": true,
+            "default_time_limit": 3,
+            "default_memory_limit": 512,
+            "jvm_options": "-Xmx{memory}m -Xss256m"
+        }
+    }
+}
