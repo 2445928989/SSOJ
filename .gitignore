@@ -1,6 +1,7 @@
 # IDE
 .vscode/
 .idea/
+*.code-workspace
 
 # Build artifacts
 *.o
@@ -35,3 +36,7 @@ judger/tests/temp_*
 
 # docs
 docs/
+
+# dev
+dev/
+.env
