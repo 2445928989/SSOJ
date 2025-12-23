@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssoj.backend.dao.TestCaseMapper">
+
+    <resultMap id="TestCaseResultMap" type="com.ssoj.backend.entity.TestCase">
+        <id property="id" column="id" />
+        <result property="problemId" column="problem_id" />
+        <result property="inputPath" column="input_path" />
+        <result property="outputPath" column="output_path" />
+        <result property="isSample" column="is_sample" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <!-- 根据ID查询测试用例 -->
+    <select id="findById" resultMap="TestCaseResultMap"> SELECT * FROM test_case WHERE id = #{id} </select>
+
+    <!-- 根据题目ID查询所有测试用例 -->
+    <select id="findByProblemId" resultMap="TestCaseResultMap"> SELECT * FROM test_case WHERE
+        problem_id = #{problemId} ORDER BY id </select>
+
+    <!-- 插入测试用例 -->
+    <insert id="insert" parameterType="com.ssoj.backend.entity.TestCase"
+        useGeneratedKeys="true" keyProperty="id"> INSERT INTO test_case ( problem_id, input_path,
+        output_path, is_sample, created_at, updated_at ) VALUES ( #{problemId}, #{inputPath},
+        #{outputPath}, #{isSample}, NOW(), NOW() ) </insert>
+
+    <!-- 更新测试用例 -->
+    <update id="update"> UPDATE test_case SET input_path = #{inputPath}, output_path =
+        #{outputPath}, is_sample = #{isSample}, updated_at = NOW() WHERE id = #{id} </update>
+
+    <!-- 删除测试用例 -->
+    <delete id="deleteById"> DELETE FROM test_case WHERE id = #{id} </delete>
+
+    <!-- 批量删除题目的测试用例 -->
+    <delete id="deleteByProblemId"> DELETE FROM test_case WHERE problem_id = #{problemId} </delete>
+
+</mapper>

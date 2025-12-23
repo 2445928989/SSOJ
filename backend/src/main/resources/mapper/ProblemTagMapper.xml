@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssoj.backend.dao.ProblemTagMapper">
+
+    <resultMap id="ProblemTagResultMap" type="com.ssoj.backend.entity.ProblemTag">
+        <result property="problemId" column="problem_id" />
+        <result property="tagId" column="tag_id" />
+        <result property="createdAt" column="created_at" />
+    </resultMap>
+
+    <!-- 根据题目ID查询所有标签关联 -->
+    <select id="findByProblemId" resultMap="ProblemTagResultMap"> SELECT * FROM problem_tag WHERE
+        problem_id = #{problemId} </select>
+
+    <!-- 根据标签ID查询所有题目关联 -->
+    <select id="findByTagId" resultMap="ProblemTagResultMap"> SELECT * FROM problem_tag WHERE tag_id
+        = #{tagId} </select>
+
+    <!-- 插入题目标签关联 -->
+    <insert id="insert" parameterType="com.ssoj.backend.entity.ProblemTag"> INSERT INTO problem_tag
+        (problem_id, tag_id, created_at) VALUES (#{problemId}, #{tagId}, NOW()) </insert>
+
+    <!-- 批量插入题目标签关联 -->
+    <insert id="batchInsert"> INSERT INTO problem_tag (problem_id, tag_id, created_at) VALUES <foreach
+            collection="list" item="item" separator=","> (#{item.problemId}, #{item.tagId}, NOW()) </foreach>
+    </insert>
+
+    <!-- 删除题目的所有标签关联 -->
+    <delete id="deleteByProblemId"> DELETE FROM problem_tag WHERE problem_id = #{problemId} </delete>
+
+    <!-- 删除指定的题目标签关联 -->
+    <delete id="delete"> DELETE FROM problem_tag WHERE problem_id = #{problemId} AND tag_id =
+        #{tagId} </delete>
+
+</mapper>

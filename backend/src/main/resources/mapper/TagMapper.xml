@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssoj.backend.dao.TagMapper">
+
+    <resultMap id="TagResultMap" type="com.ssoj.backend.entity.Tag">
+        <id property="id" column="id" />
+        <result property="name" column="name" />
+        <result property="color" column="color" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <!-- 根据ID查询标签 -->
+    <select id="findById" resultMap="TagResultMap"> SELECT * FROM tag WHERE id = #{id} </select>
+
+    <!-- 根据名称查询标签 -->
+    <select id="findByName" resultMap="TagResultMap"> SELECT * FROM tag WHERE name = #{name} </select>
+
+    <!-- 查询所有标签 -->
+    <select id="findAll" resultMap="TagResultMap"> SELECT * FROM tag ORDER BY name </select>
+
+    <!-- 插入标签 -->
+    <insert id="insert" parameterType="com.ssoj.backend.entity.Tag"
+        useGeneratedKeys="true" keyProperty="id"> INSERT INTO tag (name, color, created_at,
+        updated_at) VALUES (#{name}, #{color}, NOW(), NOW()) </insert>
+
+    <!-- 更新标签 -->
+    <update id="update"> UPDATE tag SET name = #{name}, color = #{color}, updated_at = NOW() WHERE
+        id = #{id} </update>
+
+    <!-- 删除标签 -->
+    <delete id="deleteById"> DELETE FROM tag WHERE id = #{id} </delete>
+
+</mapper>

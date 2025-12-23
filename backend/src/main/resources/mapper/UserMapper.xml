@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssoj.backend.dao.UserMapper">
+
+    <resultMap id="UserResultMap" type="com.ssoj.backend.entity.User">
+        <id property="id" column="id" />
+        <result property="username" column="username" />
+        <result property="nickname" column="nickname" />
+        <result property="password" column="password" />
+        <result property="email" column="email" />
+        <result property="profile" column="profile" />
+        <result property="avatar" column="avatar" />
+        <result property="phone" column="phone" />
+        <result property="role" column="role" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <select id="findById" resultMap="UserResultMap"> SELECT * FROM user WHERE id = #{id} </select>
+    <select id="findAll" resultMap="UserResultMap"> SELECT * FROM user </select>
+    <select id="findByNickname" resultMap="UserResultMap"> SELECT * FROM user WHERE nickname
+        =#{nickname} </select>
+    <select id="findByUsername" resultMap="UserResultMap"> SELECT * FROM user WHERE username =
+        #{username} </select>
+    <select id="findByEmail" resultMap="UserResultMap"> SELECT * FROM user WHERE email = #{email} </select>
+
+    <insert id="insert" parameterType="com.ssoj.backend.entity.User" useGeneratedKeys="true"
+        keyProperty="id">INSERT INTO user(username,password,email,role)
+        VALUES(#{username},#{password},#{email},#{role})</insert>
+
+    <update id="update" parameterType="com.ssoj.backend.entity.User"> UPDATE user SET
+        username=#{username}, email=#{email}, role=#{role},
+        updated_at=NOW(),nickname=#{nickname},password=#{password},profile=#{profile},avatar=#{avatar},phone=#{phone}
+        WHERE id=#{id} </update>
+
+    <!-- 只更新用户的个人资料字段 -->
+    <update id="updateProfile"> UPDATE user SET nickname=#{nickname}, phone=#{phone},
+        profile=#{profile}, avatar=#{avatar}, updated_at=NOW() WHERE id=#{id} </update>
+
+    <delete id="deleteById"> DELETE FROM user WHERE id = #{id} </delete>
+
+</mapper>

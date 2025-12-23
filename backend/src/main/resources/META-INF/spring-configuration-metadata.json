@@ -1,0 +1,10 @@
+{
+    "properties": [
+        {
+            "name": "judger.binary",
+            "type": "java.lang.String",
+            "description": "判题机可执行文件的路径",
+            "defaultValue": "./judger/judger"
+        }
+    ]
+}

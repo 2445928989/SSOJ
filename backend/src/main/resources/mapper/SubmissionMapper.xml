@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssoj.backend.dao.SubmissionMapper">
+
+    <!-- TODO: 实现 SQL 映射 -->
+
+    <resultMap id="SubmissionResultMap" type="com.ssoj.backend.entity.Submission">
+        <id property="id" column="id" />
+        <result property="userId" column="user_id" />
+        <result property="problemId" column="problem_id" />
+        <result property="code" column="code" />
+        <result property="language" column="language" />
+        <result property="status" column="status" />
+        <result property="maxTimeUsed" column="max_time_used" />
+        <result property="maxMemoryUsed" column="max_memory_used" />
+        <result property="submittedAt" column="submitted_at" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+        <result property="username" column="username" />
+        <result property="problemTitle" column="problem_title" />
+    </resultMap>
+
+    <!-- 根据ID查询提交记录 -->
+    <select id="findById" resultMap="SubmissionResultMap"> SELECT s.id, s.user_id, s.problem_id,
+        s.code, s.language, s.status, s.max_time_used, s.max_memory_used, s.submitted_at,
+        s.created_at, s.updated_at, u.username, p.title as problem_title FROM submission s LEFT JOIN
+        user u ON s.user_id = u.id LEFT JOIN problem p ON s.problem_id = p.id WHERE s.id = #{id} </select>
+
+    <!-- 根据用户ID查询提交记录 -->
+    <select id="findByUserId" resultMap="SubmissionResultMap"> SELECT s.id, s.user_id, s.problem_id,
+        s.code, s.language, s.status, s.max_time_used, s.max_memory_used, s.submitted_at,
+        s.created_at, s.updated_at, u.username, p.title as problem_title FROM submission s LEFT JOIN
+        user u ON s.user_id = u.id LEFT JOIN problem p ON s.problem_id = p.id WHERE s.user_id =
+        #{userId} ORDER BY s.submitted_at DESC </select>
+
+    <!-- 根据用户ID查询提交记录（分页） -->
+    <select id="findByUserIdPaged" resultMap="SubmissionResultMap"> SELECT s.id, s.user_id,
+        s.problem_id, s.code, s.language, s.status, s.max_time_used, s.max_memory_used,
+        s.submitted_at, s.created_at, s.updated_at, u.username, p.title as problem_title FROM
+        submission s LEFT JOIN user u ON s.user_id = u.id LEFT JOIN problem p ON s.problem_id = p.id
+        WHERE s.user_id = #{userId} ORDER BY s.submitted_at DESC LIMIT #{offset}, #{limit} </select>
+
+    <!-- 获取用户的提交总数 -->
+    <select id="countByUserId" resultType="int"> SELECT COUNT(*) FROM submission WHERE user_id =
+        #{userId} </select>
+
+    <!-- 根据题目ID查询提交记录 -->
+    <select id="findByProblemId" resultMap="SubmissionResultMap"> SELECT s.id, s.user_id,
+        s.problem_id, s.code, s.language, s.status, s.max_time_used, s.max_memory_used,
+        s.submitted_at, s.created_at, s.updated_at, u.username, p.title as problem_title FROM
+        submission s LEFT JOIN user u ON s.user_id = u.id LEFT JOIN problem p ON s.problem_id = p.id
+        WHERE s.problem_id = #{problemId} ORDER BY s.submitted_at DESC </select>
+
+    <!-- 根据题目ID查询提交记录（分页） -->
+    <select id="findByProblemIdPaged" resultMap="SubmissionResultMap"> SELECT s.id, s.user_id,
+        s.problem_id, s.code, s.language, s.status, s.max_time_used, s.max_memory_used,
+        s.submitted_at, s.created_at, s.updated_at, u.username, p.title as problem_title FROM
+        submission s LEFT JOIN user u ON s.user_id = u.id LEFT JOIN problem p ON s.problem_id = p.id
+        WHERE s.problem_id = #{problemId} ORDER BY s.submitted_at DESC LIMIT #{offset}, #{limit} </select>
+
+    <!-- 获取题目的提交总数 -->
+    <select id="countByProblemId" resultType="int"> SELECT COUNT(*) FROM submission WHERE problem_id
+        = #{problemId} </select>
+
+    <!-- 查询用户在某题目的所有提交 -->
+    <select id="findByUserIdAndProblemId" resultMap="SubmissionResultMap"> SELECT s.id, s.user_id,
+        s.problem_id, s.code, s.language, s.status, s.max_time_used, s.max_memory_used,
+        s.submitted_at, s.created_at, s.updated_at, u.username, p.title as problem_title FROM
+        submission s LEFT JOIN user u ON s.user_id = u.id LEFT JOIN problem p ON s.problem_id = p.id
+        WHERE s.user_id = #{userId} AND s.problem_id = #{problemId} ORDER BY s.submitted_at DESC </select>
+
+    <!-- 插入提交记录 -->
+    <insert id="insert" parameterType="com.ssoj.backend.entity.Submission"
+        useGeneratedKeys="true" keyProperty="id"> INSERT INTO submission ( user_id, problem_id,
+        code, language, status, submitted_at, created_at, updated_at ) VALUES ( #{userId},
+        #{problemId}, #{code}, #{language}, #{status}, NOW(), NOW(), NOW() ) </insert>
+
+    <!-- 更新提交状态（判题完成后） -->
+    <update id="updateStatus"> UPDATE submission SET status = #{status}, max_time_used =
+        #{maxTimeUsed}, max_memory_used = #{maxMemoryUsed}, updated_at = NOW() WHERE id = #{id} </update>
+
+    <!-- 查询最近提交（分页） -->
+    <select id="findRecent" resultMap="SubmissionResultMap"> SELECT s.id, s.user_id, s.problem_id,
+        s.code, s.language, s.status, s.max_time_used, s.max_memory_used, s.submitted_at,
+        s.created_at, s.updated_at, u.username, p.title as problem_title FROM submission s LEFT JOIN
+        user u ON s.user_id = u.id LEFT JOIN problem p ON s.problem_id = p.id ORDER BY
+        s.submitted_at DESC LIMIT #{offset}, #{limit} </select>
+
+    <!-- 查询所有提交总数 -->
+    <select id="countAll" resultType="int"> SELECT COUNT(*) FROM submission </select>
+
+    <!-- 获取用户通过（AC）的不同题目数 -->
+    <select id="countSolvedProblemsByUserId" resultType="int"> SELECT COUNT(DISTINCT problem_id)
+        FROM submission WHERE user_id = #{userId} AND status = 'AC' </select>
+
+    <!-- 获取用户已通过的所有题目ID列表 -->
+    <select id="findSolvedProblemsByUserId" resultType="java.lang.Long"> SELECT DISTINCT problem_id
+        FROM submission WHERE user_id = #{userId} AND status = 'AC' ORDER BY problem_id </select>
+
+    <!-- 获取用户在最近N天的每日提交次数 -->
+    <select id="getDailySubmissionCount" resultType="java.util.HashMap"> SELECT DATE(submitted_at)
+        as date, COUNT(*) as count FROM submission WHERE user_id = #{userId} AND submitted_at >=
+        DATE_SUB(NOW(), INTERVAL #{days} DAY) GROUP BY DATE(submitted_at) ORDER BY date ASC </select>
+
+</mapper>

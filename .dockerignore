@@ -1,0 +1,17 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.DS_Store
+.env
+.vscode
+.idea
+target
+build
+dist
+*.class
+*.jar
+.mvn
+mvnw
+mvnw.cmd

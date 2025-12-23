@@ -40,3 +40,5 @@ docs/
 # dev
 dev/
 .env
+
+node_modules/

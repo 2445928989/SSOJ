@@ -1,0 +1,101 @@
+services:
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: ssoj-mysql
+    command: --character-set-server=utf8 --collation-server=utf8_general_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: ssoj
+      MYSQL_USER: ssoj_dev
+      MYSQL_PASSWORD: ssoj_dev123
+      TZ: Asia/Shanghai
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/init_data.sql:/docker-entrypoint-initdb.d/02-init_data.sql:ro
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "ssoj_dev", "-pssoj_dev123" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ssoj-network
+
+  # Spring Boot 后端
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: ssoj-backend
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ssoj?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8&useUnicode=true&connectTimeout=30000&socketTimeout=30000
+      SPRING_DATASOURCE_USERNAME: ssoj_dev
+      SPRING_DATASOURCE_PASSWORD: ssoj_dev123
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      JAVA_OPTS: "-Xmx512m -Xms256m"
+      TZ: Asia/Shanghai
+    ports:
+      - "8080:8080"
+    volumes:
+      - /home/thanatos/SCUT/SE/ssoj/backend/target/backend-0.0.1-SNAPSHOT.jar:/app/app.jar:ro
+      - /tmp/ssoj:/tmp/ssoj
+    networks:
+      - ssoj-network
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/user/profile" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  # React 前端
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: ssoj-frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - ssoj-network
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Adminer 数据库管理工具
+  adminer:
+    image: adminer:latest
+    container_name: ssoj-adminer
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8081:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+      TZ: Asia/Shanghai
+    networks:
+      - ssoj-network
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  ssoj-network:
+    driver: bridge
