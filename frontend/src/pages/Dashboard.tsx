@@ -8,53 +8,142 @@ export default function Dashboard() {
     const [problemStats, setProblemStats] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
+    const [showAnnForm, setShowAnnForm] = useState(false)
+    const [annForm, setAnnForm] = useState({ title: '', content: '' })
+    const [editingAnnId, setEditingAnnId] = useState<number | null>(null)
 
-    useEffect(() => {
+    const loadData = () => {
+        setLoading(true)
         Promise.all([
             api.get('/api/user/profile').catch(() => ({ data: null })),
-            api.get('/api/problem/list?page=1&size=5')
+            api.get('/api/problem/list?page=1&size=5'),
+            api.get('/api/announcement/list')
         ])
-            .then(([userRes, probRes]) => {
+            .then(([userRes, probRes, annRes]) => {
                 setUser(userRes.data)
                 setProblemStats({
                     total: probRes.data.total,
                     problems: probRes.data.data || []
                 })
-                // Mock announcements
-                setAnnouncements([
-                    {
-                        id: 1,
-                        title: '欢迎来到 SSOJ',
-                        content: 'SSOJ 是一个现代化的在线编程练习平台，支持多种编程语言和实时评测。',
-                        date: new Date().toLocaleDateString('zh-CN')
-                    },
-                    {
-                        id: 2,
-                        title: '平台功能介绍',
-                        content: '平台包含题目库、实时评测、排行榜等功能，帮助您提升编程技能。',
-                        date: new Date(Date.now() - 86400000).toLocaleDateString('zh-CN')
-                    }
-                ])
+                setAnnouncements(annRes.data.data || [])
             })
             .catch(e => setError(e.response?.data?.error || '加载失败'))
             .finally(() => setLoading(false))
+    }
+
+    useEffect(() => {
+        loadData()
     }, [])
 
-    if (loading) return <div className="container"><div>加载中...</div></div>
+    const handleAnnSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        try {
+            if (editingAnnId) {
+                await api.put(`/api/announcement/${editingAnnId}`, annForm)
+            } else {
+                await api.post('/api/announcement', annForm)
+            }
+            setShowAnnForm(false)
+            setAnnForm({ title: '', content: '' })
+            setEditingAnnId(null)
+            loadData()
+        } catch (e: any) {
+            alert(e.response?.data?.error || '操作失败')
+        }
+    }
+
+    const handleEditAnn = (ann: any) => {
+        setAnnForm({ title: ann.title, content: ann.content })
+        setEditingAnnId(ann.id)
+        setShowAnnForm(true)
+    }
+
+    const handleDeleteAnn = async (id: number) => {
+        if (!window.confirm('确定要删除这条公告吗？')) return
+        try {
+            await api.delete(`/api/announcement/${id}`)
+            loadData()
+        } catch (e: any) {
+            alert(e.response?.data?.error || '删除失败')
+        }
+    }
+
+    if (loading) return <div className="container loading-container">
+        <div className="loading-spinner"></div>
+        <div className="loading-text">正在加载仪表盘...</div>
+    </div>
     if (error) return <div className="container error">{error}</div>
 
     return (
         <div className="dashboard">
             <div className="announcements-section">
-                <h2>公告与更新</h2>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <h2 style={{ margin: 0 }}>公告与更新</h2>
+                    {user?.role === 'ADMIN' && (
+                        <button
+                            onClick={() => {
+                                setAnnForm({ title: '', content: '' })
+                                setEditingAnnId(null)
+                                setShowAnnForm(true)
+                            }}
+                            className="admin-btn"
+                            style={{ padding: '6px 12px', fontSize: '14px' }}
+                        >
+                            发布公告
+                        </button>
+                    )}
+                </div>
+
+                {showAnnForm && (
+                    <div className="card" style={{ marginBottom: '20px', padding: '20px' }}>
+                        <h3>{editingAnnId ? '编辑公告' : '发布新公告'}</h3>
+                        <form onSubmit={handleAnnSubmit}>
+                            <div style={{ marginBottom: '15px' }}>
+                                <label style={{ display: 'block', marginBottom: '5px' }}>标题</label>
+                                <input
+                                    type="text"
+                                    value={annForm.title}
+                                    onChange={e => setAnnForm({ ...annForm, title: e.target.value })}
+                                    required
+                                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                                />
+                            </div>
+                            <div style={{ marginBottom: '15px' }}>
+                                <label style={{ display: 'block', marginBottom: '5px' }}>内容</label>
+                                <textarea
+                                    value={annForm.content}
+                                    onChange={e => setAnnForm({ ...annForm, content: e.target.value })}
+                                    required
+                                    rows={5}
+                                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                                />
+                            </div>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <button type="submit" className="admin-btn" style={{ border: 'none', cursor: 'pointer' }}>保存</button>
+                                <button type="button" onClick={() => setShowAnnForm(false)} style={{ padding: '10px 20px', borderRadius: '4px', border: '1px solid #ddd', background: 'white', cursor: 'pointer' }}>取消</button>
+                            </div>
+                        </form>
+                    </div>
+                )}
+
                 <div className="announcements-list">
-                    {announcements.map((announcement: any) => (
+                    {announcements.length === 0 ? (
+                        <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>暂无公告</p>
+                    ) : announcements.map((announcement: any) => (
                         <div key={announcement.id} className="announcement-item">
                             <div className="announcement-header">
-                                <h3>{announcement.title}</h3>
-                                <span className="announcement-date">{announcement.date}</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <h3>{announcement.title}</h3>
+                                    {user?.role === 'ADMIN' && (
+                                        <div style={{ display: 'flex', gap: '5px' }}>
+                                            <button onClick={() => handleEditAnn(announcement)} style={{ background: 'none', border: 'none', color: '#667eea', cursor: 'pointer', fontSize: '12px' }}>编辑</button>
+                                            <button onClick={() => handleDeleteAnn(announcement.id)} style={{ background: 'none', border: 'none', color: '#f44336', cursor: 'pointer', fontSize: '12px' }}>删除</button>
+                                        </div>
+                                    )}
+                                </div>
+                                <span className="announcement-date">{new Date(announcement.createdAt).toLocaleDateString('zh-CN')}</span>
                             </div>
-                            <p>{announcement.content}</p>
+                            <p style={{ whiteSpace: 'pre-wrap' }}>{announcement.content}</p>
                         </div>
                     ))}
                 </div>

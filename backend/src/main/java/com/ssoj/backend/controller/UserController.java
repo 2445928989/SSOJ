@@ -57,15 +57,15 @@ public class UserController {
      * 获取当前用户信息（需要登录）
      */
     @GetMapping("/profile")
-    public User getProfile(jakarta.servlet.http.HttpServletRequest httpRequest) {
+    public Object getProfile(jakarta.servlet.http.HttpServletRequest httpRequest) {
         jakarta.servlet.http.HttpSession session = httpRequest.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
-            throw new RuntimeException("未登录");
+            return org.springframework.http.ResponseEntity.status(401).body(java.util.Map.of("error", "未登录"));
         }
         Long userId = (Long) session.getAttribute("userId");
         User user = userService.getUserById(userId);
         if (user == null) {
-            throw new RuntimeException("用户不存在");
+            return org.springframework.http.ResponseEntity.status(404).body(java.util.Map.of("error", "用户不存在"));
         }
         user.setPassword(null);
         return user;
@@ -77,10 +77,10 @@ public class UserController {
      */
     @PutMapping("/profile")
     public Object updateProfile(@RequestBody java.util.Map<String, String> request,
-            jakarta.servlet.http.HttpServletRequest httpRequest) {
-        jakarta.servlet.http.HttpSession session = httpRequest.getSession(false);
+            jakarta.servlet.http.HttpSession session) {
         if (session == null || session.getAttribute("userId") == null) {
-            throw new RuntimeException("未登录");
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.UNAUTHORIZED, "未登录");
         }
         Long userId = (Long) session.getAttribute("userId");
 

@@ -24,7 +24,10 @@ export default function OtherUserProfile() {
             .finally(() => setLoading(false))
     }, [userId])
 
-    if (loading) return <div className="loading">加载中...</div>
+    if (loading) return <div className="container loading-container">
+        <div className="loading-spinner"></div>
+        <div className="loading-text">正在加载用户信息...</div>
+    </div>
     if (error) return <div className="error-msg">{error}</div>
     if (!user) return <div className="empty-state">用户不存在</div>
 
@@ -65,22 +68,22 @@ export default function OtherUserProfile() {
 
                     <div className="stats-section">
                         <h2>做题统计</h2>
-                        <div className="stats-grid">
-                            <div className="stat-card">
-                                <div className="stat-number">{user.solved || 0}</div>
-                                <div className="stat-label">已通过</div>
+                        <div className="stats-list">
+                            <div className="stat-row">
+                                <span className="stat-label">已通过</span>
+                                <span className="stat-number">{user.solved || 0}</span>
                             </div>
-                            <div className="stat-card">
-                                <div className="stat-number">{user.submissions || 0}</div>
-                                <div className="stat-label">提交数</div>
+                            <div className="stat-row">
+                                <span className="stat-label">提交数</span>
+                                <span className="stat-number">{user.submissions || 0}</span>
                             </div>
-                            <div className="stat-card">
-                                <div className="stat-number">
+                            <div className="stat-row">
+                                <span className="stat-label">通过率</span>
+                                <span className="stat-number">
                                     {user.submissions > 0
                                         ? ((user.solved / user.submissions) * 100).toFixed(1)
                                         : 0}%
-                                </div>
-                                <div className="stat-label">通过率</div>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -188,29 +191,33 @@ export default function OtherUserProfile() {
                     margin-bottom: 40px;
                 }
 
-                .stats-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-                    gap: 15px;
+                .stats-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
                 }
 
-                .stat-card {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    color: white;
-                    padding: 20px;
-                    border-radius: 8px;
-                    text-align: center;
+                .stat-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 12px 0;
+                    border-bottom: 1px solid #f0f0f0;
                 }
 
-                .stat-number {
-                    font-size: 2em;
-                    font-weight: bold;
-                    margin-bottom: 5px;
+                .stat-row:last-child {
+                    border-bottom: none;
                 }
 
                 .stat-label {
-                    font-size: 0.9em;
-                    opacity: 0.9;
+                    color: #666;
+                    font-weight: 500;
+                }
+
+                .stat-number {
+                    font-size: 1.4rem;
+                    font-weight: bold;
+                    color: #667eea;
                 }
 
                 .heatmap-section {

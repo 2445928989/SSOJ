@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssoj.backend.dao.AnnouncementMapper">
+
+    <resultMap id="AnnouncementResultMap" type="com.ssoj.backend.entity.Announcement">
+        <id property="id" column="id" />
+        <result property="title" column="title" />
+        <result property="content" column="content" />
+        <result property="authorId" column="author_id" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+        <result property="authorName" column="author_name" />
+    </resultMap>
+
+    <select id="findById" resultMap="AnnouncementResultMap"> SELECT a.*, u.username as author_name
+        FROM announcement a LEFT JOIN user u ON a.author_id = u.id WHERE a.id = #{id} </select>
+
+    <select id="findAll" resultMap="AnnouncementResultMap"> SELECT a.*, u.username as author_name
+        FROM announcement a LEFT JOIN user u ON a.author_id = u.id ORDER BY a.created_at DESC </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id"> INSERT INTO announcement (title,
+        content, author_id) VALUES (#{title}, #{content}, #{authorId}) </insert>
+
+    <update id="update"> UPDATE announcement SET title = #{title}, content = #{content}, updated_at
+        = CURRENT_TIMESTAMP WHERE id = #{id} </update>
+
+    <delete id="deleteById"> DELETE FROM announcement WHERE id = #{id} </delete>
+
+</mapper>

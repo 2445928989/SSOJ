@@ -14,7 +14,7 @@ export default function ProblemList() {
     const [sortBy, setSortBy] = useState<'id' | 'difficulty' | 'passRate'>('id')
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
     const [solvedProblems, setSolvedProblems] = useState<Set<number>>(new Set())
-    const [showTags, setShowTags] = useState(true)
+    const [showTags, setShowTags] = useState(false)
     const [selectedTag, setSelectedTag] = useState<string | null>(null)
     const [tags, setTags] = useState<string[]>([])
 
@@ -127,6 +127,11 @@ export default function ProblemList() {
         loadProblems(1, '')
     }
 
+    // 根据选中的标签过滤题目
+    const filteredProblems = selectedTag
+        ? problems.filter(p => p.categories && p.categories.includes(selectedTag))
+        : problems
+
     const totalPages = Math.ceil(total / size)
 
     if (error) return <div className="container error">{error}</div>
@@ -189,13 +194,17 @@ export default function ProblemList() {
                     )}
 
                     {loading ? (
-                        <div className="loading">加载中...</div>
+                        <div className="loading-container">
+                            <div className="loading-spinner"></div>
+                            <div className="loading-text">正在加载题目列表...</div>
+                        </div>
                     ) : problems.length === 0 ? (
                         <div className="empty-state">
                             {isSearching ? '没有找到匹配的题目' : '暂无题目'}
                         </div>
                     ) : (
                         <>
+                            <div className="problems-count">共 {filteredProblems.length} 道题目</div>
                             <table className="problems-table">
                                 <thead>
                                     <tr>
@@ -208,6 +217,7 @@ export default function ProblemList() {
                                             ID <span style={{ opacity: sortBy === 'id' ? 1 : 0.4 }}>{sortBy === 'id' ? (sortOrder === 'asc' ? '↑' : '↓') : '↑'}</span>
                                         </th>
                                         <th>题目</th>
+                                        {showTags && <th>标签</th>}
                                         <th
                                             onClick={() => handleSort('difficulty')}
                                             style={{ cursor: 'pointer', userSelect: 'none' }}
@@ -227,7 +237,7 @@ export default function ProblemList() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {problems.map(p => {
+                                    {filteredProblems.map(p => {
                                         const passRate = p.numberOfSubmissions > 0
                                             ? ((p.numberOfAccepted / p.numberOfSubmissions) * 100).toFixed(1)
                                             : 0
@@ -248,6 +258,18 @@ export default function ProblemList() {
                                                         {p.title}
                                                     </Link>
                                                 </td>
+                                                {showTags && (
+                                                    <td>
+                                                        <div className="tags-cell">
+                                                            {p.categories && p.categories.length > 0
+                                                                ? p.categories.map(cat => (
+                                                                    <span key={cat} className="tag-badge">{cat}</span>
+                                                                ))
+                                                                : <span style={{ color: '#999' }}>-</span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                )}
                                                 <td>
                                                     <span className={`difficulty-${p.difficulty.toLowerCase()}`}>
                                                         {p.difficulty === 'EASY' && '简单'}
@@ -584,6 +606,29 @@ export default function ProblemList() {
                     background: white;
                     border-radius: 6px;
                     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                }
+
+                .tags-cell {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 4px;
+                }
+
+                .tag-badge {
+                    display: inline-block;
+                    background: #f0f0f0;
+                    color: #666;
+                    padding: 2px 8px;
+                    border-radius: 3px;
+                    font-size: 12px;
+                    white-space: nowrap;
+                }
+
+                .problems-count {
+                    color: #666;
+                    font-size: 14px;
+                    padding-bottom: 8px;
+                    margin-left: 20px;
                 }
 
                 @media (max-width: 1024px) {

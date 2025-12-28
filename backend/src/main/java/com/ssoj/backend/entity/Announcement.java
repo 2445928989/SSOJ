@@ -4,18 +4,17 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 测试用例实体类
+ * 公告实体类
  */
 @Data
-public class TestCase {
+public class Announcement {
     private Long id;
-    private Long problemId;
-    private String inputPath;
-    private String outputPath;
+    private String title;
+    private String content;
+    private Long authorId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     // 显示字段
-    private String inputContent;
-    private String outputContent;
+    private String authorName;
 }

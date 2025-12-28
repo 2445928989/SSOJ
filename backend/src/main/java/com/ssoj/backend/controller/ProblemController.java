@@ -4,26 +4,50 @@ import com.ssoj.backend.entity.Problem;
 import com.ssoj.backend.service.ProblemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 题目相关 REST API
  */
 @RestController
-@RequestMapping("/api/problem")
 public class ProblemController {
 
     @Autowired
     private ProblemService problemService;
 
-    // TODO: 实现以下 API
+    @Autowired
+    private com.ssoj.backend.service.UserService userService;
 
     /**
-     * GET /api/problem/list?page=1&size=20&difficulty=easy
-     * 获取题目列表（支持分页和难度筛选）
+     * POST /api/problem/{id}/testcases
+     * 上传测试用例
      */
-    @GetMapping("/list")
+    @PostMapping("/api/problem/{id}/testcases")
+    public Object uploadTestCases(@PathVariable("id") Long id,
+            @RequestParam("file") MultipartFile file,
+            jakarta.servlet.http.HttpSession session) {
+        checkAdmin(session);
+        System.out.println("DEBUG: Received upload request for problem: " + id);
+        try {
+            problemService.uploadTestCases(id, file);
+            return Map.of("success", true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            String msg = e.getMessage();
+            if (msg == null)
+                msg = e.toString();
+            return Map.of("success", false, "error", msg);
+        }
+    }
+
+    /**
+     * GET /api/problem/list
+     * 获取题目列表
+     */
+    @GetMapping("/api/problem/list")
     public Object getProblems(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -34,15 +58,15 @@ public class ProblemController {
         } else {
             problems = problemService.getProblems(page, size);
         }
-        return java.util.Map.of("success", true, "data", problems, "total", problemService.getTotalCount());
+        return Map.of("success", true, "data", problems, "total", problemService.getTotalCount());
     }
 
     /**
      * GET /api/problem/{id}
      * 获取题目详情
      */
-    @GetMapping("/{id}")
-    public Problem getProblemById(@PathVariable Long id) {
+    @GetMapping("/api/problem/{id}")
+    public Problem getProblemById(@PathVariable("id") Long id) {
         return problemService.getProblemById(id);
     }
 
@@ -50,23 +74,23 @@ public class ProblemController {
      * GET /api/problem/count
      * 获取题目总数
      */
-    @GetMapping("/count")
+    @GetMapping("/api/problem/count")
     public Object getCount() {
-        return java.util.Map.of("success", true, "count", problemService.getTotalCount());
+        return Map.of("success", true, "count", problemService.getTotalCount());
     }
 
     /**
-     * GET /api/problem/search?keyword=xxx&page=1&size=20
+     * GET /api/problem/search
      * 搜索题目
      */
-    @GetMapping("/search")
+    @GetMapping("/api/problem/search")
     public Object searchProblems(
             @RequestParam String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
         List<Problem> problems = problemService.searchProblems(keyword, page, size);
         int total = problemService.getSearchCount(keyword);
-        return java.util.Map.of(
+        return Map.of(
                 "success", true,
                 "data", problems,
                 "total", total,
@@ -76,42 +100,69 @@ public class ProblemController {
 
     /**
      * POST /api/problem
-     * 创建题目（管理员）
+     * 创建题目
      */
-    @PostMapping
-    public Object createProblem(@RequestBody Problem problem) {
+    @PostMapping("/api/problem")
+    public Object createProblem(@RequestBody Problem problem, jakarta.servlet.http.HttpSession session) {
+        checkAdmin(session);
         Problem created = problemService.createProblem(problem);
-        return java.util.Map.of("success", true, "data", created);
+        return Map.of("success", true, "data", created);
     }
 
     /**
      * PUT /api/problem/{id}
-     * 更新题目（管理员）
+     * 更新题目
      */
-    @PutMapping("/{id}")
-    public Object updateProblem(@PathVariable Long id, @RequestBody Problem problem) {
+    @PutMapping("/api/problem/{id}")
+    public Object updateProblem(@PathVariable("id") Long id, @RequestBody Problem problem,
+            jakarta.servlet.http.HttpSession session) {
+        checkAdmin(session);
         problem.setId(id);
         boolean ok = problemService.updateProblem(problem);
-        return java.util.Map.of("success", ok);
+        return Map.of("success", ok);
     }
 
     /**
      * DELETE /api/problem/{id}
-     * 删除题目（管理员）
+     * 删除题目
      */
-    @DeleteMapping("/{id}")
-    public Object deleteProblem(@PathVariable Long id) {
+    @DeleteMapping("/api/problem/{id}")
+    public Object deleteProblem(@PathVariable("id") Long id, jakarta.servlet.http.HttpSession session) {
+        checkAdmin(session);
         boolean ok = problemService.deleteProblem(id);
-        return java.util.Map.of("success", ok);
+        return Map.of("success", ok);
     }
 
     /**
      * GET /api/problem/{id}/tags
      * 获取题目的标签列表
      */
-    @GetMapping("/{id}/tags")
-    public Object getProblemTags(@PathVariable Long id) {
+    @GetMapping("/api/problem/{id}/tags")
+    public Object getProblemTags(@PathVariable("id") Long id) {
         List<?> tags = problemService.getProblemTags(id);
-        return java.util.Map.of("success", true, "data", tags);
+        return Map.of("success", true, "data", tags);
+    }
+
+    /**
+     * GET /api/problem/{id}/testcases
+     * 获取题目的测试用例列表
+     */
+    @GetMapping("/api/problem/{id}/testcases")
+    public Object getTestCases(@PathVariable("id") Long id, jakarta.servlet.http.HttpSession session) {
+        checkAdmin(session);
+        return Map.of("success", true, "data", problemService.getTestCases(id));
+    }
+
+    private void checkAdmin(jakarta.servlet.http.HttpSession session) {
+        if (session == null || session.getAttribute("userId") == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.UNAUTHORIZED, "未登录");
+        }
+        Long userId = (Long) session.getAttribute("userId");
+        com.ssoj.backend.entity.User user = userService.getUserById(userId);
+        if (user == null || !"ADMIN".equals(user.getRole())) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.FORBIDDEN, "无权操作");
+        }
     }
 }

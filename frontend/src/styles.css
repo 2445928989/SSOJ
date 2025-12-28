@@ -21,7 +21,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Roboto, 'Noto Sans', sans-serif;
-    background-color: var(--background-color);
+    background-color: white;
     color: var(--text-primary);
     line-height: 1.6;
 }
@@ -37,7 +37,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 1000;
-    margin-bottom: 2rem;
+    margin-bottom: 0;
     overflow: hidden;
 }
 
@@ -53,28 +53,22 @@ body {
     color: var(--text-primary);
     text-decoration: none;
     font-weight: 500;
-    transition: all 0.3s ease;
+    transition: none;
     position: relative;
     padding: 0.5rem 0;
+    cursor: pointer;
 }
 
 .nav a::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: var(--primary-gradient);
-    transition: width 0.3s ease;
+    display: none;
 }
 
 .nav a:hover {
-    color: var(--primary-color);
+    color: var(--text-primary);
 }
 
 .nav a:hover::after {
-    width: 100%;
+    display: none;
 }
 
 .logo {
@@ -105,6 +99,42 @@ body {
 
 .username {
     font-weight: 600;
+}
+
+/* 全局加载动画 */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    padding: 40px;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+.loading-text {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .container {

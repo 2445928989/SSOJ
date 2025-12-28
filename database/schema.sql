@@ -1,8 +1,7 @@
-SET NAMES utf8;
-SET CHARACTER SET utf8;
-CREATE DATABASE IF NOT EXISTS ssoj CHARACTER SET utf8 COLLATE utf8_general_ci;
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+CREATE DATABASE IF NOT EXISTS ssoj CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE ssoj;
-
 CREATE TABLE user (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
@@ -18,7 +17,6 @@ CREATE TABLE user (
     INDEX idx_role (role),
     INDEX idx_created_at (created_at)
 );
-
 CREATE TABLE problem(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(100) NOT NULL UNIQUE,
@@ -35,13 +33,12 @@ CREATE TABLE problem(
     number_of_accepted INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (author_id) REFERENCES user(id) ON DELETE SET NULL,
-    INDEX idx_difficulty(difficulty),
-    INDEX idx_author_id(author_id),
-    INDEX idx_created_at(created_at)
+    FOREIGN KEY (author_id) REFERENCES user(id) ON DELETE
+    SET NULL,
+        INDEX idx_difficulty(difficulty),
+        INDEX idx_author_id(author_id),
+        INDEX idx_created_at(created_at)
 );
-
 CREATE TABLE tag(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) UNIQUE NOT NULL,
@@ -49,29 +46,25 @@ CREATE TABLE tag(
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-
 CREATE TABLE problem_tag(
     problem_id BIGINT NOT NULL,
     tag_id BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY(problem_id,tag_id),
+    PRIMARY KEY(problem_id, tag_id),
     FOREIGN KEY(problem_id) REFERENCES problem(id) ON DELETE CASCADE,
     FOREIGN KEY(tag_id) REFERENCES tag(id) ON DELETE CASCADE,
     INDEX idx_tag_id(tag_id)
 );
-
 CREATE TABLE test_case(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     problem_id BIGINT NOT NULL,
     input_path VARCHAR(500) NOT NULL COMMENT '输入文件路径',
     output_path VARCHAR(500) NOT NULL COMMENT '输出文件路径',
-    is_sample BOOLEAN DEFAULT FALSE COMMENT '是否为样例测试点',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_problem_id(problem_id),
     FOREIGN KEY(problem_id) REFERENCES problem(id) ON DELETE CASCADE
 );
-
 CREATE TABLE submission(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -84,14 +77,11 @@ CREATE TABLE submission(
     submitted_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
     INDEX idx_user_problem_time(user_id, problem_id, submitted_at),
     INDEX idx_status(status),
-
     FOREIGN KEY(user_id) REFERENCES user(id) ON DELETE CASCADE,
     FOREIGN KEY(problem_id) REFERENCES problem(id) ON DELETE CASCADE
 );
-
 CREATE TABLE result(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     submission_id BIGINT NOT NULL,
@@ -101,11 +91,19 @@ CREATE TABLE result(
     time_used INT DEFAULT NULL COMMENT '运行时间(ms)',
     memory_used INT DEFAULT NULL COMMENT '内存使用(KB)',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
     INDEX idx_submission_id (submission_id),
     INDEX idx_test_case_id (test_case_id),
     INDEX idx_status (status),
-
     FOREIGN KEY(submission_id) REFERENCES submission(id) ON DELETE CASCADE,
     FOREIGN KEY(test_case_id) REFERENCES test_case(id) ON DELETE CASCADE
+);
+CREATE TABLE announcement (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    content TEXT NOT NULL,
+    author_id BIGINT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (author_id) REFERENCES user(id) ON DELETE
+    SET NULL
 );

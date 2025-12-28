@@ -15,11 +15,11 @@ public class AuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
-        // 允许不需要鉴权的路径
         String path = request.getRequestURI();
+        // 允许不需要鉴权的路径
         if (path.equals("/api/user/login") || path.equals("/api/user/register") || path.equals("/api/user/list")
-                || path.startsWith("/api/user/") || path.startsWith("/api/problem") || path.startsWith("/api/tag")
-                || path.startsWith("/api/submission")) {
+                || path.startsWith("/api/user/") || path.startsWith("/api/problem/") || path.startsWith("/api/tag")
+                || path.startsWith("/api/submission") || path.equals("/api/announcement/list")) {
             return true;
         }
 

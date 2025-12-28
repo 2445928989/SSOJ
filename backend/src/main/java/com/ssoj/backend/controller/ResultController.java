@@ -25,6 +25,9 @@ public class ResultController {
     @GetMapping("/submission/{submissionId}")
     public Object getSubmissionResults(@PathVariable Long submissionId) {
         List<Result> results = resultMapper.findBySubmissionId(submissionId);
+        for (Result r : results) {
+            populateResultContent(r);
+        }
         return Map.of("data", results);
     }
 
@@ -34,6 +37,29 @@ public class ResultController {
      */
     @GetMapping("/{id}")
     public Result getResult(@PathVariable Long id) {
-        return resultMapper.findById(id);
+        Result r = resultMapper.findById(id);
+        if (r != null) {
+            populateResultContent(r);
+        }
+        return r;
+    }
+
+    private void populateResultContent(Result r) {
+        try {
+            if (r.getInput() != null) {
+                String input = com.ssoj.backend.util.FileUtil.readFile(r.getInput());
+                if (input.length() > 1000)
+                    input = input.substring(0, 1000) + "...";
+                r.setInputContent(input);
+            }
+            if (r.getExpectedOutput() != null) {
+                String expected = com.ssoj.backend.util.FileUtil.readFile(r.getExpectedOutput());
+                if (expected.length() > 1000)
+                    expected = expected.substring(0, 1000) + "...";
+                r.setExpectedOutputContent(expected);
+            }
+        } catch (Exception e) {
+            // Ignore or log
+        }
     }
 }

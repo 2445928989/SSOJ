@@ -19,6 +19,10 @@ public class Result {
 
     // 显示字段（不持久化，从 TestCase 表 JOIN 获取）
     private String input; // 测试用例输入路径
-    private String expectedOutput; // 期望输出
-    private String output; // 实际输出
+    private String expectedOutput; // 期望输出路径
+    private String output; // 实际输出路径
+
+    private String inputContent;
+    private String expectedOutputContent;
+    private String actualOutputContent;
 }

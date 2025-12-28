@@ -36,11 +36,11 @@ public class FileUtil {
     /**
      * 保存测试用例
      * 
-     * @return 相对路径 testcases/{problemId}/{testcaseId}_{type}.txt
+     * @return 相对路径 testcases/{problemId}/{identifier}_{type}.txt
      */
-    public static String saveTestCaseFile(Long problemId, Long testcaseId, String type, byte[] data)
+    public static String saveTestCaseFile(Long problemId, String identifier, String type, byte[] data)
             throws IOException {
-        String fileName = "testcases/" + problemId + "/" + testcaseId + "_" + type + ".txt";
+        String fileName = "testcases/" + problemId + "/" + identifier + "_" + type + ".txt";
         String fullPath = BASE_DIR + "/" + fileName;
         Files.createDirectories(Paths.get(BASE_DIR, "testcases", String.valueOf(problemId)));
         Files.write(Paths.get(fullPath), data);

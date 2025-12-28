@@ -1,10 +1,15 @@
 package com.ssoj.backend.controller;
 
 import com.ssoj.backend.entity.Tag;
+import com.ssoj.backend.entity.User;
 import com.ssoj.backend.service.TagService;
+import com.ssoj.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +22,20 @@ public class TagController {
 
     @Autowired
     private TagService tagService;
+
+    @Autowired
+    private UserService userService;
+
+    private void checkAdmin(HttpSession session) {
+        if (session == null || session.getAttribute("userId") == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "未登录");
+        }
+        Long userId = (Long) session.getAttribute("userId");
+        User user = userService.getUserById(userId);
+        if (user == null || !"ADMIN".equals(user.getRole())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "无权访问");
+        }
+    }
 
     /**
      * GET /api/tag/list
@@ -39,7 +58,7 @@ public class TagController {
     public Tag getTag(@PathVariable Long id) {
         Tag tag = tagService.getTagById(id);
         if (tag == null) {
-            throw new RuntimeException("标签不存在");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "标签不存在");
         }
         return tag;
     }
@@ -49,12 +68,8 @@ public class TagController {
      * 创建标签（需要管理员权限）
      */
     @PostMapping("/create")
-    public Object createTag(@RequestBody Tag tag, jakarta.servlet.http.HttpServletRequest request) {
-        // 检查权限
-        jakarta.servlet.http.HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userId") == null) {
-            throw new RuntimeException("未登录");
-        }
+    public Object createTag(@RequestBody Tag tag, HttpSession session) {
+        checkAdmin(session);
 
         Tag created = tagService.createTag(tag.getName(), tag.getColor());
         return Map.of(
@@ -67,12 +82,8 @@ public class TagController {
      * 删除标签（需要管理员权限）
      */
     @DeleteMapping("/{id}")
-    public Object deleteTag(@PathVariable Long id, jakarta.servlet.http.HttpServletRequest request) {
-        // 检查权限
-        jakarta.servlet.http.HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("userId") == null) {
-            throw new RuntimeException("未登录");
-        }
+    public Object deleteTag(@PathVariable Long id, HttpSession session) {
+        checkAdmin(session);
 
         boolean deleted = tagService.deleteTag(id);
         return Map.of(

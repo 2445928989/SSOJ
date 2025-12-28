@@ -13,18 +13,20 @@
         <result property="memoryUsed" column="memory_used" />
         <result property="createdAt" column="created_at" />
         <result property="input" column="test_input" />
+        <result property="expectedOutput" column="test_output" />
     </resultMap>
 
     <!-- 根据ID查询结果 -->
     <select id="findById" resultMap="ResultMap"> SELECT r.id, r.submission_id, r.test_case_id,
         r.status, r.error_message, r.time_used, r.memory_used, r.created_at, t.input_path as
-        test_input FROM result r LEFT JOIN test_case t ON r.test_case_id = t.id WHERE r.id = #{id} </select>
+        test_input, t.output_path as test_output FROM result r LEFT JOIN test_case t ON
+        r.test_case_id = t.id WHERE r.id = #{id} </select>
 
     <!-- 根据提交ID查询所有结果 -->
     <select id="findBySubmissionId" resultMap="ResultMap"> SELECT r.id, r.submission_id,
         r.test_case_id, r.status, r.error_message, r.time_used, r.memory_used, r.created_at,
-        t.input_path as test_input FROM result r LEFT JOIN test_case t ON r.test_case_id = t.id
-        WHERE r.submission_id = #{submissionId} ORDER BY r.test_case_id </select>
+        t.input_path as test_input, t.output_path as test_output FROM result r LEFT JOIN test_case t
+        ON r.test_case_id = t.id WHERE r.submission_id = #{submissionId} ORDER BY r.test_case_id </select>
 
     <!-- 插入结果 -->
     <insert id="insert" parameterType="com.ssoj.backend.entity.Result"

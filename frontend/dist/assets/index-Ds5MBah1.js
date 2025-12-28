@@ -1390,7 +1390,7 @@ https://github.com/highlightjs/highlight.js/issues/2277`),D=L,j=K),M===void 0&&(
                         transform: translateX(0);
                     }
                 }
-            `})]}):b.jsx("div",{children:"Not found"})}function nV(){const[e,t]=z.useState(null),[n,r]=z.useState(!0),[a,i]=z.useState(""),[o,s]=z.useState(!1),[l,c]=z.useState({}),[u,d]=z.useState(!1),[p,m]=z.useState(""),[_,g]=z.useState({});z.useEffect(()=>{Promise.all([Ge.get("/api/user/profile"),Ge.get("/api/user/submission-heatmap")]).then(([v,C])=>{t(v.data),c(v.data),g(C.data.data||{})}).catch(v=>{var C,O;return i(((O=(C=v.response)==null?void 0:C.data)==null?void 0:O.error)||"加载失败")}).finally(()=>r(!1))},[]);const T=v=>{const{name:C,value:O}=v.target;c({...l,[C]:O})},E=async()=>{var v,C;d(!0),i(""),m("");try{await Ge.put("/api/user/profile",{nickname:l.nickname,phone:l.phone,profile:l.profile}),t(l),s(!1),m("资料更新成功！"),setTimeout(()=>m(""),3e3)}catch(O){i(((C=(v=O.response)==null?void 0:v.data)==null?void 0:C.error)||"保存失败")}finally{d(!1)}},h=()=>{c(e),s(!1),i("")};return n?b.jsx("div",{className:"loading",children:"加载中..."}):a&&!e?b.jsx("div",{className:"error-msg",children:a}):e?b.jsxs("div",{className:"profile-container",children:[b.jsxs("div",{className:"profile-card",children:[b.jsxs("div",{className:"profile-header",children:[b.jsxs("div",{children:[b.jsx("h1",{children:e.nickname||e.username}),b.jsxs("p",{className:"username",children:["@",e.username]})]}),!o&&b.jsx("button",{className:"edit-btn",onClick:()=>s(!0),children:"编辑"})]}),b.jsxs("div",{className:"profile-content",children:[a&&b.jsx("div",{className:"error-msg",children:a}),p&&b.jsx("div",{className:"success-msg",children:p}),o?b.jsxs("form",{className:"profile-form",children:[b.jsxs("div",{className:"form-group",children:[b.jsx("label",{children:"用户名（不可更改）"}),b.jsx("input",{type:"text",value:l.username,disabled:!0,className:"input-disabled"})]}),b.jsxs("div",{className:"form-group",children:[b.jsx("label",{children:"邮箱（不可更改）"}),b.jsx("input",{type:"text",value:l.email,disabled:!0,className:"input-disabled"})]}),b.jsxs("div",{className:"form-group",children:[b.jsx("label",{children:"昵称"}),b.jsx("input",{type:"text",name:"nickname",value:l.nickname||"",onChange:T,placeholder:"输入昵称"})]}),b.jsxs("div",{className:"form-group",children:[b.jsx("label",{children:"电话"}),b.jsx("input",{type:"text",name:"phone",value:l.phone||"",onChange:T,placeholder:"输入电话号码"})]}),b.jsxs("div",{className:"form-group",children:[b.jsx("label",{children:"个人介绍"}),b.jsx("textarea",{name:"profile",value:l.profile||"",onChange:T,placeholder:"输入个人介绍...",rows:5})]}),b.jsxs("div",{className:"form-actions",children:[b.jsx("button",{type:"button",className:"save-btn",onClick:E,disabled:u,children:u?"保存中...":"保存"}),b.jsx("button",{type:"button",className:"cancel-btn",onClick:h,children:"取消"})]})]}):b.jsxs(b.Fragment,{children:[b.jsxs("div",{className:"profile-section",children:[b.jsx("h2",{children:"用户信息"}),b.jsxs("div",{className:"info-row",children:[b.jsx("span",{className:"label",children:"用户名："}),b.jsx("span",{className:"value",children:e.username})]}),b.jsxs("div",{className:"info-row",children:[b.jsx("span",{className:"label",children:"昵称："}),b.jsx("span",{className:"value",children:e.nickname||"未设置"})]}),b.jsxs("div",{className:"info-row",children:[b.jsx("span",{className:"label",children:"邮箱："}),b.jsx("span",{className:"value",children:e.email})]}),b.jsxs("div",{className:"info-row",children:[b.jsx("span",{className:"label",children:"电话："}),b.jsx("span",{className:"value",children:e.phone||"未设置"})]}),b.jsxs("div",{className:"info-row",children:[b.jsx("span",{className:"label",children:"身份："}),b.jsx("span",{className:"role-badge",children:e.role==="ADMIN"?"管理员":"普通用户"})]}),e.profile&&b.jsxs("div",{className:"info-row",children:[b.jsx("span",{className:"label",children:"个人简介："}),b.jsx("span",{className:"value",children:e.profile})]})]}),b.jsxs("div",{className:"stats-section",children:[b.jsx("h2",{children:"做题统计"}),b.jsxs("div",{className:"stats-grid",children:[b.jsxs("div",{className:"stat-card",children:[b.jsx("div",{className:"stat-number",children:e.solved||0}),b.jsx("div",{className:"stat-label",children:"已通过"})]}),b.jsxs("div",{className:"stat-card",children:[b.jsx("div",{className:"stat-number",children:e.submissions||0}),b.jsx("div",{className:"stat-label",children:"提交数"})]}),b.jsxs("div",{className:"stat-card",children:[b.jsxs("div",{className:"stat-number",children:[e.submissions>0?(e.solved/e.submissions*100).toFixed(1):0,"%"]}),b.jsx("div",{className:"stat-label",children:"通过率"})]})]})]}),Object.keys(_).length>0&&b.jsxs("div",{className:"heatmap-section",children:[b.jsx("h2",{children:"最近一年做题统计"}),b.jsx("div",{className:"heatmap-grid",children:Object.entries(_).sort().map(([v,C])=>{const O=Math.min(C/5,1),N=["#ebedf0","#c6e48b","#7bc96f","#239a3b","#196127"],I=Math.floor(O*(N.length-1));return b.jsx("div",{className:"heatmap-cell",style:{backgroundColor:N[I]},title:`${v}: ${C} 次提交`},v)})}),b.jsxs("div",{className:"heatmap-legend",children:[b.jsx("span",{children:"少"}),b.jsxs("div",{className:"legend-colors",children:[b.jsx("div",{style:{backgroundColor:"#ebedf0"}}),b.jsx("div",{style:{backgroundColor:"#c6e48b"}}),b.jsx("div",{style:{backgroundColor:"#7bc96f"}}),b.jsx("div",{style:{backgroundColor:"#239a3b"}}),b.jsx("div",{style:{backgroundColor:"#196127"}})]}),b.jsx("span",{children:"多"})]})]})]})]})]}),b.jsx("style",{children:`
+            `})]}):b.jsx("div",{children:"Not found"})}function nV(){const[e,t]=z.useState(null),[n,r]=z.useState(!0),[a,i]=z.useState(""),[o,s]=z.useState(!1),[l,c]=z.useState({}),[u,d]=z.useState(!1),[p,m]=z.useState(""),[_,g]=z.useState({});z.useEffect(()=>{Promise.all([Ge.get("/api/user/profile"),Ge.get("/api/user/submission-heatmap")]).then(([v,C])=>{t(v.data),c(v.data),g(C.data.data||{})}).catch(v=>{var C,O;return i(((O=(C=v.response)==null?void 0:C.data)==null?void 0:O.error)||"加载失败")}).finally(()=>r(!1))},[]);const T=v=>{const{name:C,value:O}=v.target;c({...l,[C]:O})},E=async()=>{var v,C;d(!0),i(""),m("");try{await Ge.put("/api/user/profile",{nickname:l.nickname,phone:l.phone,profile:l.profile}),t(l),s(!1),m("资料更新成功！"),setTimeout(()=>m(""),3e3)}catch(O){i(((C=(v=O.response)==null?void 0:v.data)==null?void 0:C.error)||"保存失败")}finally{d(!1)}},h=()=>{c(e),s(!1),i("")};return n?b.jsx("div",{className:"loading",children:"加载中..."}):a&&!e?b.jsx("div",{className:"error-msg",children:a}):e?b.jsxs("div",{className:"profile-container",children:[b.jsxs("div",{className:"profile-card",children:[b.jsxs("div",{className:"profile-header",children:[b.jsxs("div",{children:[b.jsx("h1",{children:e.nickname||e.username}),b.jsxs("p",{className:"username",children:["@",e.username]})]}),!o&&b.jsx("button",{className:"edit-btn",onClick:()=>s(!0),children:"编辑"})]}),b.jsxs("div",{className:"profile-content",children:[a&&b.jsx("div",{className:"error-msg",children:a}),p&&b.jsx("div",{className:"success-msg",children:p}),o?b.jsxs("form",{className:"profile-form",children:[b.jsxs("div",{className:"form-group",children:[b.jsx("label",{children:"用户名（不可更改）"}),b.jsx("input",{type:"text",value:l.username,disabled:!0,className:"input-disabled"})]}),b.jsxs("div",{className:"form-group",children:[b.jsx("label",{children:"邮箱（不可更改）"}),b.jsx("input",{type:"text",value:l.email,disabled:!0,className:"input-disabled"})]}),b.jsxs("div",{className:"form-group",children:[b.jsx("label",{children:"昵称"}),b.jsx("input",{type:"text",name:"nickname",value:l.nickname||"",onChange:T,placeholder:"输入昵称"})]}),b.jsxs("div",{className:"form-group",children:[b.jsx("label",{children:"电话"}),b.jsx("input",{type:"text",name:"phone",value:l.phone||"",onChange:T,placeholder:"输入电话号码"})]}),b.jsxs("div",{className:"form-group",children:[b.jsx("label",{children:"个人介绍"}),b.jsx("textarea",{name:"profile",value:l.profile||"",onChange:T,placeholder:"输入个人介绍...",rows:5})]}),b.jsxs("div",{className:"form-actions",children:[b.jsx("button",{type:"button",className:"save-btn",onClick:E,disabled:u,children:u?"保存中...":"保存"}),b.jsx("button",{type:"button",className:"cancel-btn",onClick:h,children:"取消"})]})]}):b.jsxs(b.Fragment,{children:[b.jsxs("div",{className:"profile-section",children:[b.jsx("h2",{children:"用户信息"}),b.jsxs("div",{className:"info-row",children:[b.jsx("span",{className:"label",children:"用户名："}),b.jsx("span",{className:"value",children:e.username})]}),b.jsxs("div",{className:"info-row",children:[b.jsx("span",{className:"label",children:"昵称："}),b.jsx("span",{className:"value",children:e.nickname||"未设置"})]}),b.jsxs("div",{className:"info-row",children:[b.jsx("span",{className:"label",children:"邮箱："}),b.jsx("span",{className:"value",children:e.email})]}),b.jsxs("div",{className:"info-row",children:[b.jsx("span",{className:"label",children:"电话："}),b.jsx("span",{className:"value",children:e.phone||"未设置"})]}),b.jsxs("div",{className:"info-row",children:[b.jsx("span",{className:"label",children:"身份："}),b.jsx("span",{className:"role-badge",children:e.role==="ADMIN"?"管理员":"普通用户"})]}),e.profile&&b.jsxs("div",{className:"info-row",children:[b.jsx("span",{className:"label",children:"个人简介："}),b.jsx("span",{className:"value",children:e.profile})]})]}),b.jsxs("div",{className:"stats-section",children:[b.jsx("h2",{children:"做题统计"}),b.jsxs("div",{className:"stats-list",children:[b.jsxs("div",{className:"stat-row",children:[b.jsx("span",{className:"stat-label",children:"已通过"}),b.jsx("span",{className:"stat-number",children:e.solved||0})]}),b.jsxs("div",{className:"stat-row",children:[b.jsx("span",{className:"stat-label",children:"提交数"}),b.jsx("span",{className:"stat-number",children:e.submissions||0})]}),b.jsxs("div",{className:"stat-row",children:[b.jsx("span",{className:"stat-label",children:"通过率"}),b.jsxs("span",{className:"stat-number",children:[e.submissions>0?(e.solved/e.submissions*100).toFixed(1):0,"%"]})]})]})]}),Object.keys(_).length>0&&b.jsxs("div",{className:"heatmap-section",children:[b.jsx("h2",{children:"最近一年做题统计"}),b.jsx("div",{className:"heatmap-grid",children:Object.entries(_).sort().map(([v,C])=>{const O=Math.min(C/5,1),N=["#ebedf0","#c6e48b","#7bc96f","#239a3b","#196127"],I=Math.floor(O*(N.length-1));return b.jsx("div",{className:"heatmap-cell",style:{backgroundColor:N[I]},title:`${v}: ${C} 次提交`},v)})}),b.jsxs("div",{className:"heatmap-legend",children:[b.jsx("span",{children:"少"}),b.jsxs("div",{className:"legend-colors",children:[b.jsx("div",{style:{backgroundColor:"#ebedf0"}}),b.jsx("div",{style:{backgroundColor:"#c6e48b"}}),b.jsx("div",{style:{backgroundColor:"#7bc96f"}}),b.jsx("div",{style:{backgroundColor:"#239a3b"}}),b.jsx("div",{style:{backgroundColor:"#196127"}})]}),b.jsx("span",{children:"多"})]})]})]})]})]}),b.jsx("style",{children:`
                 .profile-container {
                     padding: 20px;
                     max-width: 1000px;
@@ -1510,29 +1510,33 @@ https://github.com/highlightjs/highlight.js/issues/2277`),D=L,j=K),M===void 0&&(
                     margin-bottom: 40px;
                 }
 
-                .stats-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-                    gap: 15px;
+                .stats-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
                 }
 
-                .stat-card {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    color: white;
-                    padding: 20px;
-                    border-radius: 8px;
-                    text-align: center;
+                .stat-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 12px 0;
+                    border-bottom: 1px solid #f0f0f0;
                 }
 
-                .stat-number {
-                    font-size: 2em;
-                    font-weight: bold;
-                    margin-bottom: 5px;
+                .stat-row:last-child {
+                    border-bottom: none;
                 }
 
                 .stat-label {
-                    font-size: 0.9em;
-                    opacity: 0.9;
+                    color: #666;
+                    font-weight: 500;
+                }
+
+                .stat-number {
+                    font-size: 1.4rem;
+                    font-weight: bold;
+                    color: #667eea;
                 }
 
                 .heatmap-section {
@@ -1702,7 +1706,7 @@ https://github.com/highlightjs/highlight.js/issues/2277`),D=L,j=K),M===void 0&&(
                         grid-template-columns: 1fr;
                     }
                 }
-            `})]}):b.jsx("div",{className:"empty-state",children:"未登录"})}function rV(){const{userId:e}=Fc(),[t,n]=z.useState(null),[r,a]=z.useState(!0),[i,o]=z.useState(""),[s,l]=z.useState({});return z.useEffect(()=>{e&&Promise.all([Ge.get(`/api/user/${e}`),Ge.get(`/api/user/${e}/submission-heatmap`)]).then(([c,u])=>{n(c.data),l(u.data.data||{})}).catch(c=>{var u,d;return o(((d=(u=c.response)==null?void 0:u.data)==null?void 0:d.error)||"加载失败")}).finally(()=>a(!1))},[e]),r?b.jsx("div",{className:"loading",children:"加载中..."}):i?b.jsx("div",{className:"error-msg",children:i}):t?b.jsxs("div",{className:"profile-container",children:[b.jsxs("div",{className:"profile-card",children:[b.jsxs("div",{className:"profile-header",children:[b.jsx("h1",{children:t.nickname||t.username}),b.jsxs("p",{className:"username",children:["@",t.username]})]}),b.jsxs("div",{className:"profile-content",children:[b.jsxs("div",{className:"profile-section",children:[b.jsx("h2",{children:"用户信息"}),b.jsxs("div",{className:"info-item",children:[b.jsx("span",{className:"label",children:"用户名："}),b.jsx("span",{className:"value",children:t.username})]}),b.jsxs("div",{className:"info-item",children:[b.jsx("span",{className:"label",children:"昵称："}),b.jsx("span",{className:"value",children:t.nickname||"未设置"})]}),b.jsxs("div",{className:"info-item",children:[b.jsx("span",{className:"label",children:"邮箱："}),b.jsx("span",{className:"value",children:t.email||"未设置"})]}),b.jsxs("div",{className:"info-item",children:[b.jsx("span",{className:"label",children:"电话："}),b.jsx("span",{className:"value",children:t.phone||"未设置"})]}),t.profile&&b.jsxs("div",{className:"info-item",children:[b.jsx("span",{className:"label",children:"个人简介："}),b.jsx("span",{className:"value",children:t.profile})]})]}),b.jsxs("div",{className:"stats-section",children:[b.jsx("h2",{children:"做题统计"}),b.jsxs("div",{className:"stats-grid",children:[b.jsxs("div",{className:"stat-card",children:[b.jsx("div",{className:"stat-number",children:t.solved||0}),b.jsx("div",{className:"stat-label",children:"已通过"})]}),b.jsxs("div",{className:"stat-card",children:[b.jsx("div",{className:"stat-number",children:t.submissions||0}),b.jsx("div",{className:"stat-label",children:"提交数"})]}),b.jsxs("div",{className:"stat-card",children:[b.jsxs("div",{className:"stat-number",children:[t.submissions>0?(t.solved/t.submissions*100).toFixed(1):0,"%"]}),b.jsx("div",{className:"stat-label",children:"通过率"})]})]})]}),b.jsxs("div",{className:"heatmap-section",children:[b.jsx("h2",{children:"提交热力图"}),b.jsx("div",{className:"heatmap-grid",children:Object.entries(s).sort((c,u)=>new Date(c[0]).getTime()-new Date(u[0]).getTime()).map(([c,u])=>{const d=Math.min(u/5,1);return b.jsx("div",{className:"heatmap-cell",style:{backgroundColor:`rgba(102, 126, 234, ${d})`},title:`${c}: ${u} 次提交`},c)})}),b.jsxs("div",{className:"heatmap-legend",children:[b.jsx("span",{children:"少"}),b.jsxs("div",{style:{display:"flex",gap:"2px"},children:[b.jsx("div",{style:{width:"12px",height:"12px",backgroundColor:"rgba(102, 126, 234, 0.1)"}}),b.jsx("div",{style:{width:"12px",height:"12px",backgroundColor:"rgba(102, 126, 234, 0.4)"}}),b.jsx("div",{style:{width:"12px",height:"12px",backgroundColor:"rgba(102, 126, 234, 0.7)"}}),b.jsx("div",{style:{width:"12px",height:"12px",backgroundColor:"rgba(102, 126, 234, 1)"}})]}),b.jsx("span",{children:"多"})]})]})]})]}),b.jsx("style",{children:`
+            `})]}):b.jsx("div",{className:"empty-state",children:"未登录"})}function rV(){const{userId:e}=Fc(),[t,n]=z.useState(null),[r,a]=z.useState(!0),[i,o]=z.useState(""),[s,l]=z.useState({});return z.useEffect(()=>{e&&Promise.all([Ge.get(`/api/user/${e}`),Ge.get(`/api/user/${e}/submission-heatmap`)]).then(([c,u])=>{n(c.data),l(u.data.data||{})}).catch(c=>{var u,d;return o(((d=(u=c.response)==null?void 0:u.data)==null?void 0:d.error)||"加载失败")}).finally(()=>a(!1))},[e]),r?b.jsx("div",{className:"loading",children:"加载中..."}):i?b.jsx("div",{className:"error-msg",children:i}):t?b.jsxs("div",{className:"profile-container",children:[b.jsxs("div",{className:"profile-card",children:[b.jsxs("div",{className:"profile-header",children:[b.jsx("h1",{children:t.nickname||t.username}),b.jsxs("p",{className:"username",children:["@",t.username]})]}),b.jsxs("div",{className:"profile-content",children:[b.jsxs("div",{className:"profile-section",children:[b.jsx("h2",{children:"用户信息"}),b.jsxs("div",{className:"info-item",children:[b.jsx("span",{className:"label",children:"用户名："}),b.jsx("span",{className:"value",children:t.username})]}),b.jsxs("div",{className:"info-item",children:[b.jsx("span",{className:"label",children:"昵称："}),b.jsx("span",{className:"value",children:t.nickname||"未设置"})]}),b.jsxs("div",{className:"info-item",children:[b.jsx("span",{className:"label",children:"邮箱："}),b.jsx("span",{className:"value",children:t.email||"未设置"})]}),b.jsxs("div",{className:"info-item",children:[b.jsx("span",{className:"label",children:"电话："}),b.jsx("span",{className:"value",children:t.phone||"未设置"})]}),t.profile&&b.jsxs("div",{className:"info-item",children:[b.jsx("span",{className:"label",children:"个人简介："}),b.jsx("span",{className:"value",children:t.profile})]})]}),b.jsxs("div",{className:"stats-section",children:[b.jsx("h2",{children:"做题统计"}),b.jsxs("div",{className:"stats-list",children:[b.jsxs("div",{className:"stat-row",children:[b.jsx("span",{className:"stat-label",children:"已通过"}),b.jsx("span",{className:"stat-number",children:t.solved||0})]}),b.jsxs("div",{className:"stat-row",children:[b.jsx("span",{className:"stat-label",children:"提交数"}),b.jsx("span",{className:"stat-number",children:t.submissions||0})]}),b.jsxs("div",{className:"stat-row",children:[b.jsx("span",{className:"stat-label",children:"通过率"}),b.jsxs("span",{className:"stat-number",children:[t.submissions>0?(t.solved/t.submissions*100).toFixed(1):0,"%"]})]})]})]}),b.jsxs("div",{className:"heatmap-section",children:[b.jsx("h2",{children:"提交热力图"}),b.jsx("div",{className:"heatmap-grid",children:Object.entries(s).sort((c,u)=>new Date(c[0]).getTime()-new Date(u[0]).getTime()).map(([c,u])=>{const d=Math.min(u/5,1);return b.jsx("div",{className:"heatmap-cell",style:{backgroundColor:`rgba(102, 126, 234, ${d})`},title:`${c}: ${u} 次提交`},c)})}),b.jsxs("div",{className:"heatmap-legend",children:[b.jsx("span",{children:"少"}),b.jsxs("div",{style:{display:"flex",gap:"2px"},children:[b.jsx("div",{style:{width:"12px",height:"12px",backgroundColor:"rgba(102, 126, 234, 0.1)"}}),b.jsx("div",{style:{width:"12px",height:"12px",backgroundColor:"rgba(102, 126, 234, 0.4)"}}),b.jsx("div",{style:{width:"12px",height:"12px",backgroundColor:"rgba(102, 126, 234, 0.7)"}}),b.jsx("div",{style:{width:"12px",height:"12px",backgroundColor:"rgba(102, 126, 234, 1)"}})]}),b.jsx("span",{children:"多"})]})]})]})]}),b.jsx("style",{children:`
                 .profile-container {
                     padding: 20px;
                     max-width: 1000px;
@@ -1772,29 +1776,33 @@ https://github.com/highlightjs/highlight.js/issues/2277`),D=L,j=K),M===void 0&&(
                     margin-bottom: 40px;
                 }
 
-                .stats-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-                    gap: 15px;
+                .stats-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
                 }
 
-                .stat-card {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    color: white;
-                    padding: 20px;
-                    border-radius: 8px;
-                    text-align: center;
+                .stat-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 12px 0;
+                    border-bottom: 1px solid #f0f0f0;
                 }
 
-                .stat-number {
-                    font-size: 2em;
-                    font-weight: bold;
-                    margin-bottom: 5px;
+                .stat-row:last-child {
+                    border-bottom: none;
                 }
 
                 .stat-label {
-                    font-size: 0.9em;
-                    opacity: 0.9;
+                    color: #666;
+                    font-weight: 500;
+                }
+
+                .stat-number {
+                    font-size: 1.4rem;
+                    font-weight: bold;
+                    color: #667eea;
                 }
 
                 .heatmap-section {

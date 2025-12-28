@@ -67,7 +67,6 @@ export default function App() {
                     {user ? (
                         <>
                             <Link to="/profile" className="username" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>{user.username}</Link>
-                            <Link to="/profile">个人资料</Link>
                             {user.role === 'ADMIN' && <Link to="/admin/problems">管理</Link>}
                             <button className="logout-btn" onClick={logout}>退出</button>
                         </>

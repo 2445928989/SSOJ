@@ -43,8 +43,8 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - /home/thanatos/SCUT/SE/ssoj/backend/target/backend-0.0.1-SNAPSHOT.jar:/app/app.jar:ro
       - /tmp/ssoj:/tmp/ssoj
+      - ./database/test_cases:/tmp/ssoj/test_cases:ro
     networks:
       - ssoj-network
     healthcheck:

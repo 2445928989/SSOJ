@@ -72,7 +72,10 @@ export default function SubmissionDetail() {
         return () => clearInterval(interval)
     }, [id, isPolling])
 
-    if (loading) return <div>Loading...</div>
+    if (loading) return <div className="container loading-container">
+        <div className="loading-spinner"></div>
+        <div className="loading-text">正在加载提交详情...</div>
+    </div>
     if (error) return <div className="error">{error}</div>
     if (!submission) return <div>Not found</div>
 
@@ -184,6 +187,26 @@ export default function SubmissionDetail() {
                                     {expandedTestCase === idx && (
                                         <tr style={{ backgroundColor: '#fafafa', borderBottom: '2px solid #ddd' }}>
                                             <td colSpan={5} style={{ padding: '15px' }}>
+                                                {r.errorMessage && (
+                                                    <div style={{ marginBottom: '15px' }}>
+                                                        <h4 style={{ margin: '0 0 10px 0', color: '#e91e63' }}>错误信息</h4>
+                                                        <pre style={{
+                                                            backgroundColor: '#fff0f0',
+                                                            padding: '10px',
+                                                            borderRadius: '4px',
+                                                            whiteSpace: 'pre-wrap',
+                                                            wordWrap: 'break-word',
+                                                            maxHeight: '300px',
+                                                            overflow: 'auto',
+                                                            fontSize: '12px',
+                                                            fontFamily: 'monospace',
+                                                            border: '1px solid #ffcdd2',
+                                                            color: '#c62828'
+                                                        }}>
+                                                            {r.errorMessage}
+                                                        </pre>
+                                                    </div>
+                                                )}
                                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
                                                     <div>
                                                         <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>输入</h4>
@@ -198,7 +221,7 @@ export default function SubmissionDetail() {
                                                             fontSize: '12px',
                                                             fontFamily: 'monospace'
                                                         }}>
-                                                            {r.input || '-'}
+                                                            {r.inputContent || '-'}
                                                         </pre>
                                                     </div>
                                                     <div>
@@ -214,7 +237,7 @@ export default function SubmissionDetail() {
                                                             fontSize: '12px',
                                                             fontFamily: 'monospace'
                                                         }}>
-                                                            {r.expectedOutput || '-'}
+                                                            {r.expectedOutputContent || '-'}
                                                         </pre>
                                                     </div>
                                                     <div>

@@ -111,9 +111,22 @@ public class JudgeService {
                     caseResult.setStatus(status);
                     caseResult.setTimeUsed((int) timeUsed);
                     caseResult.setMemoryUsed((int) memoryUsed);
-                    caseResult.setErrorMessage(result.has("output") ? result.get("output").asText() : "");
+
+                    // 提取错误信息
+                    String errorMessage = "";
+                    if (status.equals("CE")) {
+                        errorMessage = result.has("compiler_message") ? result.get("compiler_message").asText() : "";
+                    } else {
+                        errorMessage = result.has("error_message") ? result.get("error_message").asText() : "";
+                    }
+                    caseResult.setErrorMessage(errorMessage);
+
                     resultMapper.insert(caseResult);
 
+                    // 如果是编译错误，不需要继续运行后续测试用例
+                    if (status.equals("CE")) {
+                        break;
+                    }
                 } catch (Exception e) {
                     overallStatus = "RE"; // 运行错误
                     // 记录单个测试的错误
