@@ -11,7 +11,7 @@ COPY frontend .
 RUN npm run build
 
 # 运行阶段 - 使用 Nginx
-FROM nginx:alpine
+FROM public.ecr.aws/nginx/nginx:alpine
 
 COPY --from=builder /app/frontend/dist /usr/share/nginx/html
 COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf

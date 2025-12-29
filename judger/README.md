@@ -1,59 +1,65 @@
-# SSOJ Judger
+# SSOJ 判题核心 (Judger)
 
-在线判题系统的核心判题模块，使用 C++ 实现，负责编译、运行用户代码并进行结果比对。
+SSOJ 判题核心是一个基于 C++ 实现的高性能判题模块，负责在受限的环境中编译、运行用户提交的代码，并对比输出结果。
 
 ## 项目结构
 
-```
-judger/
-├── src/                        # 源代码
-│   ├── main.cpp                # 判题程序入口
-│   ├── compiler.cpp/h          # 编译模块
-│   ├── runner.cpp/h            # 运行模块
-│   ├── resource.cpp/h          # 资源限制模块
-│   ├── security.cpp/h          # 安全沙箱模块
-│   ├── comparator.cpp/h        # 输出比对模块
-│   └── utils.cpp/h             # 工具函数
-├── config/                     # 配置文件
-│   ├── syscall_whitelist.json  # 系统调用白名单
-│   └── language_config.json    # 语言编译配置
-├── tests/                      # 测试文件
-└── docs/                       # 文档
-```
+- `src/`: 源代码目录
+  - `main.cpp`: 程序入口，处理命令行参数
+  - `compiler.cpp/h`: 编译模块，支持 C/C++ 和 Python
+  - `runner.cpp/h`: 运行模块，负责 fork 子进程并监控
+  - `resource.cpp/h`: 资源限制模块，使用 setrlimit 控制 CPU 和内存
+  - `security.cpp/h`: 安全沙箱模块（基于系统调用监控）
+  - `comparator.cpp/h`: 结果比对模块，支持忽略行尾空格
+  - `utils.cpp/h`: 通用工具函数
+- `config/`: 配置文件目录
+  - `syscall_whitelist.json`: 系统调用白名单配置
+  - `language_config.json`: 编程语言的编译与运行命令配置
 
-## 快速开始
+## 编译与运行
 
-### 编译
+### 编译要求
+
+- GCC/G++ 9.0+
+- CMake 3.10+
+- Linux 操作系统 (利用 Linux 内核特性进行资源限制)
+
+### 编译步骤
 
 ```bash
-cd judger
-g++ -std=c++17 -o judger src/*.cpp
+mkdir build && cd build
+cmake ..
+make
 ```
 
-### 运行
+### 运行示例
 
 ```bash
 ./judger \
-  --src solution.cpp \
+  --src /path/to/solution.cpp \
   --lang cpp \
-  --input input.txt \
-  --output expected_output.txt \
+  --input /path/to/input.txt \
+  --output /path/to/expected.txt \
   --time 1 \
   --mem 256
 ```
 
-### 参数说明
+## 判题流程
 
-- `--src` - 源代码文件路径
-- `--lang` - 编程语言（cpp/c/python）
-- `--input` - 测试输入文件
-- `--output` - 期望输出文件
-- `--time` - 时间限制（秒）
-- `--mem` - 内存限制（MB）
+1. **初始化**：解析命令行参数，准备临时工作目录。
+2. **编译**：根据语言配置调用编译器。如果编译失败，返回 `CE` 状态。
+3. **运行**：
+   - 创建子进程。
+   - 在子进程中设置 `rlimit` 限制资源使用。
+   - 重定向标准输入输出。
+   - 使用 `execvp` 执行程序。
+   - 父进程通过 `wait4` 监控子进程状态并统计资源消耗。
+4. **比对**：将程序输出与期望输出进行比对。
+5. **清理**：删除临时文件，输出 JSON 格式的判题结果。
 
-### 输出格式
+## 输出格式
 
-JSON 格式输出判题结果：
+判题结果以标准 JSON 格式输出到 stdout：
 
 ```json
 {
@@ -65,32 +71,14 @@ JSON 格式输出判题结果：
 }
 ```
 
-状态码：`AC`（通过）/ `WA`（答案错误）/ `TLE`（超时）/ `MLE`（内存超限）/ `RE`（运行时错误）/ `CE`（编译错误）/ `SE`（系统错误）
-
-## 模块说明
-
-### utils 模块
-基础工具函数，包括文件读写、临时目录管理、JSON 转义、日志记录等。
-
-### compiler 模块
-编译源代码，支持 C/C++ 和 Python。C/C++ 使用 g++ 编译，Python 直接返回源文件路径。编译失败时捕获错误信息。
-
-### runner 模块
-核心执行模块，使用 fork/exec/wait4 运行用户程序：
-- 子进程设置资源限制、重定向 IO、执行程序
-- 父进程监控子进程、检测超时、获取资源使用
-- 根据退出信号判断状态（SIGXCPU→TLE，SIGSEGV→RE 等）
-
-### resource 模块
-资源限制和统计：
-- 使用 setrlimit 设置 CPU、内存、栈、输出大小限制
-- 解析 rusage 获取实际资源使用（CPU 时间、内存）
-
-### comparator 模块
-输出比对，支持精确匹配和忽略行尾空白两种模式。比对失败时返回详细错误信息。
-
-### security 模块
-安全沙箱（当前为占位实现，需要 libseccomp-dev 支持）。
+状态码说明：
+- `AC`: Accepted (通过)
+- `WA`: Wrong Answer (答案错误)
+- `TLE`: Time Limit Exceeded (时间超限)
+- `MLE`: Memory Limit Exceeded (内存超限)
+- `RE`: Runtime Error (运行错误)
+- `CE`: Compile Error (编译错误)
+- `SE`: System Error (系统错误)
 
 ## 测试
 

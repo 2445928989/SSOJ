@@ -35,6 +35,8 @@ echo "Running generator ..."
 for ((i=1; i<=COUNT; i++)); do
     echo "Generating test $i ..."
     ./gen > "$IN_DIR/$i.in"
+    # 由于 gen.cpp 使用 time(0) 作为种子，需要等待 1 秒以确保种子不同
+    sleep 1
 done
 
 echo "Compiling and running solution on all test cases ..."

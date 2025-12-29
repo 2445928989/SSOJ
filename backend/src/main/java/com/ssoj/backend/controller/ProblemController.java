@@ -170,6 +170,41 @@ public class ProblemController {
         return Map.of("success", true, "data", problemService.getTestCases(id));
     }
 
+    /**
+     * PUT /api/problem/{id}/testcases/{tcId}
+     * 更新单个测试用例
+     */
+    @PutMapping("/api/problem/{id}/testcases/{tcId}")
+    public Object updateTestCase(@PathVariable("id") Long id,
+            @PathVariable("tcId") Long tcId,
+            @RequestBody Map<String, String> body,
+            jakarta.servlet.http.HttpSession session) {
+        checkAdmin(session);
+        try {
+            problemService.updateTestCase(id, tcId, body.get("inputContent"), body.get("outputContent"));
+            return Map.of("success", true);
+        } catch (Exception e) {
+            return Map.of("success", false, "error", e.getMessage());
+        }
+    }
+
+    /**
+     * DELETE /api/problem/{id}/testcases/{tcId}
+     * 删除单个测试用例
+     */
+    @DeleteMapping("/api/problem/{id}/testcases/{tcId}")
+    public Object deleteTestCase(@PathVariable("id") Long id,
+            @PathVariable("tcId") Long tcId,
+            jakarta.servlet.http.HttpSession session) {
+        checkAdmin(session);
+        try {
+            problemService.deleteTestCase(id, tcId);
+            return Map.of("success", true);
+        } catch (Exception e) {
+            return Map.of("success", false, "error", e.getMessage());
+        }
+    }
+
     private void checkAdmin(jakarta.servlet.http.HttpSession session) {
         if (session == null || session.getAttribute("userId") == null) {
             throw new org.springframework.web.server.ResponseStatusException(

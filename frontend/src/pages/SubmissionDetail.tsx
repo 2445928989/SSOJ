@@ -185,7 +185,9 @@ export default function SubmissionDetail() {
                                         animation: newResultIndices.has(idx) ? 'pulse 0.6s ease-in-out' : 'none'
                                     }}
                                         onClick={() => setExpandedTestCase(expandedTestCase === idx ? null : idx)}>
-                                        <td style={{ padding: '10px' }}>#{idx + 1}</td>
+                                        <td style={{ padding: '10px' }}>
+                                            #{idx + 1} ({r.input ? r.input.split('/').pop() : '未知'})
+                                        </td>
                                         <td style={{ padding: '10px' }}>
                                             <span className={`status-${r.status.toLowerCase()}`}
                                                 style={{

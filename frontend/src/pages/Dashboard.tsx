@@ -295,7 +295,15 @@ export default function Dashboard() {
                     overflow-wrap: break-word;
                 }
 
+                .markdown-body {
+                    white-space: pre-wrap;
+                }
+
                 .markdown-body p {
+                    margin-bottom: 1em;
+                }
+
+                .markdown-body p:last-child {
                     margin-bottom: 0;
                 }
 

@@ -10,6 +10,8 @@ export default function ProblemManage() {
     const [editingId, setEditingId] = useState<number | null>(null)
     const [testCaseFile, setTestCaseFile] = useState<File | null>(null)
     const [testCases, setTestCases] = useState<any[]>([])
+    const [editingTestCase, setEditingTestCase] = useState<number | null>(null)
+    const [tcEditForm, setTcEditForm] = useState({ inputContent: '', outputContent: '' })
 
     const initialForm = {
         title: '',
@@ -111,6 +113,27 @@ export default function ProblemManage() {
             loadProblems()
         } catch (e: any) {
             setError(e.response?.data?.error || '删除失败')
+        }
+    }
+
+    const handleUpdateTestCase = async (tcId: number) => {
+        try {
+            await api.put(`/api/problem/${editingId}/testcases/${tcId}`, tcEditForm)
+            setEditingTestCase(null)
+            if (editingId) loadTestCases(editingId)
+            alert('测试点更新成功')
+        } catch (e: any) {
+            alert(e.response?.data?.error || '更新失败')
+        }
+    }
+
+    const handleDeleteTestCase = async (tcId: number) => {
+        if (!confirm('确定删除该测试点吗？')) return
+        try {
+            await api.delete(`/api/problem/${editingId}/testcases/${tcId}`)
+            if (editingId) loadTestCases(editingId)
+        } catch (e: any) {
+            alert(e.response?.data?.error || '删除失败')
         }
     }
 
@@ -220,7 +243,8 @@ export default function ProblemManage() {
                                                 <tr style={{ borderBottom: '1px solid #eee', textAlign: 'left' }}>
                                                     <th style={{ padding: '8px' }}>输入文件</th>
                                                     <th style={{ padding: '8px' }}>输出文件</th>
-                                                    <th style={{ padding: '8px' }}>内容预览</th>
+                                                    <th style={{ padding: '8px' }}>内容预览与编辑</th>
+                                                    <th style={{ padding: '8px' }}>操作</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -233,34 +257,69 @@ export default function ProblemManage() {
                                                             {tc.outputPath.split('/').pop()}
                                                         </td>
                                                         <td style={{ padding: '8px' }}>
-                                                            <div style={{ display: 'flex', gap: '10px' }}>
-                                                                <div style={{ flex: 1 }}>
-                                                                    <div style={{ fontSize: '10px', color: '#999' }}>Input:</div>
-                                                                    <pre style={{
-                                                                        margin: 0,
-                                                                        background: '#f8f9fa',
-                                                                        padding: '5px',
-                                                                        borderRadius: '4px',
-                                                                        maxHeight: '80px',
-                                                                        overflow: 'auto',
-                                                                        whiteSpace: 'pre-wrap',
-                                                                        fontSize: '11px'
-                                                                    }}>{tc.inputContent}</pre>
+                                                            {editingTestCase === tc.id ? (
+                                                                <div style={{ display: 'flex', gap: '10px' }}>
+                                                                    <div style={{ flex: 1 }}>
+                                                                        <textarea
+                                                                            style={{ width: '100%', height: '100px', fontSize: '11px', fontFamily: 'monospace' }}
+                                                                            value={tcEditForm.inputContent}
+                                                                            onChange={e => setTcEditForm({ ...tcEditForm, inputContent: e.target.value })}
+                                                                        />
+                                                                    </div>
+                                                                    <div style={{ flex: 1 }}>
+                                                                        <textarea
+                                                                            style={{ width: '100%', height: '100px', fontSize: '11px', fontFamily: 'monospace' }}
+                                                                            value={tcEditForm.outputContent}
+                                                                            onChange={e => setTcEditForm({ ...tcEditForm, outputContent: e.target.value })}
+                                                                        />
+                                                                    </div>
                                                                 </div>
-                                                                <div style={{ flex: 1 }}>
-                                                                    <div style={{ fontSize: '10px', color: '#999' }}>Output:</div>
-                                                                    <pre style={{
-                                                                        margin: 0,
-                                                                        background: '#f8f9fa',
-                                                                        padding: '5px',
-                                                                        borderRadius: '4px',
-                                                                        maxHeight: '80px',
-                                                                        overflow: 'auto',
-                                                                        whiteSpace: 'pre-wrap',
-                                                                        fontSize: '11px'
-                                                                    }}>{tc.outputContent}</pre>
+                                                            ) : (
+                                                                <div style={{ display: 'flex', gap: '10px' }}>
+                                                                    <div style={{ flex: 1 }}>
+                                                                        <div style={{ fontSize: '10px', color: '#999' }}>Input:</div>
+                                                                        <pre style={{
+                                                                            margin: 0,
+                                                                            background: '#f8f9fa',
+                                                                            padding: '5px',
+                                                                            borderRadius: '4px',
+                                                                            maxHeight: '80px',
+                                                                            overflow: 'auto',
+                                                                            whiteSpace: 'pre-wrap',
+                                                                            fontSize: '11px'
+                                                                        }}>{tc.inputContent}</pre>
+                                                                    </div>
+                                                                    <div style={{ flex: 1 }}>
+                                                                        <div style={{ fontSize: '10px', color: '#999' }}>Output:</div>
+                                                                        <pre style={{
+                                                                            margin: 0,
+                                                                            background: '#f8f9fa',
+                                                                            padding: '5px',
+                                                                            borderRadius: '4px',
+                                                                            maxHeight: '80px',
+                                                                            overflow: 'auto',
+                                                                            whiteSpace: 'pre-wrap',
+                                                                            fontSize: '11px'
+                                                                        }}>{tc.outputContent}</pre>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
+                                                            )}
+                                                        </td>
+                                                        <td style={{ padding: '8px' }}>
+                                                            {editingTestCase === tc.id ? (
+                                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                                                                    <button type="button" onClick={() => handleUpdateTestCase(tc.id)} style={{ fontSize: '10px', padding: '2px 5px', background: '#4caf50', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>保存</button>
+                                                                    <button type="button" onClick={() => setEditingTestCase(null)} style={{ fontSize: '10px', padding: '2px 5px', background: '#9e9e9e', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>取消</button>
+                                                                </div>
+                                                            ) : (
+                                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                                                                    <button type="button" onClick={() => {
+                                                                        setEditingTestCase(tc.id);
+                                                                        setTcEditForm({ inputContent: tc.inputContent, outputContent: tc.outputContent });
+                                                                    }} style={{ fontSize: '10px', padding: '2px 5px', background: '#2196f3', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>编辑</button>
+                                                                    <button type="button" onClick={() => handleDeleteTestCase(tc.id)} style={{ fontSize: '10px', padding: '2px 5px', background: '#f44336', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>删除</button>
+                                                                </div>
+                                                            )}
                                                         </td>
                                                     </tr>
                                                 ))}
