@@ -2,6 +2,8 @@ package com.ssoj.backend.controller;
 
 import com.ssoj.backend.entity.User;
 import com.ssoj.backend.service.UserService;
+import com.ssoj.backend.service.EmailService;
+import com.ssoj.backend.service.VerificationCodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,10 +17,76 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private VerificationCodeService verificationCodeService;
+
+    /**
+     * POST /api/user/send-code
+     * 发送注册验证码
+     */
+    @PostMapping("/send-code")
+    public Object sendCode(@RequestBody java.util.Map<String, String> request) {
+        String email = request.get("email");
+        if (email == null || !email.contains("@")) {
+            return java.util.Map.of("success", false, "message", "无效的邮箱地址");
+        }
+        String code = verificationCodeService.generateCode(email);
+        try {
+            emailService.sendVerificationCode(email, code);
+            return java.util.Map.of("success", true, "message", "验证码已发送");
+        } catch (Exception e) {
+            return java.util.Map.of("success", false, "message", "发送失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * POST /api/user/send-reset-code
+     * 发送重置密码验证码
+     */
+    @PostMapping("/send-reset-code")
+    public Object sendResetCode(@RequestBody java.util.Map<String, String> request) {
+        String email = request.get("email");
+        if (email == null || !email.contains("@")) {
+            return java.util.Map.of("success", false, "message", "无效的邮箱地址");
+        }
+        String code = verificationCodeService.generateCode(email);
+        try {
+            emailService.sendVerificationCode(email, code);
+            return java.util.Map.of("success", true, "message", "验证码已发送");
+        } catch (Exception e) {
+            return java.util.Map.of("success", false, "message", "发送失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * POST /api/user/reset-password
+     * 重置密码
+     */
+    @PostMapping("/reset-password")
+    public Object resetPassword(@RequestBody java.util.Map<String, String> request) {
+        String email = request.get("email");
+        String code = request.get("code");
+        String newPassword = request.get("newPassword");
+
+        if (!verificationCodeService.verifyCode(email, code)) {
+            return java.util.Map.of("success", false, "message", "验证码错误或已过期");
+        }
+
+        try {
+            userService.resetPassword(email, newPassword);
+            return java.util.Map.of("success", true, "message", "密码重置成功");
+        } catch (Exception e) {
+            return java.util.Map.of("success", false, "message", e.getMessage());
+        }
+    }
+
     /**
      * POST /api/user/register
      * 用户注册
-     * Request Body: {username, password, email}
+     * Request Body: {username, password, email, code}
      * Response: {success, message, data}
      */
     @PostMapping("/register")
@@ -26,6 +94,12 @@ public class UserController {
         String username = request.get("username");
         String password = request.get("password");
         String email = request.get("email");
+        String code = request.get("code");
+
+        if (!verificationCodeService.verifyCode(email, code)) {
+            return java.util.Map.of("success", false, "message", "验证码错误或已过期");
+        }
+
         User user = userService.register(username, password, email);
         user.setPassword(null);
         return java.util.Map.of("success", true, "user", user);
@@ -40,9 +114,9 @@ public class UserController {
     @PostMapping("/login")
     public Object login(@RequestBody java.util.Map<String, String> request,
             jakarta.servlet.http.HttpServletRequest httpRequest) {
-        String username = request.get("username");
+        String identifier = request.get("username"); // 保持 key 为 username 以兼容前端，但逻辑上是 identifier
         String password = request.get("password");
-        User user = userService.login(username, password);
+        User user = userService.login(identifier, password);
         // 在 session 中存 userId
         jakarta.servlet.http.HttpSession session = httpRequest.getSession(true);
         session.setAttribute("userId", user.getId());

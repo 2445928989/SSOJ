@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import api from '../api'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 
-export default function Register() {
-    const [username, setUsername] = useState('')
+export default function ForgotPassword() {
     const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
     const [code, setCode] = useState('')
+    const [newPassword, setNewPassword] = useState('')
     const [error, setError] = useState('')
+    const [message, setMessage] = useState('')
     const [loading, setLoading] = useState(false)
     const [sending, setSending] = useState(false)
     const [countdown, setCountdown] = useState(0)
@@ -20,9 +20,11 @@ export default function Register() {
         }
         setSending(true)
         setError('')
+        setMessage('')
         try {
-            const res = await api.post('/api/user/send-code', { email })
+            const res = await api.post('/api/user/send-reset-code', { email })
             if (res.data.success) {
+                setMessage('验证码已发送至您的邮箱')
                 setCountdown(60)
                 const timer = setInterval(() => {
                     setCountdown(prev => {
@@ -45,33 +47,31 @@ export default function Register() {
 
     const submit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!username.trim() || username.length < 3) {
-            setError('用户名长度至少为 3 个字符')
-            return
-        }
         if (!email.includes('@')) {
             setError('请输入有效的邮箱地址')
-            return
-        }
-        if (!password || password.length < 6) {
-            setError('密码长度至少为 6 个字符')
             return
         }
         if (!code.trim()) {
             setError('请输入验证码')
             return
         }
+        if (!newPassword || newPassword.length < 6) {
+            setError('新密码长度至少为 6 个字符')
+            return
+        }
         setLoading(true)
         setError('')
+        setMessage('')
         try {
-            const res = await api.post('/api/user/register', { username, password, email, code })
+            const res = await api.post('/api/user/reset-password', { email, code, newPassword })
             if (res.data.success) {
-                navigate('/login')
+                setMessage('密码重置成功，正在跳转至登录页...')
+                setTimeout(() => navigate('/login'), 2000)
             } else {
-                setError(res.data.message || '注册失败')
+                setError(res.data.message || '重置失败')
             }
         } catch (e: any) {
-            setError(e.response?.data?.message || '注册失败')
+            setError(e.response?.data?.message || '重置失败')
         } finally {
             setLoading(false)
         }
@@ -99,28 +99,15 @@ export default function Register() {
                 width: '100%',
                 maxWidth: '400px'
             }}>
-                <h2 style={{ textAlign: 'center', marginBottom: '30px', color: '#333' }}>注册</h2>
+                <h2 style={{ textAlign: 'center', marginBottom: '30px', color: '#333' }}>找回密码</h2>
                 {error && <div className="error" style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#ffebee', color: '#c62828', borderRadius: '4px' }}>{error}</div>}
-                <input
-                    name="username"
-                    value={username}
-                    onChange={e => setUsername(e.target.value)}
-                    placeholder="用户名（至少3个字符）"
-                    style={{
-                        width: '100%',
-                        padding: '12px',
-                        marginBottom: '15px',
-                        border: '1px solid #ddd',
-                        borderRadius: '4px',
-                        fontSize: '14px',
-                        boxSizing: 'border-box'
-                    }}
-                />
+                {message && <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#e8f5e9', color: '#2e7d32', borderRadius: '4px' }}>{message}</div>}
+
                 <input
                     name="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    placeholder="邮箱地址"
+                    placeholder="注册邮箱"
                     type="email"
                     style={{
                         width: '100%',
@@ -132,6 +119,7 @@ export default function Register() {
                         boxSizing: 'border-box'
                     }}
                 />
+
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
                     <input
                         name="code"
@@ -166,10 +154,11 @@ export default function Register() {
                         {countdown > 0 ? `${countdown}s` : '获取验证码'}
                     </button>
                 </div>
+
                 <input
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="密码（至少6个字符）"
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
+                    placeholder="新密码（至少6个字符）"
                     type="password"
                     style={{
                         width: '100%',
@@ -181,24 +170,29 @@ export default function Register() {
                         boxSizing: 'border-box'
                     }}
                 />
+
                 <button
                     type="submit"
                     disabled={loading}
                     style={{
                         width: '100%',
                         padding: '12px',
-                        backgroundColor: loading ? '#ccc' : '#1976d2',
+                        backgroundColor: '#667eea',
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',
                         fontSize: '16px',
-                        fontWeight: 'bold',
-                        cursor: loading ? 'default' : 'pointer',
-                        transition: 'background-color 0.3s'
+                        fontWeight: '600',
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        marginBottom: '15px'
                     }}
                 >
-                    {loading ? '注册中...' : '注册'}
+                    {loading ? '正在重置...' : '重置密码'}
                 </button>
+
+                <div style={{ textAlign: 'center', fontSize: '14px' }}>
+                    <Link to="/login" style={{ color: '#667eea', textDecoration: 'none' }}>返回登录</Link>
+                </div>
             </form>
         </div>
     )

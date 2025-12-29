@@ -61,17 +61,23 @@ public class UserService {
 
     /**
      * 用户登录
-     * - 验证用户名密码
+     * - 验证用户名或邮箱
      */
-    public User login(String username, String password) {
-        if (username == null || username.trim().isEmpty()) {
-            throw new IllegalArgumentException("用户名不能为空");
+    public User login(String identifier, String password) {
+        if (identifier == null || identifier.trim().isEmpty()) {
+            throw new IllegalArgumentException("用户名或邮箱不能为空");
         }
         if (password == null || password.trim().isEmpty()) {
             throw new IllegalArgumentException("密码不能为空");
         }
 
-        User user = userMapper.findByUsername(username);
+        // 尝试通过用户名查找
+        User user = userMapper.findByUsername(identifier);
+        // 如果没找到，尝试通过邮箱查找
+        if (user == null && identifier.contains("@")) {
+            user = userMapper.findByEmail(identifier);
+        }
+
         if (user == null) {
             throw new RuntimeException("用户不存在");
         }
@@ -95,6 +101,18 @@ public class UserService {
             user.setSolved(submissionMapper.countSolvedProblemsByUserId(user.getId()));
         }
         return user;
+    }
+
+    /**
+     * 重置密码
+     */
+    public void resetPassword(String email, String newPassword) {
+        User user = userMapper.findByEmail(email);
+        if (user == null) {
+            throw new RuntimeException("该邮箱未注册用户");
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userMapper.update(user);
     }
 
     /**

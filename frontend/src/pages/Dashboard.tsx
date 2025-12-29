@@ -185,7 +185,7 @@ export default function Dashboard() {
                                         </span>
                                     </div>
                                     <div className="problem-stats">
-                                        <span>投稿 {p.numberOfSubmissions || 0}</span>
+                                        <span>提交 {p.numberOfSubmissions || 0}</span>
                                         <span>通过 {p.numberOfAccepted || 0}</span>
                                     </div>
                                 </div>

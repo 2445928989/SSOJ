@@ -4,6 +4,7 @@ import api from './api'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import ForgotPassword from './pages/ForgotPassword'
 import ProblemList from './pages/ProblemList'
 import ProblemDetail from './pages/ProblemDetail'
 import SubmitPage from './pages/Submit'
@@ -84,6 +85,7 @@ export default function App() {
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/login" element={<Login onLoginSuccess={fetchUserProfile} />} />
                     <Route path="/register" element={<Register />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/problems" element={<ProblemList />} />
                     <Route path="/problems/:id" element={<ProblemDetail />} />
                     <Route path="/submit/:id" element={<SubmitPage />} />

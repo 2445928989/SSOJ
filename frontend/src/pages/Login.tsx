@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import api from '../api'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 
 export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void }) {
     const [username, setUsername] = useState('')
@@ -57,9 +57,10 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
                 <h2 style={{ textAlign: 'center', marginBottom: '30px', color: '#333' }}>登录</h2>
                 {error && <div className="error" style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#ffebee', color: '#c62828', borderRadius: '4px' }}>{error}</div>}
                 <input
+                    name="username"
                     value={username}
                     onChange={e => setUsername(e.target.value)}
-                    placeholder="用户名"
+                    placeholder="用户名或邮箱"
                     style={{
                         width: '100%',
                         padding: '12px',
@@ -103,6 +104,10 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
                 >
                     {loading ? '登录中...' : '登录'}
                 </button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '15px', fontSize: '14px' }}>
+                    <Link to="/register" style={{ color: '#1976d2', textDecoration: 'none' }}>立即注册</Link>
+                    <Link to="/forgot-password" style={{ color: '#1976d2', textDecoration: 'none' }}>忘记密码？</Link>
+                </div>
             </form>
         </div>
     )
