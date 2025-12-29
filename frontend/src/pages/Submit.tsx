@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import api from '../api'
 import { useParams, useNavigate } from 'react-router-dom'
-import Editor from '@monaco-editor/react'
+import Editor, { loader } from '@monaco-editor/react'
 import type { Monaco } from '@monaco-editor/react'
 import * as prettier from 'prettier'
 import { cppCompletions, pythonCompletions, javaCompletions, cCompletions } from '../completions'
+
+// 配置 Monaco Editor 使用国内镜像 CDN
+loader.config({
+    paths: {
+        vs: 'https://lib.baomitu.com/monaco-editor/0.52.2/min/vs'
+    }
+})
 
 export default function SubmitPage() {
     const { id } = useParams()
