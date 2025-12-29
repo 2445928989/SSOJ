@@ -6,10 +6,10 @@ import type { Monaco } from '@monaco-editor/react'
 import * as prettier from 'prettier'
 import { cppCompletions, pythonCompletions, javaCompletions, cCompletions } from '../completions'
 
-// 使用字节跳动 CDN，这是目前国内最稳定的镜像之一
+// 配置 Monaco Editor 使用本地静态资源路径
 loader.config({
     paths: {
-        vs: 'https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/monaco-editor/0.44.0/min/vs'
+        vs: '/libs/monaco-editor/min/vs'
     }
 })
 
