@@ -3,7 +3,9 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
-RUN npm ci
+# 使用淘宝镜像加速 npm install
+RUN npm config set registry https://registry.npmmirror.com && \
+    npm ci
 
 COPY frontend .
 RUN npm run build
