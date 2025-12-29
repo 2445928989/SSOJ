@@ -8,6 +8,20 @@ RUN mvn dependency:go-offline
 COPY backend/src ./src
 RUN mvn clean package -DskipTests
 
+# Judger 编译阶段
+FROM ubuntu:24.04 AS judger-builder
+
+WORKDIR /app/judger
+RUN apt-get update && apt-get install -y \
+    g++ \
+    cmake \
+    make \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY judger/src ./src
+COPY judger/CMakeLists.txt .
+RUN mkdir build && cd build && cmake .. && make
+
 # 运行阶段 - 使用非Alpine镜像以兼容judger二进制
 FROM eclipse-temurin:17-jdk-noble
 
@@ -23,7 +37,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/backend/target/*.jar app.jar
-COPY judger/judger ./judger/judger
+COPY --from=judger-builder /app/judger/build/judger ./judger/judger
 
 EXPOSE 8080
 

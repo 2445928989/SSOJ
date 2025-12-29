@@ -47,17 +47,12 @@ public class ResultController {
     private void populateResultContent(Result r) {
         try {
             if (r.getInput() != null) {
-                String input = com.ssoj.backend.util.FileUtil.readFile(r.getInput());
-                if (input.length() > 1000)
-                    input = input.substring(0, 1000) + "...";
-                r.setInputContent(input);
+                r.setInputContent(com.ssoj.backend.util.FileUtil.readFileContent(r.getInput()));
             }
             if (r.getExpectedOutput() != null) {
-                String expected = com.ssoj.backend.util.FileUtil.readFile(r.getExpectedOutput());
-                if (expected.length() > 1000)
-                    expected = expected.substring(0, 1000) + "...";
-                r.setExpectedOutputContent(expected);
+                r.setExpectedOutputContent(com.ssoj.backend.util.FileUtil.readFileContent(r.getExpectedOutput()));
             }
+            // actualOutputContent 已经由 MyBatis 从数据库加载，无需额外处理
         } catch (Exception e) {
             // Ignore or log
         }

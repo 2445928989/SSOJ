@@ -9,6 +9,7 @@
         <result property="testCaseId" column="test_case_id" />
         <result property="status" column="status" />
         <result property="errorMessage" column="error_message" />
+        <result property="actualOutputContent" column="actual_output" />
         <result property="timeUsed" column="time_used" />
         <result property="memoryUsed" column="memory_used" />
         <result property="createdAt" column="created_at" />
@@ -18,21 +19,23 @@
 
     <!-- 根据ID查询结果 -->
     <select id="findById" resultMap="ResultMap"> SELECT r.id, r.submission_id, r.test_case_id,
-        r.status, r.error_message, r.time_used, r.memory_used, r.created_at, t.input_path as
-        test_input, t.output_path as test_output FROM result r LEFT JOIN test_case t ON
-        r.test_case_id = t.id WHERE r.id = #{id} </select>
+        r.status, r.error_message, r.actual_output, r.time_used, r.memory_used, r.created_at,
+        t.input_path as test_input, t.output_path as test_output FROM result r LEFT JOIN test_case t
+        ON r.test_case_id = t.id WHERE r.id = #{id} </select>
 
     <!-- 根据提交ID查询所有结果 -->
     <select id="findBySubmissionId" resultMap="ResultMap"> SELECT r.id, r.submission_id,
-        r.test_case_id, r.status, r.error_message, r.time_used, r.memory_used, r.created_at,
-        t.input_path as test_input, t.output_path as test_output FROM result r LEFT JOIN test_case t
-        ON r.test_case_id = t.id WHERE r.submission_id = #{submissionId} ORDER BY r.test_case_id </select>
+        r.test_case_id, r.status, r.error_message, r.actual_output, r.time_used, r.memory_used,
+        r.created_at, t.input_path as test_input, t.output_path as test_output FROM result r LEFT
+        JOIN test_case t ON r.test_case_id = t.id WHERE r.submission_id = #{submissionId} ORDER BY
+        r.test_case_id </select>
 
     <!-- 插入结果 -->
     <insert id="insert" parameterType="com.ssoj.backend.entity.Result"
         useGeneratedKeys="true" keyProperty="id"> INSERT INTO result ( submission_id, test_case_id,
-        status, error_message, time_used, memory_used, created_at ) VALUES ( #{submissionId},
-        #{testCaseId}, #{status}, #{errorMessage}, #{timeUsed}, #{memoryUsed}, NOW() ) </insert>
+        status, error_message, actual_output, time_used, memory_used, created_at ) VALUES (
+        #{submissionId}, #{testCaseId}, #{status}, #{errorMessage}, #{actualOutputContent},
+        #{timeUsed}, #{memoryUsed}, NOW() ) </insert>
 
     <!-- 批量插入结果 -->
     <insert id="batchInsert"> INSERT INTO result ( submission_id, test_case_id, status,

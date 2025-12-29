@@ -51,14 +51,21 @@ public class ProblemController {
     public Object getProblems(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String difficulty) {
+            @RequestParam(required = false) String difficulty,
+            @RequestParam(required = false) String tag) {
         List<Problem> problems;
+        int total;
         if (difficulty != null && !difficulty.isEmpty()) {
             problems = problemService.getProblemsByDifficulty(difficulty);
+            total = problems.size(); // 简单处理，难度筛选暂不支持分页
+        } else if (tag != null && !tag.isEmpty()) {
+            problems = problemService.getProblemsByTag(tag, page, size);
+            total = problemService.getCountByTag(tag);
         } else {
             problems = problemService.getProblems(page, size);
+            total = problemService.getTotalCount();
         }
-        return Map.of("success", true, "data", problems, "total", problemService.getTotalCount());
+        return Map.of("success", true, "data", problems, "total", total);
     }
 
     /**
@@ -140,6 +147,16 @@ public class ProblemController {
     @GetMapping("/api/problem/{id}/tags")
     public Object getProblemTags(@PathVariable("id") Long id) {
         List<?> tags = problemService.getProblemTags(id);
+        return Map.of("success", true, "data", tags);
+    }
+
+    /**
+     * GET /api/problem/tags
+     * 获取所有标签列表
+     */
+    @GetMapping("/api/problem/tags")
+    public Object getAllTags() {
+        List<String> tags = problemService.getAllTagNames();
         return Map.of("success", true, "data", tags);
     }
 

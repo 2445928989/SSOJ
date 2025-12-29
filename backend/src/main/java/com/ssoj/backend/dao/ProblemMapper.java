@@ -68,4 +68,14 @@ public interface ProblemMapper {
      * 增加题目的通过数
      */
     int incrementAcceptedCount(@Param("problemId") Long problemId);
+
+    /**
+     * 根据标签查询题目
+     */
+    List<Problem> findByTag(@Param("tagName") String tagName, @Param("offset") int offset, @Param("limit") int limit);
+
+    /**
+     * 统计标签下的题目总数
+     */
+    int countByTag(@Param("tagName") String tagName);
 }

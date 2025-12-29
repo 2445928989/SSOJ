@@ -16,11 +16,13 @@ public class Submission {
     private String status;
     private Integer maxTimeUsed;
     private Integer maxMemoryUsed;
+    private String errorMessage;
     private LocalDateTime submittedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     // 用于显示的额外信息（不存储在数据库）
     private String username; // 用户名
+    private String nickname; // 昵称
     private String problemTitle; // 题目标题
 }

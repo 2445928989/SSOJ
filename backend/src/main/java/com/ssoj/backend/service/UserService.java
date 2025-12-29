@@ -133,6 +133,21 @@ public class UserService {
     }
 
     /**
+     * 修改密码
+     */
+    public boolean changePassword(Long userId, String oldPassword, String newPassword) {
+        User user = userMapper.findById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("原密码错误");
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        return userMapper.update(user) > 0;
+    }
+
+    /**
      * 删除用户（管理员功能）
      */
     public boolean deleteUser(Long id) {

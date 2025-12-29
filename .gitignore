@@ -6,6 +6,7 @@
 # Build artifacts
 *.o
 *.out
+!database/**/*.out
 *.exe
 build/
 CMakeCache.txt
@@ -42,3 +43,5 @@ dev/
 .env
 
 node_modules/
+
+/OJ/data/

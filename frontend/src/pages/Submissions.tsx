@@ -40,7 +40,16 @@ export default function Submissions() {
                         {subs.map(s => (
                             <tr key={s.id} style={{ borderBottom: '1px solid #eee' }}>
                                 <td style={{ padding: '15px' }}><Link to={`/submissions/${s.id}`} style={{ color: '#667eea', fontWeight: '600' }}>#{s.id}</Link></td>
-                                <td style={{ padding: '15px' }}><Link to={`/user/${s.userId}`} style={{ color: '#4a5568', textDecoration: 'none', fontWeight: '500' }}>{s.username || '未知用户'}</Link></td>
+                                <td style={{ padding: '15px' }}>
+                                    <Link to={`/user/${s.userId}`} style={{ color: '#4a5568', textDecoration: 'none', fontWeight: '500' }}>
+                                        {s.username || '未知用户'}
+                                        {s.nickname && (
+                                            <span style={{ color: '#a0aec0', fontWeight: 'normal', fontSize: '0.9em', marginLeft: '8px' }}>
+                                                ({s.nickname})
+                                            </span>
+                                        )}
+                                    </Link>
+                                </td>
                                 <td style={{ padding: '15px' }}><Link to={`/problems/${s.problemId}`} style={{ color: '#4a5568', textDecoration: 'none' }}>{s.problemTitle || `问题 ${s.problemId}`}</Link></td>
                                 <td style={{ padding: '15px' }}>
                                     <Link to={`/submissions/${s.id}`} style={{ textDecoration: 'none' }}>

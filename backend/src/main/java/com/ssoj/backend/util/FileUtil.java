@@ -36,13 +36,13 @@ public class FileUtil {
     /**
      * 保存测试用例
      * 
-     * @return 相对路径 testcases/{problemId}/{identifier}_{type}.txt
+     * @return 相对路径 test_cases/problem_{problemId}/{identifier}.{type}
      */
     public static String saveTestCaseFile(Long problemId, String identifier, String type, byte[] data)
             throws IOException {
-        String fileName = "testcases/" + problemId + "/" + identifier + "_" + type + ".txt";
+        String fileName = "test_cases/problem_" + problemId + "/" + identifier + "." + type;
         String fullPath = BASE_DIR + "/" + fileName;
-        Files.createDirectories(Paths.get(BASE_DIR, "testcases", String.valueOf(problemId)));
+        Files.createDirectories(Paths.get(BASE_DIR, "test_cases", "problem_" + String.valueOf(problemId)));
         Files.write(Paths.get(fullPath), data);
         return fileName;
     }
@@ -71,6 +71,23 @@ public class FileUtil {
      */
     public static String getAbsolutePath(String relativePath) {
         return BASE_DIR + "/" + relativePath;
+    }
+
+    /**
+     * 读取文件内容（截断前1000字符）
+     */
+    public static String readFileContent(String relativePath) {
+        try {
+            String fullPath = getAbsolutePath(relativePath);
+            byte[] bytes = Files.readAllBytes(Paths.get(fullPath));
+            String content = new String(bytes);
+            if (content.length() > 1000) {
+                return content.substring(0, 1000) + "... [truncated]";
+            }
+            return content;
+        } catch (Exception e) {
+            return "Error reading file: " + e.getMessage();
+        }
     }
 
     private static String getLanguageExtension(String language) {

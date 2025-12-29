@@ -18,7 +18,7 @@ export default function ProblemList() {
     const [selectedTag, setSelectedTag] = useState<string | null>(null)
     const [tags, setTags] = useState<string[]>([])
 
-    const loadProblems = (pageNum: number = 1, keyword: string = '', sort: string = 'id', order: string = 'asc') => {
+    const loadProblems = (pageNum: number = 1, keyword: string = '', sort: string = 'id', order: string = 'asc', tag: string | null = null) => {
         setLoading(true)
         setError('')
 
@@ -26,6 +26,9 @@ export default function ProblemList() {
         if (keyword.trim()) {
             promise = api.get(`/api/problem/search?keyword=${encodeURIComponent(keyword)}&page=${pageNum}&size=${size}`)
             setIsSearching(true)
+        } else if (tag) {
+            promise = api.get(`/api/problem/list?tag=${encodeURIComponent(tag)}&page=${pageNum}&size=${size}`)
+            setIsSearching(false)
         } else {
             promise = api.get(`/api/problem/list?page=${pageNum}&size=${size}`)
             setIsSearching(false)
@@ -105,7 +108,8 @@ export default function ProblemList() {
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault()
-        loadProblems(1, searchKeyword, sortBy, sortOrder)
+        setSelectedTag(null)
+        loadProblems(1, searchKeyword, sortBy, sortOrder, null)
     }
 
     const handleSort = (newSort: 'id' | 'difficulty' | 'passRate') => {
@@ -119,18 +123,23 @@ export default function ProblemList() {
             setSortBy(newSort)
             setSortOrder('asc')
         }
-        loadProblems(page, searchKeyword, newSort, newOrder)
+        loadProblems(page, searchKeyword, newSort, newOrder, selectedTag)
     }
 
     const handleClearSearch = () => {
         setSearchKeyword('')
-        loadProblems(1, '')
+        setSelectedTag(null)
+        loadProblems(1, '', sortBy, sortOrder, null)
     }
 
-    // 根据选中的标签过滤题目
-    const filteredProblems = selectedTag
-        ? problems.filter(p => p.categories && p.categories.includes(selectedTag))
-        : problems
+    const handleTagSelect = (tag: string | null) => {
+        setSelectedTag(tag)
+        setSearchKeyword('')
+        loadProblems(1, '', sortBy, sortOrder, tag)
+    }
+
+    // 根据选中的标签过滤题目 (现在由后端处理，但保留这个逻辑以防万一，或者移除它)
+    const filteredProblems = problems
 
     const totalPages = Math.ceil(total / size)
 
@@ -169,7 +178,7 @@ export default function ProblemList() {
                         <div className="tags-list">
                             <button
                                 className={`tag-btn ${selectedTag === null ? 'active' : ''}`}
-                                onClick={() => setSelectedTag(null)}
+                                onClick={() => handleTagSelect(null)}
                             >
                                 全部
                             </button>
@@ -177,7 +186,7 @@ export default function ProblemList() {
                                 <button
                                     key={tag}
                                     className={`tag-btn ${selectedTag === tag ? 'active' : ''}`}
-                                    onClick={() => setSelectedTag(tag)}
+                                    onClick={() => handleTagSelect(tag)}
                                 >
                                     {tag}
                                 </button>
@@ -289,7 +298,7 @@ export default function ProblemList() {
                             {totalPages > 1 && (
                                 <div className="pagination">
                                     <button
-                                        onClick={() => loadProblems(page - 1, searchKeyword)}
+                                        onClick={() => loadProblems(page - 1, searchKeyword, sortBy, sortOrder, selectedTag)}
                                         disabled={page <= 1}
                                         className="page-btn"
                                     >
@@ -299,7 +308,7 @@ export default function ProblemList() {
                                         第 {page} / {totalPages} 页
                                     </span>
                                     <button
-                                        onClick={() => loadProblems(page + 1, searchKeyword)}
+                                        onClick={() => loadProblems(page + 1, searchKeyword, sortBy, sortOrder, selectedTag)}
                                         disabled={page >= totalPages}
                                         className="page-btn"
                                     >

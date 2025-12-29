@@ -71,7 +71,7 @@ public class TagController {
     public Object createTag(@RequestBody Tag tag, HttpSession session) {
         checkAdmin(session);
 
-        Tag created = tagService.createTag(tag.getName(), tag.getColor());
+        Tag created = tagService.createTag(tag.getName());
         return Map.of(
                 "success", true,
                 "data", created);

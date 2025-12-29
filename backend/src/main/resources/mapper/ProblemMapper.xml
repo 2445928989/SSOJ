@@ -70,4 +70,13 @@
     <update id="incrementAcceptedCount"> UPDATE problem SET number_of_accepted = number_of_accepted
         + 1 WHERE id = #{problemId} </update>
 
+    <!-- 根据标签查询题目 -->
+    <select id="findByTag" resultMap="ProblemResultMap"> SELECT p.* FROM problem p JOIN problem_tag
+        pt ON p.id = pt.problem_id JOIN tag t ON pt.tag_id = t.id WHERE t.name = #{tagName} ORDER BY
+        p.created_at DESC LIMIT #{offset}, #{limit} </select>
+
+    <!-- 统计标签下的题目总数 -->
+    <select id="countByTag" resultType="int"> SELECT COUNT(*) FROM problem p JOIN problem_tag pt ON
+        p.id = pt.problem_id JOIN tag t ON pt.tag_id = t.id WHERE t.name = #{tagName} </select>
+
 </mapper>

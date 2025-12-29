@@ -33,7 +33,7 @@ public class TagService {
     /**
      * 创建标签
      */
-    public Tag createTag(String name, String color) {
+    public Tag createTag(String name) {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("标签名不能为空");
         }
@@ -46,7 +46,6 @@ public class TagService {
 
         Tag tag = new Tag();
         tag.setName(name);
-        tag.setColor(color);
 
         tagMapper.insert(tag);
         return tagMapper.findById(tag.getId());
@@ -68,7 +67,7 @@ public class TagService {
     /**
      * 更新标签
      */
-    public Tag updateTag(Long id, String name, String color) {
+    public Tag updateTag(Long id, String name) {
         Tag tag = tagMapper.findById(id);
         if (tag == null) {
             throw new IllegalArgumentException("标签不存在");
@@ -81,10 +80,6 @@ public class TagService {
                 throw new IllegalArgumentException("标签名已存在");
             }
             tag.setName(name);
-        }
-
-        if (color != null) {
-            tag.setColor(color);
         }
 
         tagMapper.update(tag);

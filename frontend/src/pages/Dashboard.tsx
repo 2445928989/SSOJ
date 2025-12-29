@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import api from '../api'
 import { Link } from 'react-router-dom'
+import ReactMarkdown from 'react-markdown'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import 'katex/dist/katex.min.css'
 
 export default function Dashboard() {
     const [user, setUser] = useState<any>(null)
@@ -129,7 +133,7 @@ export default function Dashboard() {
                 <div className="announcements-list">
                     {announcements.length === 0 ? (
                         <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>暂无公告</p>
-                    ) : announcements.map((announcement: any) => (
+                    ) : announcements.slice(0, 4).map((announcement: any) => (
                         <div key={announcement.id} className="announcement-item">
                             <div className="announcement-header">
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -143,10 +147,26 @@ export default function Dashboard() {
                                 </div>
                                 <span className="announcement-date">{new Date(announcement.createdAt).toLocaleDateString('zh-CN')}</span>
                             </div>
-                            <p style={{ whiteSpace: 'pre-wrap' }}>{announcement.content}</p>
+                            <div className="announcement-content">
+                                <div className="markdown-body">
+                                    <ReactMarkdown
+                                        remarkPlugins={[remarkMath]}
+                                        rehypePlugins={[rehypeKatex]}
+                                    >
+                                        {announcement.content.length > 100
+                                            ? announcement.content.substring(0, 100) + '...'
+                                            : announcement.content}
+                                    </ReactMarkdown>
+                                </div>
+                            </div>
                         </div>
                     ))}
                 </div>
+                {announcements.length > 4 && (
+                    <div style={{ textAlign: 'right', marginTop: '15px' }}>
+                        <Link to="/announcements" className="view-all">查看全部公告 →</Link>
+                    </div>
+                )}
             </div>
 
             <div className="content-grid">
@@ -160,7 +180,9 @@ export default function Dashboard() {
                                 <div key={p.id} className="problem-item">
                                     <div className="problem-header">
                                         <Link to={`/problems/${p.id}`} className="problem-title">{p.title}</Link>
-                                        <span className={`difficulty-${p.difficulty.toLowerCase()}`}>{p.difficulty}</span>
+                                        <span className={`difficulty-${p.difficulty.toLowerCase()}`}>
+                                            {p.difficulty === 'EASY' ? '简单' : p.difficulty === 'MEDIUM' ? '中等' : '困难'}
+                                        </span>
                                     </div>
                                     <div className="problem-stats">
                                         <span>投稿 {p.numberOfSubmissions || 0}</span>
@@ -265,10 +287,16 @@ export default function Dashboard() {
                     font-size: 0.9em;
                 }
 
-                .announcement-item p {
-                    margin: 0;
+                .announcement-content {
                     color: #666;
+                    font-size: 14px;
                     line-height: 1.5;
+                    word-break: break-all;
+                    overflow-wrap: break-word;
+                }
+
+                .markdown-body p {
+                    margin-bottom: 0;
                 }
 
                 .content-grid {
@@ -435,6 +463,8 @@ export default function Dashboard() {
                     text-decoration: none;
                     border-radius: 4px;
                     transition: background 0.3s;
+                    border: none;
+                    cursor: pointer;
                 }
 
                 .admin-btn:hover {

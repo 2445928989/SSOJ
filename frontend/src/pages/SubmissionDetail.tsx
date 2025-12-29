@@ -141,6 +141,24 @@ export default function SubmissionDetail() {
                         <p style={{ margin: 0, fontSize: '16px', fontWeight: 'bold' }}>{new Date(submission.submittedAt).toLocaleString('zh-CN')}</p>
                     </div>
                 </div>
+
+                {/* 错误信息展示 (CE/RE) */}
+                {submission.errorMessage && (
+                    <div style={{
+                        margin: '0 25px 25px 25px',
+                        padding: '15px',
+                        backgroundColor: '#fff3f3',
+                        border: '1px solid #ffcdd2',
+                        borderRadius: '4px',
+                        color: '#c62828',
+                        fontFamily: 'monospace',
+                        whiteSpace: 'pre-wrap',
+                        fontSize: '14px'
+                    }}>
+                        <strong>错误详情:</strong>
+                        <div style={{ marginTop: '10px' }}>{submission.errorMessage}</div>
+                    </div>
+                )}
             </div>
 
             {results.length > 0 && (
@@ -253,7 +271,7 @@ export default function SubmissionDetail() {
                                                             fontSize: '12px',
                                                             fontFamily: 'monospace'
                                                         }}>
-                                                            {r.output || '-'}
+                                                            {r.actualOutputContent || '-'}
                                                         </pre>
                                                     </div>
                                                 </div>

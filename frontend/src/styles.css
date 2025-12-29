@@ -53,22 +53,30 @@ body {
     color: var(--text-primary);
     text-decoration: none;
     font-weight: 500;
-    transition: none;
+    transition: color 0.3s ease;
     position: relative;
     padding: 0.5rem 0;
     cursor: pointer;
 }
 
 .nav a::after {
-    display: none;
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+.nav a:hover::after {
+    width: 100%;
 }
 
 .nav a:hover {
     color: var(--text-primary);
-}
-
-.nav a:hover::after {
-    display: none;
+    text-decoration: none;
 }
 
 .logo {
@@ -365,6 +373,12 @@ a {
 a:hover {
     text-decoration: underline;
     color: var(--primary-dark);
+}
+
+.submit-btn:hover,
+.edit-profile-btn:hover {
+    color: white !important;
+    text-decoration: none !important;
 }
 
 table {

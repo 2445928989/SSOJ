@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 public class Tag {
     private Long id;
     private String name;
-    private String color;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

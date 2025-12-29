@@ -201,7 +201,42 @@ public class ProblemService {
     }
 
     /**
-     * 获取题目的标签列表
+     * * 根据标签获取题目列表
+     */
+    public List<Problem> getProblemsByTag(String tag, int page, int size) {
+        if (page < 1) {
+            throw new IllegalArgumentException("页码必须 >= 1");
+        }
+        if (size < 1 || size > 100) {
+            throw new IllegalArgumentException("每页数量必须在 1-100 之间");
+        }
+        int offset = (page - 1) * size;
+        List<Problem> problems = problemMapper.findByTag(tag, offset, size);
+        problems.forEach(this::loadProblemCategories);
+        return problems;
+    }
+
+    /**
+     * 获取标签下的题目总数
+     */
+    public int getCountByTag(String tag) {
+        if (tag == null || tag.trim().isEmpty()) {
+            return 0;
+        }
+        return problemMapper.countByTag(tag);
+    }
+
+    /**
+     * 获取所有标签名称
+     */
+    public List<String> getAllTagNames() {
+        return tagMapper.findAll().stream()
+                .map(com.ssoj.backend.entity.Tag::getName)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * * 获取题目的标签列表
      */
     public List<?> getProblemTags(Long problemId) {
         if (problemId == null || problemId <= 0) {

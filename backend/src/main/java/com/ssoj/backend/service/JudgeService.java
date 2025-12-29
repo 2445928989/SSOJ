@@ -12,11 +12,18 @@ import com.ssoj.backend.util.JudgerInvoker;
 import com.ssoj.backend.util.FileUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 /**
  * 判题服务（核心模块）
@@ -42,11 +49,19 @@ public class JudgeService {
     @Autowired
     private ResultMapper resultMapper;
 
+    @Autowired
+    @Qualifier("judgeExecutor")
+    private Executor judgeExecutor;
+
+    @Autowired
+    @Qualifier("testCaseExecutor")
+    private Executor testCaseExecutor;
+
     /**
      * 监听提交事件，异步触发判题
      */
     @EventListener
-    @Async
+    @Async("submissionExecutor")
     public void onSubmissionSubmitted(SubmissionSubmittedEvent event) {
         judge(event.getSubmissionId());
     }
@@ -57,7 +72,7 @@ public class JudgeService {
     public void judge(Long submissionId) {
         try {
             // 0. 标记提交为RUNNING状态
-            submissionService.updateJudgeResult(submissionId, "RUNNING", 0, 0);
+            submissionService.updateJudgeResult(submissionId, "RUNNING", 0, 0, null);
 
             // 1. 获取提交记录和题目信息
             Submission submission = submissionMapper.findById(submissionId);
@@ -73,78 +88,96 @@ public class JudgeService {
             // 3. 获取所有测试用例
             List<TestCase> testCases = testCaseMapper.findByProblemId(submission.getProblemId());
 
-            // 4. 逐个运行测试用例，收集结果
-            long maxTimeUsed = 0;
-            long maxMemoryUsed = 0;
-            String overallStatus = "AC"; // 假设全部通过
-
-            for (TestCase tc : testCases) {
-                String inputPath = FileUtil.getAbsolutePath(tc.getInputPath());
-                String outputPath = FileUtil.getAbsolutePath(tc.getOutputPath());
-
-                try {
-                    String jsonResult = judgerInvoker.judge(
-                            FileUtil.getAbsolutePath(codePath),
-                            submission.getLanguage(),
-                            inputPath,
-                            outputPath,
-                            problem.getTimeLimit(),
-                            problem.getMemoryLimit());
-
-                    JsonNode result = judgerInvoker.parseResult(jsonResult);
-                    String status = result.get("status").asText();
-                    long timeUsed = result.get("time_ms").asLong();
-                    long memoryUsed = result.get("memory_kb").asLong();
-
-                    maxTimeUsed = Math.max(maxTimeUsed, timeUsed);
-                    maxMemoryUsed = Math.max(maxMemoryUsed, memoryUsed);
-
-                    // 如果有一个测试用例失败，整体状态失败
-                    if (!status.equals("AC")) {
-                        overallStatus = status;
-                    }
-
-                    // 保存单个测试用例的结果
-                    Result caseResult = new Result();
-                    caseResult.setSubmissionId(submissionId);
-                    caseResult.setTestCaseId(tc.getId());
-                    caseResult.setStatus(status);
-                    caseResult.setTimeUsed((int) timeUsed);
-                    caseResult.setMemoryUsed((int) memoryUsed);
-
-                    // 提取错误信息
-                    String errorMessage = "";
-                    if (status.equals("CE")) {
-                        errorMessage = result.has("compiler_message") ? result.get("compiler_message").asText() : "";
-                    } else {
-                        errorMessage = result.has("error_message") ? result.get("error_message").asText() : "";
-                    }
-                    caseResult.setErrorMessage(errorMessage);
-
-                    resultMapper.insert(caseResult);
-
-                    // 如果是编译错误，不需要继续运行后续测试用例
-                    if (status.equals("CE")) {
-                        break;
-                    }
-                } catch (Exception e) {
-                    overallStatus = "RE"; // 运行错误
-                    // 记录单个测试的错误
-                    Result caseResult = new Result();
-                    caseResult.setSubmissionId(submissionId);
-                    caseResult.setTestCaseId(tc.getId());
-                    caseResult.setStatus("RE");
-                    caseResult.setErrorMessage(e.getMessage());
-                    resultMapper.insert(caseResult);
-                }
+            if (testCases.isEmpty()) {
+                submissionService.updateJudgeResult(submissionId, "AC", 0, 0, null);
+                return;
             }
 
-            // 5. 更新提交记录的最终状态
-            submissionService.updateJudgeResult(submissionId, overallStatus, (int) maxTimeUsed, (int) maxMemoryUsed);
+            AtomicLong maxTimeUsed = new AtomicLong(0);
+            AtomicLong maxMemoryUsed = new AtomicLong(0);
+            AtomicReference<String> overallStatus = new AtomicReference<>("AC");
+            AtomicReference<String> overallErrorMessage = new AtomicReference<>(null);
+
+            // 4. 并行运行测试用例
+            List<CompletableFuture<Result>> futures = testCases.stream()
+                    .map(tc -> CompletableFuture.supplyAsync(() -> {
+                        String inputPath = FileUtil.getAbsolutePath(tc.getInputPath());
+                        String outputPath = FileUtil.getAbsolutePath(tc.getOutputPath());
+
+                        try {
+                            String jsonResult = judgerInvoker.judge(
+                                    FileUtil.getAbsolutePath(codePath),
+                                    submission.getLanguage(),
+                                    inputPath,
+                                    outputPath,
+                                    problem.getTimeLimit(),
+                                    problem.getMemoryLimit());
+
+                            JsonNode resultNode = judgerInvoker.parseResult(jsonResult);
+                            String status = resultNode.get("status").asText();
+                            long timeUsed = resultNode.get("time_ms").asLong();
+                            long memoryUsed = resultNode.get("memory_kb").asLong();
+                            String actualOutput = resultNode.has("actual_output")
+                                    ? resultNode.get("actual_output").asText()
+                                    : "";
+
+                            maxTimeUsed.updateAndGet(current -> Math.max(current, timeUsed));
+                            maxMemoryUsed.updateAndGet(current -> Math.max(current, memoryUsed));
+
+                            // 保存单个测试用例的结果
+                            Result caseResult = new Result();
+                            caseResult.setSubmissionId(submissionId);
+                            caseResult.setTestCaseId(tc.getId());
+                            caseResult.setStatus(status);
+                            caseResult.setTimeUsed((int) timeUsed);
+                            caseResult.setMemoryUsed((int) memoryUsed);
+                            caseResult.setActualOutputContent(actualOutput);
+
+                            String errorMessage = "";
+                            if (status.equals("CE")) {
+                                errorMessage = resultNode.has("compiler_message")
+                                        ? resultNode.get("compiler_message").asText()
+                                        : "";
+                            } else {
+                                errorMessage = resultNode.has("error_message")
+                                        ? resultNode.get("error_message").asText()
+                                        : "";
+                            }
+                            caseResult.setErrorMessage(errorMessage);
+
+                            // 更新整体状态（第一个非AC状态）
+                            if (!status.equals("AC")) {
+                                if (overallStatus.compareAndSet("AC", status)) {
+                                    overallErrorMessage.set(errorMessage);
+                                }
+                            }
+
+                            resultMapper.insert(caseResult);
+                            return caseResult;
+                        } catch (Exception e) {
+                            Result errorResult = new Result();
+                            errorResult.setSubmissionId(submissionId);
+                            errorResult.setTestCaseId(tc.getId());
+                            errorResult.setStatus("RE");
+                            errorResult.setErrorMessage(e.getMessage());
+                            if (overallStatus.compareAndSet("AC", "RE")) {
+                                overallErrorMessage.set(e.getMessage());
+                            }
+                            resultMapper.insert(errorResult);
+                            return errorResult;
+                        }
+                    }, testCaseExecutor))
+                    .collect(Collectors.toList());
+
+            // 等待所有测试点完成
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+            // 5. 更新最终结果
+            submissionService.updateJudgeResult(submissionId, overallStatus.get(), (int) maxTimeUsed.get(),
+                    (int) maxMemoryUsed.get(), overallErrorMessage.get());
 
         } catch (Exception e) {
-            // 记录异常，将提交标记为运行时错误
-            submissionService.updateJudgeResult(submissionId, "RE", 0, 0);
+            submissionService.updateJudgeResult(submissionId, "RE", 0, 0, e.getMessage());
         }
     }
 }

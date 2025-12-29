@@ -186,7 +186,7 @@ public class SubmissionService {
      * 更新判题结果（由 JudgeService 回调）
      */
     public Boolean updateJudgeResult(Long submissionId, String status,
-            int maxTimeUsed, int maxMemoryUsed) {
+            int maxTimeUsed, int maxMemoryUsed, String errorMessage) {
         if (submissionId == null || submissionId <= 0) {
             throw new IllegalArgumentException("提交ID不合法");
         }
@@ -205,6 +205,7 @@ public class SubmissionService {
         submission.setStatus(status);
         submission.setMaxTimeUsed(maxTimeUsed);
         submission.setMaxMemoryUsed(maxMemoryUsed);
+        submission.setErrorMessage(errorMessage);
         int ret = submissionMapper.updateStatus(submission);
         if (ret == 0) {
             throw new RuntimeException("更新提交状态失败: " + submissionId);

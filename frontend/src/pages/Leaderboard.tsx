@@ -5,6 +5,7 @@ import api from '../api'
 interface UserStats {
     id: number
     username: string
+    nickname?: string
     solved: number
     submissions: number
 }
@@ -21,6 +22,7 @@ export default function Leaderboard() {
                 const userStats: UserStats[] = (res.data.data || []).map((u: any) => ({
                     id: u.id,
                     username: u.username,
+                    nickname: u.nickname,
                     solved: u.solved || 0,
                     submissions: u.submissions || 0
                 }))
@@ -71,6 +73,11 @@ export default function Leaderboard() {
                                     <td style={{ padding: '15px' }}>
                                         <Link to={`/user/${user.id}`} style={{ color: '#4a5568', textDecoration: 'none', fontWeight: '600' }}>
                                             {user.username}
+                                            {user.nickname && (
+                                                <span style={{ color: '#a0aec0', fontWeight: 'normal', fontSize: '0.9em', marginLeft: '8px' }}>
+                                                    ({user.nickname})
+                                                </span>
+                                            )}
                                         </Link>
                                     </td>
                                     <td style={{ padding: '15px', color: '#48bb78', fontWeight: 'bold' }}>{user.solved}</td>

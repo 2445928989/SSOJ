@@ -14,6 +14,7 @@ import OtherUserProfile from './pages/OtherUserProfile'
 import ProblemManage from './pages/ProblemManage'
 import Dashboard from './pages/Dashboard'
 import Leaderboard from './pages/Leaderboard'
+import Announcements from './pages/Announcements'
 
 export default function App() {
     const [user, setUser] = useState<any>(null)
@@ -91,6 +92,7 @@ export default function App() {
                     <Route path="/user/:userId" element={<OtherUserProfile />} />
                     <Route path="/profile" element={<UserProfile />} />
                     <Route path="/leaderboard" element={<Leaderboard />} />
+                    <Route path="/announcements" element={<Announcements />} />
                     <Route path="/admin/problems" element={<ProblemManage />} />
                 </Routes>
             </main>

@@ -151,7 +151,6 @@ export default function ProblemDetail() {
 
                 .problem-title-bar {
                     padding: 20px 20px 15px;
-                    border-bottom: 1px solid #e0e0e0;
                 }
 
                 .problem-title-bar h1 {
@@ -167,6 +166,7 @@ export default function ProblemDetail() {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
+                    border-bottom: 1px solid #e0e0e0;
                 }
 
                 .meta-left {
@@ -234,7 +234,7 @@ export default function ProblemDetail() {
                     padding: 12px 20px;
                     display: flex;
                     gap: 20px;
-                    border-bottom: 2px solid #b3b2b2ff;
+                    border-bottom: 1px solid #e0e0e0;
                     font-size: 14px;
                 }
 

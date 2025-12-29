@@ -42,7 +42,6 @@ CREATE TABLE problem(
 CREATE TABLE tag(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) UNIQUE NOT NULL,
-    color VARCHAR(7) DEFAULT '#23ff20',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -74,6 +73,7 @@ CREATE TABLE submission(
     status VARCHAR(30) NOT NULL,
     max_time_used INT DEFAULT NULL COMMENT '最大运行时间(ms)',
     max_memory_used INT DEFAULT NULL COMMENT '最大内存使用(KB)',
+    error_message TEXT DEFAULT NULL COMMENT '整体错误信息（如编译错误）',
     submitted_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -88,6 +88,7 @@ CREATE TABLE result(
     test_case_id BIGINT NOT NULL,
     status VARCHAR(50) NOT NULL COMMENT 'AC/WA/TLE/MLE/RE/CE等',
     error_message TEXT COMMENT '编译/运行错误信息',
+    actual_output TEXT COMMENT '实际输出（部分）',
     time_used INT DEFAULT NULL COMMENT '运行时间(ms)',
     memory_used INT DEFAULT NULL COMMENT '内存使用(KB)',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

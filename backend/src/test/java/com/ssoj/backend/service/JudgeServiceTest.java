@@ -53,7 +53,7 @@ class JudgeServiceTest {
 
         judgeService.judge(1L);
 
-        verify(submissionService, times(1)).updateJudgeResult(anyLong(), eq("RUNNING"), anyInt(), anyInt());
+        verify(submissionService, times(1)).updateJudgeResult(anyLong(), eq("RUNNING"), anyInt(), anyInt(), any());
         verify(problemService, never()).getProblemById(anyLong());
     }
 
@@ -76,14 +76,14 @@ class JudgeServiceTest {
         List<TestCase> testCases = new ArrayList<>();
         TestCase tc1 = new TestCase();
         tc1.setId(100L);
-        tc1.setInputPath("testcases/10/100_in.txt");
-        tc1.setOutputPath("testcases/10/100_out.txt");
+        tc1.setInputPath("test_cases/10/100_in.txt");
+        tc1.setOutputPath("test_cases/10/100_out.txt");
         testCases.add(tc1);
 
         TestCase tc2 = new TestCase();
         tc2.setId(101L);
-        tc2.setInputPath("testcases/10/101_in.txt");
-        tc2.setOutputPath("testcases/10/101_out.txt");
+        tc2.setInputPath("test_cases/10/101_in.txt");
+        tc2.setOutputPath("test_cases/10/101_out.txt");
         testCases.add(tc2);
 
         when(submissionMapper.findById(submissionId)).thenReturn(submission);
@@ -110,7 +110,8 @@ class JudgeServiceTest {
             // 忽略文件操作相关的异常
         }
 
-        verify(submissionService, atLeastOnce()).updateJudgeResult(eq(submissionId), eq("WA"), anyInt(), anyInt());
+        verify(submissionService, atLeastOnce()).updateJudgeResult(eq(submissionId), eq("WA"), anyInt(), anyInt(),
+                any());
     }
 
     @Test
@@ -132,8 +133,8 @@ class JudgeServiceTest {
         List<TestCase> testCases = new ArrayList<>();
         TestCase tc = new TestCase();
         tc.setId(201L);
-        tc.setInputPath("testcases/20/201_in.txt");
-        tc.setOutputPath("testcases/20/201_out.txt");
+        tc.setInputPath("test_cases/20/201_in.txt");
+        tc.setOutputPath("test_cases/20/201_out.txt");
         testCases.add(tc);
 
         when(submissionMapper.findById(submissionId)).thenReturn(submission);
@@ -145,6 +146,7 @@ class JudgeServiceTest {
 
         judgeService.judge(submissionId);
 
-        verify(submissionService, atLeastOnce()).updateJudgeResult(eq(submissionId), eq("RE"), anyInt(), anyInt());
+        verify(submissionService, atLeastOnce()).updateJudgeResult(eq(submissionId), eq("RE"), anyInt(), anyInt(),
+                any());
     }
 }

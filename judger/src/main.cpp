@@ -12,11 +12,12 @@ using namespace judger;
  * @brief 判题结果
  */
 struct JudgeResult {
-    std::string status;      // AC/WA/TLE/MLE/RE/CE/SE
-    long timeMs;             // 运行时间（毫秒）
-    long memoryKB;           // 内存使用（KB）
-    std::string compilerMsg; // 编译信息
-    std::string errorMsg;    // 错误信息
+    std::string status;       // AC/WA/TLE/MLE/RE/CE/SE
+    long timeMs;              // 运行时间（毫秒）
+    long memoryKB;            // 内存使用（KB）
+    std::string compilerMsg;  // 编译信息
+    std::string errorMsg;     // 错误信息
+    std::string actualOutput; // 实际输出
 };
 
 /**
@@ -28,7 +29,8 @@ void outputJson(const JudgeResult &result) {
     std::cout << "\"time_ms\":" << result.timeMs << ",";
     std::cout << "\"memory_kb\":" << result.memoryKB << ",";
     std::cout << "\"compiler_message\":\"" << jsonEscape(result.compilerMsg) << "\",";
-    std::cout << "\"error_message\":\"" << jsonEscape(result.errorMsg) << "\"";
+    std::cout << "\"error_message\":\"" << jsonEscape(result.errorMsg) << "\",";
+    std::cout << "\"actual_output\":\"" << jsonEscape(result.actualOutput) << "\"";
     std::cout << "}" << std::endl;
 }
 
@@ -118,6 +120,13 @@ JudgeResult judge(const std::string &sourcePath,
     // 6. 记录资源使用
     result.timeMs = runResult.usage.cpuTimeMs;
     result.memoryKB = runResult.usage.memoryKB;
+
+    // 记录实际输出（截断前1000字符）
+    if (runResult.stdoutContent.length() > 1000) {
+        result.actualOutput = runResult.stdoutContent.substr(0, 1000) + "... [truncated]";
+    } else {
+        result.actualOutput = runResult.stdoutContent;
+    }
 
     // 7. 清理临时目录
     removeDir(workDir);

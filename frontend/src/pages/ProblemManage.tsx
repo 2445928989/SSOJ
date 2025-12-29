@@ -18,7 +18,7 @@ export default function ProblemManage() {
         outputFormat: '',
         sampleInput: '',
         sampleOutput: '',
-        difficulty: 'easy',
+        difficulty: 'EASY',
         timeLimit: 1.0,
         memoryLimit: 262144,
         categories: [] as string[]
@@ -124,17 +124,7 @@ export default function ProblemManage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                 <h2 style={{ margin: 0, fontSize: '2rem', fontWeight: '700' }}>题目管理</h2>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    <Link to="/" style={{
-                        padding: '8px 20px',
-                        borderRadius: '6px',
-                        textDecoration: 'none',
-                        color: '#666',
-                        background: '#f5f5f5',
-                        fontWeight: '500',
-                        border: '1px solid #ddd',
-                        display: 'flex',
-                        alignItems: 'center'
-                    }}>返回仪表盘</Link>
+                    <Link to="/" className="back-btn">返回仪表盘</Link>
                     <button className="submit-btn" style={{ width: 'auto', padding: '8px 20px', margin: 0 }} onClick={() => {
                         setEditingId(null)
                         setForm(initialForm)
@@ -228,25 +218,49 @@ export default function ProblemManage() {
                                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                                             <thead style={{ position: 'sticky', top: 0, background: '#f8f9fa' }}>
                                                 <tr style={{ borderBottom: '1px solid #eee', textAlign: 'left' }}>
-                                                    <th style={{ padding: '8px' }}>文件名</th>
-                                                    <th style={{ padding: '8px' }}>内容预览 (前1000字)</th>
+                                                    <th style={{ padding: '8px' }}>输入文件</th>
+                                                    <th style={{ padding: '8px' }}>输出文件</th>
+                                                    <th style={{ padding: '8px' }}>内容预览</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {testCases.map((tc, i) => (
                                                     <tr key={i} style={{ borderBottom: '1px solid #f9f9f9' }}>
-                                                        <td style={{ padding: '8px', fontWeight: 'bold', color: '#4a5568' }}>{tc.filename}</td>
+                                                        <td style={{ padding: '8px', color: '#4a5568', fontSize: '11px' }}>
+                                                            {tc.inputPath.split('/').pop()}
+                                                        </td>
+                                                        <td style={{ padding: '8px', color: '#4a5568', fontSize: '11px' }}>
+                                                            {tc.outputPath.split('/').pop()}
+                                                        </td>
                                                         <td style={{ padding: '8px' }}>
-                                                            <pre style={{
-                                                                margin: 0,
-                                                                background: '#f8f9fa',
-                                                                padding: '5px',
-                                                                borderRadius: '4px',
-                                                                maxHeight: '80px',
-                                                                overflow: 'auto',
-                                                                whiteSpace: 'pre-wrap',
-                                                                fontSize: '11px'
-                                                            }}>{tc.content}</pre>
+                                                            <div style={{ display: 'flex', gap: '10px' }}>
+                                                                <div style={{ flex: 1 }}>
+                                                                    <div style={{ fontSize: '10px', color: '#999' }}>Input:</div>
+                                                                    <pre style={{
+                                                                        margin: 0,
+                                                                        background: '#f8f9fa',
+                                                                        padding: '5px',
+                                                                        borderRadius: '4px',
+                                                                        maxHeight: '80px',
+                                                                        overflow: 'auto',
+                                                                        whiteSpace: 'pre-wrap',
+                                                                        fontSize: '11px'
+                                                                    }}>{tc.inputContent}</pre>
+                                                                </div>
+                                                                <div style={{ flex: 1 }}>
+                                                                    <div style={{ fontSize: '10px', color: '#999' }}>Output:</div>
+                                                                    <pre style={{
+                                                                        margin: 0,
+                                                                        background: '#f8f9fa',
+                                                                        padding: '5px',
+                                                                        borderRadius: '4px',
+                                                                        maxHeight: '80px',
+                                                                        overflow: 'auto',
+                                                                        whiteSpace: 'pre-wrap',
+                                                                        fontSize: '11px'
+                                                                    }}>{tc.outputContent}</pre>
+                                                                </div>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -307,13 +321,16 @@ export default function ProblemManage() {
                             <tr key={p.id}>
                                 <td>{p.id}</td>
                                 <td>
-                                    <Link to={`/problems/${p.id}`} style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>
+                                    <span
+                                        onClick={() => handleEdit(p)}
+                                        style={{ fontWeight: 'bold', color: 'var(--primary-color)', cursor: 'pointer' }}
+                                    >
                                         {p.title}
-                                    </Link>
+                                    </span>
                                 </td>
                                 <td>
-                                    <span className={`difficulty-badge ${p.difficulty}`}>
-                                        {p.difficulty === 'easy' ? '简单' : p.difficulty === 'medium' ? '中等' : '困难'}
+                                    <span className={`difficulty-badge ${p.difficulty.toLowerCase()}`}>
+                                        {p.difficulty === 'EASY' ? '简单' : p.difficulty === 'MEDIUM' ? '中等' : '困难'}
                                     </span>
                                 </td>
                                 <td style={{ fontSize: '13px', color: '#666' }}>
@@ -377,6 +394,25 @@ export default function ProblemManage() {
                     background: #ffebee;
                     color: #d32f2f;
                 }
+                .submit-btn {
+                    background: var(--primary-color);
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                }
+                .submit-btn:hover {
+                    opacity: 0.9;
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                }
                 .difficulty-badge {
                     padding: 2px 8px;
                     border-radius: 4px;
@@ -386,6 +422,25 @@ export default function ProblemManage() {
                 .difficulty-badge.easy { background: #e6fffa; color: #319795; }
                 .difficulty-badge.medium { background: #fffaf0; color: #dd6b20; }
                 .difficulty-badge.hard { background: #fff5f5; color: #e53e3e; }
+                .back-btn {
+                    padding: 8px 20px;
+                    border-radius: 8px;
+                    text-decoration: none;
+                    color: var(--text-secondary);
+                    background: white;
+                    font-weight: 600;
+                    border: 1.5px solid var(--border-color);
+                    display: flex;
+                    align-items: center;
+                    transition: all 0.3s ease;
+                }
+                .back-btn:hover {
+                    background: #f8fafc;
+                    border-color: var(--primary-color);
+                    color: var(--primary-color);
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                }
             `}</style>
         </div>
     )

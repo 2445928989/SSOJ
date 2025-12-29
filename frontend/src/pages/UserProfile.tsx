@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import api from '../api'
+import ReactMarkdown from 'react-markdown'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import 'katex/dist/katex.min.css'
 
 export default function UserProfile() {
     const [user, setUser] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [isEditing, setIsEditing] = useState(false)
+    const [isChangingPassword, setIsChangingPassword] = useState(false)
     const [formData, setFormData] = useState<any>({})
+    const [passwordData, setPasswordData] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' })
     const [isSaving, setIsSaving] = useState(false)
     const [successMsg, setSuccessMsg] = useState('')
     const [heatmap, setHeatmap] = useState<Record<string, number>>({})
@@ -54,7 +60,38 @@ export default function UserProfile() {
     const handleCancel = () => {
         setFormData(user)
         setIsEditing(false)
+        setIsChangingPassword(false)
+        setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' })
         setError('')
+    }
+
+    const handleChangePassword = async () => {
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            setError('两次输入的密码不一致')
+            return
+        }
+        if (passwordData.newPassword.length < 6) {
+            setError('新密码长度至少为6位')
+            return
+        }
+
+        setIsSaving(true)
+        setError('')
+        setSuccessMsg('')
+        try {
+            await api.put('/api/user/change-password', {
+                oldPassword: passwordData.oldPassword,
+                newPassword: passwordData.newPassword
+            })
+            setIsChangingPassword(false)
+            setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' })
+            setSuccessMsg('密码修改成功！')
+            setTimeout(() => setSuccessMsg(''), 3000)
+        } catch (e: any) {
+            setError(e.response?.data?.error || '密码修改失败')
+        } finally {
+            setIsSaving(false)
+        }
     }
 
     if (loading) return <div className="container loading-container">
@@ -72,13 +109,22 @@ export default function UserProfile() {
                         <h1>{user.nickname || user.username}</h1>
                         <p className="username">@{user.username}</p>
                     </div>
-                    {!isEditing && (
-                        <button
-                            className="edit-btn"
-                            onClick={() => setIsEditing(true)}
-                        >
-                            编辑
-                        </button>
+                    {!isEditing && !isChangingPassword && (
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button
+                                className="edit-btn"
+                                onClick={() => setIsEditing(true)}
+                            >
+                                编辑资料
+                            </button>
+                            <button
+                                className="edit-btn"
+                                style={{ background: 'rgba(0,0,0,0.1)', border: '1px solid rgba(255,255,255,0.5)' }}
+                                onClick={() => setIsChangingPassword(true)}
+                            >
+                                修改密码
+                            </button>
+                        </div>
                     )}
                 </div>
 
@@ -86,7 +132,7 @@ export default function UserProfile() {
                     {error && <div className="error-msg">{error}</div>}
                     {successMsg && <div className="success-msg">{successMsg}</div>}
 
-                    {!isEditing ? (
+                    {!isEditing && !isChangingPassword ? (
                         <>
                             <div className="profile-section">
                                 <h2>用户信息</h2>
@@ -107,17 +153,18 @@ export default function UserProfile() {
                                     <span className="value">{user.phone || '未设置'}</span>
                                 </div>
                                 <div className="info-row">
-                                    <span className="label">身份：</span>
-                                    <span className="role-badge">
-                                        {user.role === 'ADMIN' ? '管理员' : '普通用户'}
-                                    </span>
-                                </div>
-                                {user.profile && (
-                                    <div className="info-row">
-                                        <span className="label">个人简介：</span>
-                                        <span className="value">{user.profile}</span>
+                                    <span className="label">个人简介：</span>
+                                    <div className="value markdown-body" style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}>
+                                        {user.profile ? (
+                                            <ReactMarkdown
+                                                remarkPlugins={[remarkMath]}
+                                                rehypePlugins={[rehypeKatex]}
+                                            >
+                                                {user.profile}
+                                            </ReactMarkdown>
+                                        ) : '这个人很懒，什么都没有写~'}
                                     </div>
-                                )}
+                                </div>
                             </div>
 
                             <div className="stats-section">
@@ -177,6 +224,55 @@ export default function UserProfile() {
                                 </div>
                             )}
                         </>
+                    ) : isChangingPassword ? (
+                        <form className="profile-form" onSubmit={(e) => { e.preventDefault(); handleChangePassword(); }}>
+                            <div className="form-group">
+                                <label>原密码</label>
+                                <input
+                                    type="password"
+                                    value={passwordData.oldPassword}
+                                    onChange={e => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
+                                    placeholder="输入当前密码"
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>新密码</label>
+                                <input
+                                    type="password"
+                                    value={passwordData.newPassword}
+                                    onChange={e => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                    placeholder="输入新密码（至少6位）"
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>确认新密码</label>
+                                <input
+                                    type="password"
+                                    value={passwordData.confirmPassword}
+                                    onChange={e => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                                    placeholder="再次输入新密码"
+                                    required
+                                />
+                            </div>
+                            <div className="form-actions">
+                                <button
+                                    type="submit"
+                                    className="save-btn"
+                                    disabled={isSaving}
+                                >
+                                    {isSaving ? '提交中...' : '确认修改'}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="cancel-btn"
+                                    onClick={handleCancel}
+                                >
+                                    取消
+                                </button>
+                            </div>
+                        </form>
                     ) : (
                         <form className="profile-form">
                             <div className="form-group">

@@ -15,8 +15,6 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    // TODO: 实现以下 API
-
     /**
      * POST /api/user/register
      * 用户注册
@@ -92,6 +90,30 @@ public class UserController {
         return java.util.Map.of("success", ok);
     }
 
+    /**
+     * PUT /api/user/change-password
+     * 修改密码
+     */
+    @PutMapping("/change-password")
+    public Object changePassword(@RequestBody java.util.Map<String, String> request,
+            jakarta.servlet.http.HttpSession session) {
+        if (session == null || session.getAttribute("userId") == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.UNAUTHORIZED, "未登录");
+        }
+        Long userId = (Long) session.getAttribute("userId");
+
+        String oldPassword = request.get("oldPassword");
+        String newPassword = request.get("newPassword");
+
+        try {
+            boolean ok = userService.changePassword(userId, oldPassword, newPassword);
+            return java.util.Map.of("success", ok);
+        } catch (Exception e) {
+            return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
+
     @PostMapping("/logout")
     public Object logout(jakarta.servlet.http.HttpServletRequest httpRequest) {
         jakarta.servlet.http.HttpSession session = httpRequest.getSession(false);
@@ -109,7 +131,11 @@ public class UserController {
     @GetMapping("/list")
     public Object listUsers(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int size) {
         java.util.List<User> users = userService.getAllUsers();
-        users.forEach(u -> u.setPassword(null));
+        users.forEach(u -> {
+            u.setPassword(null);
+            u.setEmail(null);
+            u.setPhone(null);
+        });
 
         int total = users.size();
         int start = (page - 1) * size;
@@ -130,6 +156,8 @@ public class UserController {
             throw new RuntimeException("用户不存在");
         }
         user.setPassword(null);
+        user.setEmail(null);
+        user.setPhone(null);
         return user;
     }
 

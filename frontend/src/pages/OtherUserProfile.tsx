@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import api from '../api'
+import ReactMarkdown from 'react-markdown'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import 'katex/dist/katex.min.css'
 
 export default function OtherUserProfile() {
     const { userId } = useParams()
@@ -51,19 +55,18 @@ export default function OtherUserProfile() {
                             <span className="value">{user.nickname || '未设置'}</span>
                         </div>
                         <div className="info-item">
-                            <span className="label">邮箱：</span>
-                            <span className="value">{user.email || '未设置'}</span>
-                        </div>
-                        <div className="info-item">
-                            <span className="label">电话：</span>
-                            <span className="value">{user.phone || '未设置'}</span>
-                        </div>
-                        {user.profile && (
-                            <div className="info-item">
-                                <span className="label">个人简介：</span>
-                                <span className="value">{user.profile}</span>
+                            <span className="label">个人简介：</span>
+                            <div className="value markdown-body" style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}>
+                                {user.profile ? (
+                                    <ReactMarkdown
+                                        remarkPlugins={[remarkMath]}
+                                        rehypePlugins={[rehypeKatex]}
+                                    >
+                                        {user.profile}
+                                    </ReactMarkdown>
+                                ) : '这个人很懒，什么都没有写~'}
                             </div>
-                        )}
+                        </div>
                     </div>
 
                     <div className="stats-section">

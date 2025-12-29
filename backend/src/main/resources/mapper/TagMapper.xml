@@ -6,7 +6,6 @@
     <resultMap id="TagResultMap" type="com.ssoj.backend.entity.Tag">
         <id property="id" column="id" />
         <result property="name" column="name" />
-        <result property="color" column="color" />
         <result property="createdAt" column="created_at" />
         <result property="updatedAt" column="updated_at" />
     </resultMap>
@@ -22,12 +21,11 @@
 
     <!-- 插入标签 -->
     <insert id="insert" parameterType="com.ssoj.backend.entity.Tag"
-        useGeneratedKeys="true" keyProperty="id"> INSERT INTO tag (name, color, created_at,
-        updated_at) VALUES (#{name}, #{color}, NOW(), NOW()) </insert>
+        useGeneratedKeys="true" keyProperty="id"> INSERT INTO tag (name, created_at, updated_at)
+        VALUES (#{name}, NOW(), NOW()) </insert>
 
     <!-- 更新标签 -->
-    <update id="update"> UPDATE tag SET name = #{name}, color = #{color}, updated_at = NOW() WHERE
-        id = #{id} </update>
+    <update id="update"> UPDATE tag SET name = #{name}, updated_at = NOW() WHERE id = #{id} </update>
 
     <!-- 删除标签 -->
     <delete id="deleteById"> DELETE FROM tag WHERE id = #{id} </delete>
