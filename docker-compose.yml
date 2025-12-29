@@ -1,9 +1,9 @@
 services:
   # MySQL 数据库
   mysql:
-    image: mysql:8.0
+    image: public.ecr.aws/docker/library/mysql:8.0
     container_name: ssoj-mysql
-    command: --character-set-server=utf8 --collation-server=utf8_general_ci
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
       MYSQL_ROOT_PASSWORD: root123456
       MYSQL_DATABASE: ssoj
@@ -35,7 +35,7 @@ services:
       mysql:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ssoj?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8&useUnicode=true&connectTimeout=30000&socketTimeout=30000
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ssoj?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=UTF-8&useUnicode=true&connectTimeout=30000&socketTimeout=30000
       SPRING_DATASOURCE_USERNAME: ssoj_dev
       SPRING_DATASOURCE_PASSWORD: ssoj_dev123
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
@@ -80,7 +80,7 @@ services:
 
   # Adminer 数据库管理工具
   adminer:
-    image: adminer:latest
+    image: public.ecr.aws/docker/library/adminer:latest
     container_name: ssoj-adminer
     depends_on:
       mysql:

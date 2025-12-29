@@ -28,7 +28,7 @@
         r.test_case_id, r.status, r.error_message, r.actual_output, r.time_used, r.memory_used,
         r.created_at, t.input_path as test_input, t.output_path as test_output FROM result r LEFT
         JOIN test_case t ON r.test_case_id = t.id WHERE r.submission_id = #{submissionId} ORDER BY
-        r.test_case_id </select>
+        LENGTH(t.input_path), t.input_path </select>
 
     <!-- 插入结果 -->
     <insert id="insert" parameterType="com.ssoj.backend.entity.Result"

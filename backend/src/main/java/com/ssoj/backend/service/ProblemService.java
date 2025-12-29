@@ -14,7 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -385,5 +386,44 @@ public class ProblemService {
                 testCaseMapper.insert(tc);
             }
         }
+    }
+
+    /**
+     * 更新单个测试用例内容
+     */
+    public void updateTestCase(Long problemId, Long testCaseId, String inputContent, String outputContent)
+            throws IOException {
+        TestCase tc = testCaseMapper.findById(testCaseId);
+        if (tc == null || !tc.getProblemId().equals(problemId)) {
+            throw new RuntimeException("测试用例不存在或不属于该题目");
+        }
+
+        // 保存新内容到物理文件
+        if (inputContent != null) {
+            Files.write(Paths.get(FileUtil.getAbsolutePath(tc.getInputPath())), inputContent.getBytes());
+        }
+        if (outputContent != null) {
+            Files.write(Paths.get(FileUtil.getAbsolutePath(tc.getOutputPath())), outputContent.getBytes());
+        }
+
+        tc.setUpdatedAt(java.time.LocalDateTime.now());
+        testCaseMapper.update(tc);
+    }
+
+    /**
+     * 删除单个测试用例
+     */
+    public void deleteTestCase(Long problemId, Long testCaseId) {
+        TestCase tc = testCaseMapper.findById(testCaseId);
+        if (tc == null || !tc.getProblemId().equals(problemId)) {
+            throw new RuntimeException("测试用例不存在或不属于该题目");
+        }
+
+        // 删除物理文件
+        FileUtil.deleteFile(tc.getInputPath());
+        FileUtil.deleteFile(tc.getOutputPath());
+
+        // 删除数据库记录
+        testCaseMapper.deleteById(testCaseId);
     }
 }

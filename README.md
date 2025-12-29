@@ -1,90 +1,61 @@
-# 🎓 SSOJ - Simple School Online Judge
+# SSOJ - Simple School Online Judge
 
-轻量级在线编程判题系统。
+SSOJ 是一个轻量级的在线编程判题系统，旨在为学校或小型组织提供简单易用的编程练习和竞赛平台。
 
-## ✨ 特性
+## 项目简介
 
-- React 18 + TypeScript 前端
-- Spring Boot 3 后端
-- MySQL 8.0 数据库
-- 题目管理和代码提交
-- 异步判题系统
-- 用户排行榜
-- Docker 容器化部署
+SSOJ 采用了现代化的前后端分离架构，结合了高性能的判题核心，支持多种编程语言。系统提供了从题目管理、代码提交到自动判题、结果反馈的完整流程。
 
-## 🚀 快速开始
+## 核心特性
 
-### Docker 部署
+- 前端：基于 React 18 和 TypeScript 构建，使用 Vite 作为构建工具，提供流畅的用户体验。
+- 后端：基于 Spring Boot 3 框架，使用 MyBatis 进行持久层管理，保证了系统的稳定性和可扩展性。
+- 判题系统：独立的 C++ 判题核心，运行在隔离的 Docker 容器中，确保判题的安全性和准确性。
+- 数据库：使用 MySQL 8.0 存储用户、题目、提交记录等核心数据。
+- 认证系统：支持邮箱注册、登录以及找回密码功能。
+- 题目管理：支持 Markdown 格式的题目描述，支持 ZIP 压缩包批量上传测试用例，并允许管理员直接在线编辑测试点。
+- 实时反馈：采用异步判题机制，用户提交代码后可实时查看判题进度和详细结果。
 
-```bash
-docker-compose up -d
-```
+## 技术栈
 
-访问:
-- 前端: http://localhost
-- 后端: http://localhost:8080
+- 后端：Spring Boot 3, MyBatis, MySQL, JavaMail (用于验证码发送)
+- 前端：React 18, TypeScript, Vite, Monaco Editor (代码编辑器), KaTeX (数学公式渲染)
+- 判题核心：C++, Docker SDK
+- 部署：Docker, Docker Compose, Nginx
 
-### 本地开发
+## 快速开始
 
-**后端:**
-```bash
-cd backend
-mvn spring-boot:run
-```
+### 环境要求
 
-**前端:**
-```bash
-cd frontend
-npm install
-npm run dev
-```
+- Docker
+- Docker Compose
 
-## 🔐 默认账号
+### 部署步骤
 
-```
-用户名: admin
-密码: admin123
-```
+1. 克隆仓库到本地。
+2. 配置环境变量（如 SMTP 邮箱设置，见 docker-compose.yml）。
+3. 在项目根目录下执行启动命令：
+   ```bash
+   docker-compose up -d
+   ```
+4. 访问地址：
+   - 前端界面：http://localhost:8088 (默认配置)
+   - 数据库管理 (Adminer)：http://localhost:8082
 
-## 🏗️ 项目结构
+### 默认管理员账号
 
-```
-ssoj/
-├── backend/              # Spring Boot 后端
-├── frontend/             # React 前端
-├── database/             # 数据库 schema 和初始数据
-├── judger/              # 判题程序（C++）
-└── docker-compose.yml    # Docker 编排配置
-```
+- 用户名：admin
+- 密码：admin123
 
-## 📚 技术栈
+## 项目结构
 
-**后端:** Spring Boot 3, MyBatis, MySQL, BCrypt, Spring Event  
-**前端:** React 18, TypeScript, Vite, Axios, React Router  
-**部署:** Docker, Docker Compose, Nginx
+- backend/: Spring Boot 后端源代码。
+- frontend/: React 前端源代码。
+- judger/: C++ 判题核心程序。
+- database/: 数据库初始化脚本和测试用例示例。
+- docs/: 项目文档，包括需求分析、设计文档和用户手册。
+- maker/: 测试用例生成工具。
 
-## 🐳 Docker 命令
+## 许可证
 
-```bash
-docker-compose up -d        # 启动
-docker-compose down         # 停止（保留数据）
-docker-compose down -v      # 停止（删除所有）
-docker-compose logs -f      # 查看日志
-docker-compose ps           # 查看容器状态
-```
-
-## 📝 初始化数据
-
-- 1 个管理员用户 (admin/admin123)
-- 5 个示例题目
-- 7 个分类标签
-
-## 🔧 环境配置
-
-数据库用户: `ssoj_dev`  
-数据库密码: `ssoj_dev123`  
-数据库名: `ssoj`
-
-## 📄 许可证
-
-MIT
+本项目采用 MIT 许可证。

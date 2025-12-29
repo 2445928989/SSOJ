@@ -1,138 +1,59 @@
-# SSOJ Backend 开发说明
+# SSOJ 后端模块
+
+SSOJ 的后端服务基于 Spring Boot 3 构建，负责处理业务逻辑、用户认证、题目管理以及判题任务的调度。
+
+## 技术栈
+
+- 核心框架：Spring Boot 3.4.1
+- 持久层：MyBatis
+- 数据库：MySQL 8.0
+- 认证：基于 Session 的认证，支持邮箱验证码
+- 邮件服务：JavaMailSender (用于注册验证和密码重置)
+- 异步处理：Spring TaskExecutor (用于异步判题调度)
 
 ## 项目结构
 
-已创建完整的三层架构框架，所有类都包含 TODO 注释，待你逐步实现。
+- `src/main/java/com/ssoj/backend/`
+  - `controller/`: REST API 控制器
+  - `service/`: 业务逻辑层
+  - `dao/`: 数据访问接口 (MyBatis Mapper)
+  - `entity/`: 数据库实体类
+  - `util/`: 工具类 (文件操作、邮件发送等)
+  - `config/`: 系统配置 (跨域、异步、安全等)
+- `src/main/resources/`
+  - `mapper/`: MyBatis SQL 映射文件
+  - `application.properties`: 核心配置文件
 
-## 开发顺序建议
+## 核心功能
 
-### 第一阶段：数据库和基础功能（已完成）
-1. **创建数据库表**
-   
-   ```sql
-   CREATE DATABASE ssoj;
-   USE ssoj;
-   
-   -- 参考 entity 类的字段创建表
-   -- user, problem, test_case, submission
+1. **用户系统**：支持注册、登录、个人资料修改、头像上传、邮箱验证码发送及密码重置。
+2. **题目管理**：支持题目的 CRUD 操作，支持 ZIP 压缩包上传测试用例，支持在线编辑测试点。
+3. **判题调度**：接收用户提交的代码，将其保存到本地文件系统，并调用独立的判题核心进行评测。
+4. **结果统计**：实时更新用户的通过数、提交数以及题目的通过率。
+
+## 开发与运行
+
+### 环境要求
+
+- JDK 17+
+- Maven 3.6+
+- MySQL 8.0
+
+### 本地运行
+
+1. 配置 `src/main/resources/application.properties` 中的数据库连接和邮件服务器信息。
+2. 执行 Maven 命令：
+   ```bash
+   mvn spring-boot:run
    ```
-   
-2. **配置数据库连接**
-   - 编辑 `application.properties`，取消注释数据库配置
-   - 填写你的 MySQL 用户名密码
 
-3. **实现 Entity 字段**
-   
-   - 在 `User.java`, `Problem.java` 等类中添加具体字段
-   
-4. **实现 Mapper XML**
-   - 填充 `mapper/*.xml` 中的 SQL 语句
-
-### 第二阶段：实现 Service 层
-5. **UserService** - 注册、登录、JWT 生成
-6. **ProblemService** - CRUD 操作
-7. **SubmissionService** - 提交记录管理
-
-### 第三阶段：实现 Controller 层
-8. **UserController** - `/api/user/*` 接口
-9. **ProblemController** - `/api/problem/*` 接口
-10. **SubmissionController** - `/api/submission/*` 接口
-
-### 第四阶段：核心判题功能
-11. **JudgerInvoker** - 调用 judger 程序
-12. **JudgeService** - 异步判题逻辑
-13. **FileUtil** - 临时文件管理
-
-### 第五阶段：配置和优化
-14. **CorsConfig** - 跨域配置（对接前端时）
-15. **AsyncConfig** - 判题线程池
-16. **SecurityConfig** - 鉴权（可选）
-
-## 测试运行
+### 编译打包
 
 ```bash
-# 编译
-mvn clean compile
-
-# 运行
-mvn spring-boot:run
-
-# 测试
-mvn test
+mvn clean package
 ```
+生成的 JAR 包位于 `target/` 目录下。
 
-## API 文档
+## API 接口
 
-所有 Controller 中都有 API 注释，包括：
-- 请求方法
-- 路径
-- 参数格式
-- 响应格式
-
-## 依赖说明（已完成）
-
-需要在 `pom.xml` 添加的依赖（如果还没有）：
-- `spring-boot-starter-web`
-- `spring-boot-starter-data-jdbc` 或 `mybatis-spring-boot-starter`
-- `mysql-connector-java`
-- `lombok`
-- `jjwt` (JWT 库)
-- `jackson-databind` (JSON 解析)
-
-## 数据库表设计参考（已完成）
-
-```sql
-CREATE TABLE user (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    email VARCHAR(100),
-    role VARCHAR(20) DEFAULT 'user',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
-CREATE TABLE problem (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    title VARCHAR(200) NOT NULL,
-    description TEXT,
-    input_format TEXT,
-    output_format TEXT,
-    sample_input TEXT,
-    sample_output TEXT,
-    difficulty VARCHAR(20),
-    time_limit DOUBLE DEFAULT 1.0,
-    memory_limit INT DEFAULT 262144,
-    created_by BIGINT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
-CREATE TABLE test_case (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    problem_id BIGINT NOT NULL,
-    input_path VARCHAR(255),
-    output_path VARCHAR(255),
-    is_sample BOOLEAN DEFAULT FALSE
-);
-
-CREATE TABLE submission (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    user_id BIGINT NOT NULL,
-    problem_id BIGINT NOT NULL,
-    code TEXT,
-    language VARCHAR(20),
-    status VARCHAR(20) DEFAULT 'PENDING',
-    time_used BIGINT,
-    memory_used BIGINT,
-    error_message TEXT,
-    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    judged_at TIMESTAMP
-);
-```
-
-## 下一步（已完成）
-
-从 Entity 字段定义开始，逐步实现每个 TODO 标记的功能。
-
-​	
+后端提供标准的 RESTful API，主要路径前缀为 `/api`。详细接口定义请参考各 Controller 类中的注释。

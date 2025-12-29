@@ -1,5 +1,5 @@
 # Spring Boot 后端 Dockerfile
-FROM maven:3.9.6-eclipse-temurin-17 AS builder
+FROM public.ecr.aws/docker/library/maven:3.9.6-eclipse-temurin-17 AS builder
 
 WORKDIR /app/backend
 COPY backend/pom.xml .
@@ -9,7 +9,7 @@ COPY backend/src ./src
 RUN mvn clean package -DskipTests
 
 # Judger 编译阶段
-FROM ubuntu:24.04 AS judger-builder
+FROM public.ecr.aws/docker/library/ubuntu:24.04 AS judger-builder
 
 WORKDIR /app/judger
 # 使用清华大学镜像加速 apt-get，同时兼容新旧两种配置格式
@@ -26,7 +26,7 @@ COPY judger/CMakeLists.txt .
 RUN mkdir build && cd build && cmake .. && make
 
 # 运行阶段 - 使用非Alpine镜像以兼容judger二进制
-FROM eclipse-temurin:17-jdk-noble
+FROM public.ecr.aws/docker/library/eclipse-temurin:17-jdk-noble
 
 WORKDIR /app
 
