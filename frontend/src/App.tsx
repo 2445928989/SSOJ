@@ -92,7 +92,16 @@ export default function App() {
                 <div className="nav-right">
                     {user ? (
                         <>
-                            <Link to="/profile" className="username" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>{user.username}</Link>
+                            <Link to="/profile" className="nav-user-info" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: 'inherit' }}>
+                                {user.avatar ? (
+                                    <img src={user.avatar} alt="avatar" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #eee' }} />
+                                ) : (
+                                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#667eea', color: 'white', display: 'flex', alignItems: 'center', justifyCenter: 'center', fontSize: '14px', fontWeight: 'bold' }}>
+                                        {user.username.charAt(0).toUpperCase()}
+                                    </div>
+                                )}
+                                <span className="username">{user.username}</span>
+                            </Link>
                             {user.role === 'ADMIN' && <Link to="/admin/problems">管理</Link>}
                             <button className="logout-btn" onClick={logout}>退出</button>
                         </>

@@ -16,6 +16,7 @@ export default function UserProfile() {
     const [isSaving, setIsSaving] = useState(false)
     const [successMsg, setSuccessMsg] = useState('')
     const [heatmap, setHeatmap] = useState<Record<string, number>>({})
+    const [isUploading, setIsUploading] = useState(false)
 
     useEffect(() => {
         Promise.all([
@@ -66,6 +67,38 @@ export default function UserProfile() {
         setError('')
     }
 
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        if (file.size > 2 * 1024 * 1024) {
+            setError('头像文件不能超过 2MB')
+            return
+        }
+
+        const formData = new FormData()
+        formData.append('file', file)
+
+        setIsUploading(true)
+        setError('')
+        try {
+            const res = await api.post('/api/user/upload-avatar', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            })
+            if (res.data.url) {
+                setUser({ ...user, avatar: res.data.url })
+                setSuccessMsg('头像上传成功！')
+                setTimeout(() => setSuccessMsg(''), 3000)
+                // 触发全局更新
+                window.dispatchEvent(new Event('storage'))
+            }
+        } catch (e: any) {
+            setError(e.response?.data?.message || '上传失败')
+        } finally {
+            setIsUploading(false)
+        }
+    }
+
     const handleChangePassword = async () => {
         if (passwordData.newPassword !== passwordData.confirmPassword) {
             setError('两次输入的密码不一致')
@@ -106,9 +139,29 @@ export default function UserProfile() {
         <div className="profile-container">
             <div className="profile-card">
                 <div className="profile-header">
-                    <div>
-                        <h1>{user.nickname || user.username}</h1>
-                        <p className="username">@{user.username}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                        <div className="avatar-upload-wrapper" style={{ position: 'relative' }}>
+                            {user.avatar ? (
+                                <img src={user.avatar} alt="avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '3px solid white', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }} />
+                            ) : (
+                                <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#667eea', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', fontWeight: 'bold', border: '3px solid white', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+                                    {user.username.charAt(0).toUpperCase()}
+                                </div>
+                            )}
+                            <label htmlFor="avatar-input" style={{ position: 'absolute', bottom: '0', right: '0', background: 'white', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.2)', fontSize: '14px' }}>
+                                📷
+                                <input id="avatar-input" type="file" accept="image/*" onChange={handleAvatarUpload} style={{ display: 'none' }} disabled={isUploading} />
+                            </label>
+                            {isUploading && (
+                                <div style={{ position: 'absolute', top: '0', left: '0', width: '100%', height: '100%', background: 'rgba(255,255,255,0.7)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <div className="loading-spinner" style={{ width: '20px', height: '20px' }}></div>
+                                </div>
+                            )}
+                        </div>
+                        <div>
+                            <h1>{user.nickname || user.username}</h1>
+                            <p className="username">@{user.username}</p>
+                        </div>
                     </div>
                     {!isEditing && !isChangingPassword && (
                         <div style={{ display: 'flex', gap: '10px' }}>

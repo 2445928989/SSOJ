@@ -23,6 +23,51 @@ public class UserController {
     @Autowired
     private VerificationCodeService verificationCodeService;
 
+    @org.springframework.beans.factory.annotation.Value("${upload.path}")
+    private String uploadPath;
+
+    /**
+     * POST /api/user/upload-avatar
+     * 上传头像
+     */
+    @PostMapping("/upload-avatar")
+    public Object uploadAvatar(
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            jakarta.servlet.http.HttpServletRequest httpRequest) {
+        jakarta.servlet.http.HttpSession session = httpRequest.getSession(false);
+        if (session == null || session.getAttribute("userId") == null) {
+            return java.util.Map.of("success", false, "message", "未登录");
+        }
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (file.isEmpty()) {
+            return java.util.Map.of("success", false, "message", "文件不能为空");
+        }
+
+        try {
+            // 确保目录存在
+            java.io.File dir = new java.io.File(uploadPath);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            // 生成文件名: userId_timestamp.ext
+            String originalFilename = file.getOriginalFilename();
+            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            String filename = userId + "_" + System.currentTimeMillis() + extension;
+            java.io.File dest = new java.io.File(uploadPath + filename);
+            file.transferTo(dest);
+
+            // 更新数据库
+            String avatarUrl = "/api/user/avatar/" + filename;
+            userService.updateAvatar(userId, avatarUrl);
+
+            return java.util.Map.of("success", true, "url", avatarUrl);
+        } catch (Exception e) {
+            return java.util.Map.of("success", false, "message", "上传失败: " + e.getMessage());
+        }
+    }
+
     /**
      * POST /api/user/send-code
      * 发送注册验证码

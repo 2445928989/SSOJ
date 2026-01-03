@@ -92,6 +92,17 @@ public class UserService {
     }
 
     /**
+     * 更新用户头像
+     */
+    public void updateAvatar(Long userId, String avatarUrl) {
+        User user = userMapper.findById(userId);
+        if (user != null) {
+            user.setAvatar(avatarUrl);
+            userMapper.update(user);
+        }
+    }
+
+    /**
      * 根据ID获取用户信息
      */
     public User getUserById(Long id) {

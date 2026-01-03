@@ -99,7 +99,7 @@ public class SubmissionController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
         List<Submission> submissions = submissionService.getRecentSubmissions(page, size);
-        int total = submissionService.getTotalSubmissionCount();
+        int total = submissionService.getRecentSubmissionCount();
         return Map.of(
                 "success", true,
                 "data", submissions,

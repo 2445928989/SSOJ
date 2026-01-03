@@ -6,6 +6,7 @@ interface UserStats {
     id: number
     username: string
     nickname?: string
+    avatar?: string
     solved: number
     submissions: number
 }
@@ -23,6 +24,7 @@ export default function Leaderboard() {
                     id: u.id,
                     username: u.username,
                     nickname: u.nickname,
+                    avatar: u.avatar,
                     solved: u.solved || 0,
                     submissions: u.submissions || 0
                 }))
@@ -71,10 +73,17 @@ export default function Leaderboard() {
                                         </Link>
                                     </td>
                                     <td style={{ padding: '15px' }}>
-                                        <Link to={`/user/${user.id}`} style={{ color: '#4a5568', textDecoration: 'none', fontWeight: '600' }}>
-                                            {user.username}
+                                        <Link to={`/user/${user.id}`} style={{ color: '#4a5568', textDecoration: 'none', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            {user.avatar ? (
+                                                <img src={user.avatar} alt="" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
+                                            ) : (
+                                                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#edf2f7', color: '#718096', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>
+                                                    {user.username.charAt(0).toUpperCase()}
+                                                </div>
+                                            )}
+                                            <span>{user.username}</span>
                                             {user.nickname && (
-                                                <span style={{ color: '#a0aec0', fontWeight: 'normal', fontSize: '0.9em', marginLeft: '8px' }}>
+                                                <span style={{ color: '#a0aec0', fontWeight: 'normal', fontSize: '0.9em' }}>
                                                     ({user.nickname})
                                                 </span>
                                             )}
