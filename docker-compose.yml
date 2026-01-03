@@ -11,8 +11,8 @@ services:
       MYSQL_PASSWORD: ssoj_dev123
       TZ: Asia/Shanghai
     ports:
-      # 仅允许本地访问数据库，提高安全性
-      - "127.0.0.1:3307:3306"
+      # 更改为 3308 以避免与主机上其他 MySQL 冲突
+      - "127.0.0.1:3308:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
@@ -69,7 +69,8 @@ services:
     depends_on:
       - backend
     ports:
-      - "80:80"
+      # 更改为 8088 以避免占用主机的 80 端口
+      - "8088:80"
     networks:
       - ssoj-network
     healthcheck:
@@ -86,8 +87,8 @@ services:
       mysql:
         condition: service_healthy
     ports:
-      # 仅允许本地访问管理界面
-      - "127.0.0.1:8081:8080"
+      # 更改为 8082 以避免与 scut_adminer (8080) 或其他工具冲突
+      - "127.0.0.1:8082:8080"
     environment:
       ADMINER_DEFAULT_SERVER: mysql
       TZ: Asia/Shanghai
@@ -106,3 +107,4 @@ volumes:
 networks:
   ssoj-network:
     driver: bridge
+
