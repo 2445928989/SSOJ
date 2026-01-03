@@ -51,20 +51,27 @@ export default function OtherUserProfile() {
                         flexDirection: 'column',
                         justifyContent: 'flex-end',
                         alignItems: 'flex-start',
-                        padding: '30px'
+                        padding: '30px',
+                        overflow: 'hidden'
                     }}
                 >
+                    {/* 背景模糊层：仅模糊背景图，不影响前景文字 */}
                     <div style={{
                         position: 'absolute',
                         bottom: 0,
                         left: 0,
                         right: 0,
-                        height: '80px',
-                        background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.2))',
-                        backdropFilter: 'blur(2px)',
+                        height: '120px',
+                        background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.7))',
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
+                        maskImage: 'linear-gradient(to bottom, transparent, black)',
+                        WebkitMaskImage: 'linear-gradient(to bottom, transparent, black)',
+                        zIndex: 1,
                         pointerEvents: 'none'
                     }}></div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', position: 'relative', zIndex: 10 }}>
                         {user.avatar ? (
                             <img src={user.avatar} alt="avatar" style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '4px solid white', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }} />
                         ) : (

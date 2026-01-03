@@ -3,6 +3,127 @@ import { Link, useSearchParams } from 'react-router-dom'
 import api from '../api'
 import { ThumbsUp, ThumbsDown, MessageSquare, User as UserIcon } from 'lucide-react'
 
+function DiscussionListItem({ d, onVote }: { d: any, onVote: () => void }) {
+    const [voteStatus, setVoteStatus] = useState(0);
+
+    useEffect(() => {
+        api.get(`/api/votes/status?type=DISCUSSION&targetId=${d.id}`)
+            .then(res => setVoteStatus(res.data.data))
+            .catch(() => { });
+    }, [d.id]);
+
+    const handleVote = async (voteType: number) => {
+        try {
+            const res = await api.post('/api/votes', {
+                type: 'DISCUSSION',
+                targetId: d.id,
+                voteType: voteType
+            });
+            if (res.data.success) {
+                onVote();
+                api.get(`/api/votes/status?type=DISCUSSION&targetId=${d.id}`)
+                    .then(res => setVoteStatus(res.data.data));
+            }
+        } catch (e) {
+            alert('操作失败，请先登录');
+        }
+    };
+
+    return (
+        <div className="discussion-list-item" style={{
+            padding: '20px',
+            borderBottom: '1px solid #f1f5f9',
+            display: 'flex',
+            gap: '15px'
+        }}>
+            <Link to={`/profile/${d.userId}`} className="avatar">
+                {d.avatar ? (
+                    <img src={d.avatar} alt="" style={{ width: '45px', height: '45px', borderRadius: '50%', objectFit: 'cover' }} />
+                ) : (
+                    <div style={{
+                        width: '45px',
+                        height: '45px',
+                        borderRadius: '50%',
+                        background: '#edf2f7',
+                        color: '#718096',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 'bold'
+                    }}>
+                        {(d.nickname || d.username || '?').charAt(0).toUpperCase()}
+                    </div>
+                )}
+            </Link>
+            <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <Link to={`/profile/${d.userId}`} style={{ fontWeight: '600', color: '#2d3748', textDecoration: 'none' }}>
+                            {d.nickname || d.username}
+                        </Link>
+                        <span style={{ color: '#a0aec0', fontSize: '12px' }}>{new Date(d.createdAt).toLocaleString()}</span>
+                    </div>
+                    {d.problemId && (
+                        <Link to={`/problems/${d.problemId}`} style={{
+                            fontSize: '13px',
+                            color: '#667eea',
+                            textDecoration: 'none',
+                            background: '#f0f4ff',
+                            padding: '2px 10px',
+                            borderRadius: '12px'
+                        }}>
+                            #{d.problemId} {d.problemTitle}
+                        </Link>
+                    )}
+                </div>
+                <div style={{ color: '#4a5568', fontSize: '15px', lineHeight: '1.6', whiteSpace: 'pre-wrap', marginBottom: '12px' }}>
+                    {d.content}
+                </div>
+                <div style={{ display: 'flex', gap: '20px', color: '#94a3b8', fontSize: '13px' }}>
+                    <button
+                        onClick={() => handleVote(1)}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: voteStatus === 1 ? '#667eea' : '#94a3b8',
+                            padding: 0,
+                            transition: 'color 0.2s'
+                        }}
+                    >
+                        <ThumbsUp size={14} fill={voteStatus === 1 ? 'currentColor' : 'none'} />
+                        <span>{d.likes || 0}</span>
+                    </button>
+                    <button
+                        onClick={() => handleVote(-1)}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: voteStatus === -1 ? '#e53e3e' : '#94a3b8',
+                            padding: 0,
+                            transition: 'color 0.2s'
+                        }}
+                    >
+                        <ThumbsDown size={14} fill={voteStatus === -1 ? 'currentColor' : 'none'} />
+                        <span>{d.dislikes || 0}</span>
+                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <MessageSquare size={14} />
+                        <span>{d.repliesCount || 0} 回复</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function DiscussionList() {
     const [searchParams, setSearchParams] = useSearchParams()
     const [discussions, setDiscussions] = useState<any[]>([])
@@ -33,6 +154,15 @@ export default function DiscussionList() {
     }
 
     const totalPages = Math.ceil(total / size)
+
+    const refreshDiscussions = () => {
+        api.get(`/api/discussion/list?page=${page}&size=${size}&keyword=${keyword}`)
+            .then(res => {
+                setDiscussions(res.data.data)
+                setTotal(res.data.total)
+            })
+            .catch(() => { });
+    };
 
     if (loading && discussions.length === 0) return <div className="container loading">正在加载讨论...</div>
 
@@ -68,71 +198,7 @@ export default function DiscussionList() {
                 ) : (
                     <div style={{ background: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                         {discussions.map((d) => (
-                            <div key={d.id} className="discussion-list-item" style={{
-                                padding: '20px',
-                                borderBottom: '1px solid #f1f5f9',
-                                display: 'flex',
-                                gap: '15px'
-                            }}>
-                                <Link to={`/profile/${d.userId}`} className="avatar">
-                                    {d.avatar ? (
-                                        <img src={d.avatar} alt="" style={{ width: '45px', height: '45px', borderRadius: '50%', objectFit: 'cover' }} />
-                                    ) : (
-                                        <div style={{
-                                            width: '45px',
-                                            height: '45px',
-                                            borderRadius: '50%',
-                                            background: '#edf2f7',
-                                            color: '#718096',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            fontWeight: 'bold'
-                                        }}>
-                                            {(d.nickname || d.username || '?').charAt(0).toUpperCase()}
-                                        </div>
-                                    )}
-                                </Link>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <Link to={`/profile/${d.userId}`} style={{ fontWeight: '600', color: '#2d3748', textDecoration: 'none' }}>
-                                                {d.nickname || d.username}
-                                            </Link>
-                                            <span style={{ color: '#a0aec0', fontSize: '12px' }}>{new Date(d.createdAt).toLocaleString()}</span>
-                                        </div>
-                                        {d.problemId && (
-                                            <Link to={`/problem/${d.problemId}`} style={{
-                                                fontSize: '13px',
-                                                color: '#667eea',
-                                                textDecoration: 'none',
-                                                background: '#f0f4ff',
-                                                padding: '2px 10px',
-                                                borderRadius: '12px'
-                                            }}>
-                                                #{d.problemId} {d.problemTitle}
-                                            </Link>
-                                        )}
-                                    </div>
-                                    <div style={{ color: '#4a5568', fontSize: '15px', lineHeight: '1.6', whiteSpace: 'pre-wrap', marginBottom: '12px' }}>
-                                        {d.content}
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '20px', color: '#94a3b8', fontSize: '13px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                            <ThumbsUp size={14} />
-                                            <span>{d.likes || 0}</span>
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                            <ThumbsDown size={14} />
-                                            <span>{d.dislikes || 0}</span>
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                            <MessageSquare size={14} />
-                                            <span>{d.repliesCount || 0} 回复</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <DiscussionListItem key={d.id} d={d} onVote={refreshDiscussions} />
                         ))}
                     </div>
                 )}

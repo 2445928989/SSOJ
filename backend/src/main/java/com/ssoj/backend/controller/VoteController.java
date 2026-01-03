@@ -18,8 +18,8 @@ public class VoteController {
 
     @PostMapping
     public Object vote(@RequestBody Map<String, Object> params, HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
             return Map.of("success", false, "message", "请先登录");
         }
 
@@ -27,18 +27,18 @@ public class VoteController {
         Long targetId = Long.valueOf(params.get("targetId").toString());
         Integer voteType = (Integer) params.get("voteType");
 
-        voteService.vote(user.getId(), type, targetId, voteType);
+        voteService.vote(userId, type, targetId, voteType);
         return Map.of("success", true);
     }
 
     @GetMapping("/status")
     public Object getVoteStatus(@RequestParam String type, @RequestParam Long targetId, HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
             return Map.of("success", true, "data", 0);
         }
 
-        Vote vote = voteService.getVote(user.getId(), type, targetId);
+        Vote vote = voteService.getVote(userId, type, targetId);
         return Map.of("success", true, "data", vote != null ? vote.getVoteType() : 0);
     }
 }

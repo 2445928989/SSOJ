@@ -185,41 +185,51 @@ export default function UserProfile() {
                         flexDirection: 'column',
                         justifyContent: 'flex-end',
                         alignItems: 'flex-start',
-                        padding: '30px'
-                    }}
-                >                    <div style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: '80px',
-                    background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.2))',
-                    backdropFilter: 'blur(2px)',
-                    pointerEvents: 'none'
-                }}></div>                    <label
-                    htmlFor="bg-input"
-                    className="bg-upload-btn"
-                    title="支持 JPG/PNG 格式，最大 10MB"
-                    style={{
-                        position: 'absolute',
-                        top: '20px',
-                        right: '20px',
-                        background: 'rgba(0,0,0,0.3)',
-                        color: 'white',
-                        padding: '8px 15px',
-                        borderRadius: '20px',
-                        cursor: 'pointer',
-                        fontSize: '14px',
-                        backdropFilter: 'blur(5px)',
-                        border: '1px solid rgba(255,255,255,0.3)',
-                        transition: 'all 0.3s'
+                        padding: '30px',
+                        overflow: 'hidden'
                     }}
                 >
+                    {/* 背景模糊层：仅模糊背景图，不影响前景文字和按钮 */}
+                    <div style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: '120px',
+                        background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.7))',
+                        backdropFilter: 'blur(10px)',
+                        WebkitBackdropFilter: 'blur(10px)',
+                        maskImage: 'linear-gradient(to bottom, transparent, black)',
+                        WebkitMaskImage: 'linear-gradient(to bottom, transparent, black)',
+                        zIndex: 1,
+                        pointerEvents: 'none'
+                    }}></div>
+
+                    <label
+                        htmlFor="bg-input"
+                        className="bg-upload-btn"
+                        title="支持 JPG/PNG 格式，最大 10MB"
+                        style={{
+                            position: 'absolute',
+                            top: '20px',
+                            right: '20px',
+                            background: 'rgba(0,0,0,0.3)',
+                            color: 'white',
+                            padding: '8px 15px',
+                            borderRadius: '20px',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            backdropFilter: 'blur(5px)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            transition: 'all 0.3s',
+                            zIndex: 10
+                        }}
+                    >
                         {isUploadingBg ? '上传中...' : '更换背景 (最大 10MB)'}
                         <input id="bg-input" type="file" accept="image/*" onChange={handleBackgroundUpload} style={{ display: 'none' }} disabled={isUploadingBg} />
                     </label>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', width: '100%', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', width: '100%', justifyContent: 'space-between', position: 'relative', zIndex: 10 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                             <div className="avatar-upload-wrapper" style={{ position: 'relative' }}>
                                 {user.avatar ? (
