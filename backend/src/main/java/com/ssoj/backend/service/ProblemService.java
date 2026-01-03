@@ -339,7 +339,6 @@ public class ProblemService {
 
         // 2. 清理旧的测试用例
         testCaseMapper.deleteByProblemId(problemId);
-        // TODO: 清理物理文件（可选，FileUtil.saveTestCaseFile 会覆盖）
 
         // 3. 解析 ZIP 文件
         Map<String, byte[]> inputs = new HashMap<>();

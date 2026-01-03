@@ -18,8 +18,6 @@ public class SubmissionController {
     @Autowired
     private SubmissionService submissionService;
 
-    // TODO: 实现以下 API
-
     /**
      * POST /api/submission/submit
      * 提交代码

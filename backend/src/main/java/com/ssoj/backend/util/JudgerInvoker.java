@@ -20,8 +20,6 @@ public class JudgerInvoker {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    // TODO: 实现判题机调用
-
     /**
      * 调用判题机执行判题
      * 

@@ -925,7 +925,7 @@ function DiscussionItem({ d, onReply, onVote, isReply = false }: { d: any, onRep
     return (
         <div className={`discussion-item-container ${isReply ? 'is-reply' : ''}`}>
             <div className="discussion-item">
-                <Link to={`/profile/${d.userId}`} className="discussion-avatar">
+                <Link to={`/user/${d.userId}`} className="discussion-avatar">
                     {d.avatar ? (
                         <img src={d.avatar} alt="" />
                     ) : (
@@ -936,7 +936,7 @@ function DiscussionItem({ d, onReply, onVote, isReply = false }: { d: any, onRep
                 </Link>
                 <div className="discussion-body">
                     <div className="discussion-meta">
-                        <Link to={`/profile/${d.userId}`} className="discussion-author">
+                        <Link to={`/user/${d.userId}`} className="discussion-author">
                             {d.nickname || d.username}
                         </Link>
                         <span className="discussion-time">

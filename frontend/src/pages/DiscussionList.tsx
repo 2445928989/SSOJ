@@ -36,7 +36,7 @@ function DiscussionListItem({ d, onVote }: { d: any, onVote: () => void }) {
             display: 'flex',
             gap: '15px'
         }}>
-            <Link to={`/profile/${d.userId}`} className="avatar">
+            <Link to={`/user/${d.userId}`} className="avatar">
                 {d.avatar ? (
                     <img src={d.avatar} alt="" style={{ width: '45px', height: '45px', borderRadius: '50%', objectFit: 'cover' }} />
                 ) : (
@@ -58,7 +58,7 @@ function DiscussionListItem({ d, onVote }: { d: any, onVote: () => void }) {
             <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <Link to={`/profile/${d.userId}`} style={{ fontWeight: '600', color: '#2d3748', textDecoration: 'none' }}>
+                        <Link to={`/user/${d.userId}`} style={{ fontWeight: '600', color: '#2d3748', textDecoration: 'none' }}>
                             {d.nickname || d.username}
                         </Link>
                         <span style={{ color: '#a0aec0', fontSize: '12px' }}>{new Date(d.createdAt).toLocaleString()}</span>

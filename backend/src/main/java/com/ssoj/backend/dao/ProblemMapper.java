@@ -11,7 +11,6 @@ import java.util.List;
  */
 @Mapper
 public interface ProblemMapper {
-    // TODO: 实现以下方法
 
     /**
      * 根据ID查询题目

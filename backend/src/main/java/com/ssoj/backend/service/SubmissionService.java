@@ -26,8 +26,6 @@ public class SubmissionService {
     @Autowired
     private ProblemService problemService;
 
-    // TODO: 实现以下业务逻辑
-
     /**
      * 提交代码
      * - 保存提交记录（状态为 PENDING）

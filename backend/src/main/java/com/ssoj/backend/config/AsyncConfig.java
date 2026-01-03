@@ -14,8 +14,6 @@ import java.util.concurrent.Executor;
 @EnableAsync
 public class AsyncConfig {
 
-    // TODO: 配置异步线程池
-
     @Bean(name = "judgeExecutor")
     public Executor judgeExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

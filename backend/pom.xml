@@ -14,9 +14,13 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>backend</name>
 	<description>a backend for ssoj</description>
-	<url />
+	<url>https://github.com/2445928989/SSOJ</url>
 	<licenses>
-		<license />
+		<license>
+			<name>MIT License</name>
+			<url>https://opensource.org/licenses/MIT</url>
+			<distribution>repo</distribution>
+		</license>
 	</licenses>
 	<developers>
 		<developer />

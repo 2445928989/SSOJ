@@ -198,8 +198,7 @@ public class UserService {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("删除用户ID不合法");
         }
-
-        return true;
+        return userMapper.deleteById(id) > 0;
     }
 
     /**

@@ -10,16 +10,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
 
-    // TODO: 配置跨域策略
-
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        // TODO: 实现跨域配置
-        // registry.addMapping("/api/**")
-        // .allowedOrigins("http://localhost:5173") // 前端地址
-        // .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-        // .allowedHeaders("*")
-        // .allowCredentials(true)
-        // .maxAge(3600);
+        registry.addMapping("/api/**")
+                .allowedOriginPatterns("*") // 允许所有来源，或者指定前端地址
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600);
     }
 }
