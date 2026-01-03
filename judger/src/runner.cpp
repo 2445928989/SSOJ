@@ -44,6 +44,15 @@ namespace judger {
             // 读取输出
             result.stdoutContent = readFile(stdoutPath);
             result.stderrContent = readFile(stderrPath);
+
+            // 如果是运行时错误，将 stderr 的前 500 个字符加入错误信息中，方便调试
+            if (result.status == RunStatus::RE && !result.stderrContent.empty()) {
+                std::string truncatedStderr = result.stderrContent;
+                if (truncatedStderr.length() > 500) {
+                    truncatedStderr = truncatedStderr.substr(0, 500) + "... [truncated]";
+                }
+                result.errorMessage += "\n" + truncatedStderr;
+            }
         }
 
         return result;

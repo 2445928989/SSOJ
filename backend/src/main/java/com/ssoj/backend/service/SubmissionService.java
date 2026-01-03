@@ -187,7 +187,27 @@ public class SubmissionService {
      */
     public Boolean updateJudgeResult(Long submissionId, String status,
             int maxTimeUsed, int maxMemoryUsed, String errorMessage) {
-        // ... existing code ...
+        Submission submission = submissionMapper.findById(submissionId);
+        if (submission == null) {
+            return false;
+        }
+
+        submission.setStatus(status);
+        submission.setMaxTimeUsed(maxTimeUsed);
+        submission.setMaxMemoryUsed(maxMemoryUsed);
+        submission.setErrorMessage(errorMessage);
+
+        submissionMapper.updateStatus(submission);
+
+        // 如果是 AC，更新题目的通过数
+        if ("AC".equals(status)) {
+            try {
+                problemService.incrementAcceptedCount(submission.getProblemId());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         return true;
     }
 
