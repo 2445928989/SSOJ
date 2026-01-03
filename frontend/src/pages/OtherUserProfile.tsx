@@ -39,9 +39,34 @@ export default function OtherUserProfile() {
     return (
         <div className="profile-container">
             <div className="profile-card">
-                <div className="profile-header">
-                    <h1>{user.nickname || user.username}</h1>
-                    <p className="username">@{user.username}</p>
+                <div
+                    className="profile-header"
+                    style={{
+                        backgroundImage: user.backgroundImage ? `url(${user.backgroundImage})` : 'linear-gradient(135deg, #8e9eab 0%, #eef2f3 100%)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        height: '240px',
+                        position: 'relative',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'flex-end',
+                        alignItems: 'flex-start',
+                        padding: '30px'
+                    }}
+                >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                        {user.avatar ? (
+                            <img src={user.avatar} alt="avatar" style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '4px solid white', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }} />
+                        ) : (
+                            <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: '#667eea', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '40px', fontWeight: 'bold', border: '4px solid white', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }}>
+                                {user.username.charAt(0).toUpperCase()}
+                            </div>
+                        )}
+                        <div style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+                            <h1 style={{ margin: 0, color: 'white', fontSize: '2.5em' }}>{user.nickname || user.username}</h1>
+                            <p className="username" style={{ margin: 0, color: 'rgba(255,255,255,0.9)', fontSize: '1.2em' }}>@{user.username}</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="profile-content">
@@ -99,12 +124,14 @@ export default function OtherUserProfile() {
                                 .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
                                 .map(([date, count]: [string, any]) => {
                                     const intensity = Math.min(count / 5, 1)
+                                    const colors = ['#ebedf0', '#c6e48b', '#7bc96f', '#239a3b', '#196127']
+                                    const colorIdx = Math.floor(intensity * (colors.length - 1))
                                     return (
                                         <div
                                             key={date}
                                             className="heatmap-cell"
                                             style={{
-                                                backgroundColor: `rgba(102, 126, 234, ${intensity})`,
+                                                backgroundColor: colors[colorIdx],
                                             }}
                                             title={`${date}: ${count} 次提交`}
                                         />
@@ -113,11 +140,12 @@ export default function OtherUserProfile() {
                         </div>
                         <div className="heatmap-legend">
                             <span>少</span>
-                            <div style={{ display: 'flex', gap: '2px' }}>
-                                <div style={{ width: '12px', height: '12px', backgroundColor: 'rgba(102, 126, 234, 0.1)' }}></div>
-                                <div style={{ width: '12px', height: '12px', backgroundColor: 'rgba(102, 126, 234, 0.4)' }}></div>
-                                <div style={{ width: '12px', height: '12px', backgroundColor: 'rgba(102, 126, 234, 0.7)' }}></div>
-                                <div style={{ width: '12px', height: '12px', backgroundColor: 'rgba(102, 126, 234, 1)' }}></div>
+                            <div className="legend-colors">
+                                <div style={{ backgroundColor: '#ebedf0' }}></div>
+                                <div style={{ backgroundColor: '#c6e48b' }}></div>
+                                <div style={{ backgroundColor: '#7bc96f' }}></div>
+                                <div style={{ backgroundColor: '#239a3b' }}></div>
+                                <div style={{ backgroundColor: '#196127' }}></div>
                             </div>
                             <span>多</span>
                         </div>
@@ -137,23 +165,6 @@ export default function OtherUserProfile() {
                     border-radius: 12px;
                     box-shadow: 0 4px 20px rgba(0,0,0,0.1);
                     overflow: hidden;
-                }
-
-                .profile-header {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    color: white;
-                    padding: 40px 30px;
-                }
-
-                .profile-header h1 {
-                    margin: 0 0 10px 0;
-                    font-size: 2em;
-                }
-
-                .profile-header .username {
-                    margin: 0;
-                    opacity: 0.9;
-                    font-size: 1.1em;
                 }
 
                 .profile-content {
@@ -271,6 +282,17 @@ export default function OtherUserProfile() {
                     gap: 10px;
                     font-size: 0.9em;
                     color: #666;
+                }
+
+                .legend-colors {
+                    display: flex;
+                    gap: 3px;
+                }
+
+                .legend-colors div {
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 2px;
                 }
 
                 .loading,

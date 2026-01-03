@@ -17,6 +17,7 @@ export default function UserProfile() {
     const [successMsg, setSuccessMsg] = useState('')
     const [heatmap, setHeatmap] = useState<Record<string, number>>({})
     const [isUploading, setIsUploading] = useState(false)
+    const [isUploadingBg, setIsUploadingBg] = useState(false)
 
     useEffect(() => {
         Promise.all([
@@ -99,6 +100,36 @@ export default function UserProfile() {
         }
     }
 
+    const handleBackgroundUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        if (file.size > 5 * 1024 * 1024) {
+            setError('背景图文件不能超过 5MB')
+            return
+        }
+
+        const formData = new FormData()
+        formData.append('file', file)
+
+        setIsUploadingBg(true)
+        setError('')
+        try {
+            const res = await api.post('/api/user/upload-background', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            })
+            if (res.data.url) {
+                setUser({ ...user, backgroundImage: res.data.url })
+                setSuccessMsg('背景图上传成功！')
+                setTimeout(() => setSuccessMsg(''), 3000)
+            }
+        } catch (e: any) {
+            setError(e.response?.data?.message || '上传失败')
+        } finally {
+            setIsUploadingBg(false)
+        }
+    }
+
     const handleChangePassword = async () => {
         if (passwordData.newPassword !== passwordData.confirmPassword) {
             setError('两次输入的密码不一致')
@@ -138,48 +169,86 @@ export default function UserProfile() {
     return (
         <div className="profile-container">
             <div className="profile-card">
-                <div className="profile-header">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                        <div className="avatar-upload-wrapper" style={{ position: 'relative' }}>
-                            {user.avatar ? (
-                                <img src={user.avatar} alt="avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '3px solid white', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }} />
-                            ) : (
-                                <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#667eea', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', fontWeight: 'bold', border: '3px solid white', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
-                                    {user.username.charAt(0).toUpperCase()}
-                                </div>
-                            )}
-                            <label htmlFor="avatar-input" style={{ position: 'absolute', bottom: '0', right: '0', background: 'white', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.2)', fontSize: '14px' }}>
-                                📷
-                                <input id="avatar-input" type="file" accept="image/*" onChange={handleAvatarUpload} style={{ display: 'none' }} disabled={isUploading} />
-                            </label>
-                            {isUploading && (
-                                <div style={{ position: 'absolute', top: '0', left: '0', width: '100%', height: '100%', background: 'rgba(255,255,255,0.7)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <div className="loading-spinner" style={{ width: '20px', height: '20px' }}></div>
-                                </div>
-                            )}
+                <div
+                    className="profile-header"
+                    style={{
+                        backgroundImage: user.backgroundImage ? `url(${user.backgroundImage})` : 'linear-gradient(135deg, #8e9eab 0%, #eef2f3 100%)',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        height: '240px',
+                        position: 'relative',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'flex-end',
+                        alignItems: 'flex-start',
+                        padding: '30px'
+                    }}
+                >
+                    <label
+                        htmlFor="bg-input"
+                        className="bg-upload-btn"
+                        style={{
+                            position: 'absolute',
+                            top: '20px',
+                            right: '20px',
+                            background: 'rgba(0,0,0,0.3)',
+                            color: 'white',
+                            padding: '8px 15px',
+                            borderRadius: '20px',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            backdropFilter: 'blur(5px)',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            transition: 'all 0.3s'
+                        }}
+                    >
+                        {isUploadingBg ? '上传中...' : '🖼️ 更换背景'}
+                        <input id="bg-input" type="file" accept="image/*" onChange={handleBackgroundUpload} style={{ display: 'none' }} disabled={isUploadingBg} />
+                    </label>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px', width: '100%', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                            <div className="avatar-upload-wrapper" style={{ position: 'relative' }}>
+                                {user.avatar ? (
+                                    <img src={user.avatar} alt="avatar" style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '4px solid white', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }} />
+                                ) : (
+                                    <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: '#667eea', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '40px', fontWeight: 'bold', border: '4px solid white', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }}>
+                                        {user.username.charAt(0).toUpperCase()}
+                                    </div>
+                                )}
+                                <label htmlFor="avatar-input" style={{ position: 'absolute', bottom: '5px', right: '5px', background: 'white', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.3)', fontSize: '16px' }}>
+                                    📷
+                                    <input id="avatar-input" type="file" accept="image/*" onChange={handleAvatarUpload} style={{ display: 'none' }} disabled={isUploading} />
+                                </label>
+                                {isUploading && (
+                                    <div style={{ position: 'absolute', top: '0', left: '0', width: '100%', height: '100%', background: 'rgba(255,255,255,0.7)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <div className="loading-spinner" style={{ width: '24px', height: '24px' }}></div>
+                                    </div>
+                                )}
+                            </div>
+                            <div style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+                                <h1 style={{ margin: 0, color: 'white', fontSize: '2.5em' }}>{user.nickname || user.username}</h1>
+                                <p className="username" style={{ margin: 0, color: 'rgba(255,255,255,0.9)', fontSize: '1.2em' }}>@{user.username}</p>
+                            </div>
                         </div>
-                        <div>
-                            <h1>{user.nickname || user.username}</h1>
-                            <p className="username">@{user.username}</p>
-                        </div>
+                        {!isEditing && !isChangingPassword && (
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <button
+                                    className="edit-btn"
+                                    onClick={() => setIsEditing(true)}
+                                >
+                                    编辑资料
+                                </button>
+                                <button
+                                    className="edit-btn"
+                                    style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.5)' }}
+                                    onClick={() => setIsChangingPassword(true)}
+                                >
+                                    修改密码
+                                </button>
+                            </div>
+                        )}
                     </div>
-                    {!isEditing && !isChangingPassword && (
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <button
-                                className="edit-btn"
-                                onClick={() => setIsEditing(true)}
-                            >
-                                编辑资料
-                            </button>
-                            <button
-                                className="edit-btn"
-                                style={{ background: 'rgba(0,0,0,0.1)', border: '1px solid rgba(255,255,255,0.5)' }}
-                                onClick={() => setIsChangingPassword(true)}
-                            >
-                                修改密码
-                            </button>
-                        </div>
-                    )}
                 </div>
 
                 <div className="profile-content">
@@ -430,6 +499,11 @@ export default function UserProfile() {
                 .profile-header h1 {
                     margin: 0 0 10px 0;
                     font-size: 2em;
+                }
+
+                .bg-upload-btn:hover {
+                    background: rgba(0,0,0,0.5) !important;
+                    transform: scale(1.05);
                 }
 
                 .profile-header .username {

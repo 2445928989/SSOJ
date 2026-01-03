@@ -15,6 +15,7 @@ public class User {
     private String email;
     private String profile;
     private String avatar;
+    private String backgroundImage;
     private String phone;
     private String role;
     private LocalDateTime createdAt;

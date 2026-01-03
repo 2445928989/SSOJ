@@ -10,6 +10,7 @@ CREATE TABLE user (
     email VARCHAR(100) UNIQUE NOT NULL,
     profile TEXT,
     avatar VARCHAR(500) COMMENT '头像URL',
+    background_image VARCHAR(500) COMMENT '背景图URL',
     phone VARCHAR(20),
     role VARCHAR(20) NOT NULL DEFAULT 'USER',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

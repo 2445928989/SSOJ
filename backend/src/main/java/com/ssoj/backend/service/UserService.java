@@ -103,6 +103,17 @@ public class UserService {
     }
 
     /**
+     * 更新用户背景图
+     */
+    public void updateBackgroundImage(Long userId, String backgroundUrl) {
+        User user = userMapper.findById(userId);
+        if (user != null) {
+            user.setBackgroundImage(backgroundUrl);
+            userMapper.update(user);
+        }
+    }
+
+    /**
      * 根据ID获取用户信息
      */
     public User getUserById(Long id) {

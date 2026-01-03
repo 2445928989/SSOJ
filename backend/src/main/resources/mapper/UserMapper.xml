@@ -11,6 +11,7 @@
         <result property="email" column="email" />
         <result property="profile" column="profile" />
         <result property="avatar" column="avatar" />
+        <result property="backgroundImage" column="background_image" />
         <result property="phone" column="phone" />
         <result property="role" column="role" />
         <result property="createdAt" column="created_at" />
@@ -31,12 +32,13 @@
 
     <update id="update" parameterType="com.ssoj.backend.entity.User"> UPDATE user SET
         username=#{username}, email=#{email}, role=#{role},
-        updated_at=NOW(),nickname=#{nickname},password=#{password},profile=#{profile},avatar=#{avatar},phone=#{phone}
+        updated_at=NOW(),nickname=#{nickname},password=#{password},profile=#{profile},avatar=#{avatar},background_image=#{backgroundImage},phone=#{phone}
         WHERE id=#{id} </update>
 
     <!-- 只更新用户的个人资料字段 -->
     <update id="updateProfile"> UPDATE user SET nickname=#{nickname}, phone=#{phone},
-        profile=#{profile}, avatar=#{avatar}, updated_at=NOW() WHERE id=#{id} </update>
+        profile=#{profile}, avatar=#{avatar}, background_image=#{backgroundImage}, updated_at=NOW()
+        WHERE id=#{id} </update>
 
     <delete id="deleteById"> DELETE FROM user WHERE id = #{id} </delete>
 

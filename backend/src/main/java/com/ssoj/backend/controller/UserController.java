@@ -69,6 +69,48 @@ public class UserController {
     }
 
     /**
+     * POST /api/user/upload-background
+     * 上传背景图
+     */
+    @PostMapping("/upload-background")
+    public Object uploadBackground(
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            jakarta.servlet.http.HttpServletRequest httpRequest) {
+        jakarta.servlet.http.HttpSession session = httpRequest.getSession(false);
+        if (session == null || session.getAttribute("userId") == null) {
+            return java.util.Map.of("success", false, "message", "未登录");
+        }
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (file.isEmpty()) {
+            return java.util.Map.of("success", false, "message", "文件不能为空");
+        }
+
+        try {
+            // 确保目录存在
+            java.io.File dir = new java.io.File(uploadPath);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            // 生成文件名: bg_userId_timestamp.ext
+            String originalFilename = file.getOriginalFilename();
+            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            String filename = "bg_" + userId + "_" + System.currentTimeMillis() + extension;
+            java.io.File dest = new java.io.File(uploadPath + filename);
+            file.transferTo(dest);
+
+            // 更新数据库
+            String backgroundUrl = "/api/user/avatar/" + filename; // 复用 avatar 的路径映射
+            userService.updateBackgroundImage(userId, backgroundUrl);
+
+            return java.util.Map.of("success", true, "url", backgroundUrl);
+        } catch (Exception e) {
+            return java.util.Map.of("success", false, "message", "上传失败: " + e.getMessage());
+        }
+    }
+
+    /**
      * POST /api/user/send-code
      * 发送注册验证码
      */
