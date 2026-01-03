@@ -12,6 +12,7 @@ export default function ProblemDetail() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [showTags, setShowTags] = useState(false)
+    const [copyStatus, setCopyStatus] = useState<Record<string, boolean>>({})
 
     // 格式化内存大小显示（超过1MB用MB单位）
     const formatMemory = (kb: number) => {
@@ -19,6 +20,15 @@ export default function ProblemDetail() {
             return `${(kb / 1024).toFixed(1)}MB`
         }
         return `${kb}KB`
+    }
+
+    const handleCopy = (text: string, key: string) => {
+        navigator.clipboard.writeText(text).then(() => {
+            setCopyStatus({ ...copyStatus, [key]: true })
+            setTimeout(() => {
+                setCopyStatus(prev => ({ ...prev, [key]: false }))
+            }, 2000)
+        })
     }
 
     useEffect(() => {
@@ -140,14 +150,30 @@ export default function ProblemDetail() {
 
                         return Array.from({ length: count }).map((_, i) => (
                             <div key={i} className="samples-wrapper">
-                                <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#4a5568' }}>样例 {i + 1}</div>
+                                <div className="sample-title">样例 {i + 1}</div>
                                 <div className="sample-grid">
                                     <div className="sample-group">
-                                        <h3>输入</h3>
+                                        <div className="sample-header">
+                                            <h3>输入</h3>
+                                            <button
+                                                className="copy-btn"
+                                                onClick={() => handleCopy(inputs[i] || '', `in-${i}`)}
+                                            >
+                                                {copyStatus[`in-${i}`] ? '已复制!' : '复制'}
+                                            </button>
+                                        </div>
                                         <pre className="sample-box">{inputs[i] || ''}</pre>
                                     </div>
                                     <div className="sample-group">
-                                        <h3>输出</h3>
+                                        <div className="sample-header">
+                                            <h3>输出</h3>
+                                            <button
+                                                className="copy-btn"
+                                                onClick={() => handleCopy(outputs[i] || '', `out-${i}`)}
+                                            >
+                                                {copyStatus[`out-${i}`] ? '已复制!' : '复制'}
+                                            </button>
+                                        </div>
                                         <pre className="sample-box">{outputs[i] || ''}</pre>
                                     </div>
                                 </div>
@@ -335,16 +361,52 @@ export default function ProblemDetail() {
                     gap: 20px;
                 }
 
+                .sample-title {
+                    font-size: 1.1rem;
+                    font-weight: bold;
+                    margin-bottom: 12px;
+                    color: #2d3748;
+                }
+
                 .sample-group {
                     display: flex;
                     flex-direction: column;
+                    position: relative;
+                }
+
+                .sample-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 8px;
                 }
 
                 .sample-group h3 {
-                    margin: 0 0 8px 0;
-                    font-size: 14px;
+                    margin: 0;
+                    font-size: 13px;
                     font-weight: 600;
-                    color: #333;
+                    color: #718096;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                }
+
+                .copy-btn {
+                    background: #f1f5f9;
+                    border: 1px solid #e2e8f0;
+                    color: #64748b;
+                    font-size: 11px;
+                    cursor: pointer;
+                    padding: 2px 8px;
+                    border-radius: 4px;
+                    transition: all 0.2s;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                }
+
+                .copy-btn:hover {
+                    background: #e2e8f0;
+                    color: #475569;
+                    border-color: #cbd5e1;
                 }
 
                 .sample-box {
