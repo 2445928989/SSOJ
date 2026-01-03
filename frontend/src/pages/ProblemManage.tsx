@@ -20,6 +20,7 @@ export default function ProblemManage() {
         outputFormat: '',
         sampleInput: '',
         sampleOutput: '',
+        sampleExplanation: '',
         difficulty: 'EASY',
         timeLimit: 1.0,
         memoryLimit: 262144,
@@ -95,6 +96,7 @@ export default function ProblemManage() {
             outputFormat: p.outputFormat,
             sampleInput: p.sampleInput,
             sampleOutput: p.sampleOutput,
+            sampleExplanation: p.sampleExplanation || '',
             difficulty: p.difficulty,
             timeLimit: p.timeLimit,
             memoryLimit: p.memoryLimit,
@@ -188,13 +190,18 @@ export default function ProblemManage() {
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '15px' }}>
                             <div className="form-group">
-                                <label>样例输入</label>
+                                <label>样例输入 (多个样例请用 --- 分隔)</label>
                                 <textarea rows={4} value={form.sampleInput} onChange={e => setForm({ ...form, sampleInput: e.target.value })} style={{ fontFamily: 'monospace' }} />
                             </div>
                             <div className="form-group">
-                                <label>样例输出</label>
+                                <label>样例输出 (多个样例请用 --- 分隔)</label>
                                 <textarea rows={4} value={form.sampleOutput} onChange={e => setForm({ ...form, sampleOutput: e.target.value })} style={{ fontFamily: 'monospace' }} />
                             </div>
+                        </div>
+
+                        <div className="form-group">
+                            <label>样例说明 (Markdown)</label>
+                            <textarea rows={3} value={form.sampleExplanation} onChange={e => setForm({ ...form, sampleExplanation: e.target.value })} placeholder="对样例的解释说明" />
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '15px', marginBottom: '15px' }}>

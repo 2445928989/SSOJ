@@ -42,10 +42,34 @@ export default function App() {
         return () => window.removeEventListener('storage', handleStorageChange)
     }, [])
 
-    // 路由改变时显示加载条
+    // 路由改变时显示加载条并更新标题
     useEffect(() => {
         setLoading(true)
         const timer = setTimeout(() => setLoading(false), 600)
+
+        // 根据路径设置默认标题
+        const pathMap: Record<string, string> = {
+            '/': '首页',
+            '/login': '登录',
+            '/register': '注册',
+            '/forgot-password': '找回密码',
+            '/problems': '题目列表',
+            '/submissions': '提交记录',
+            '/leaderboard': '排名',
+            '/announcements': '公告',
+            '/dashboard': '管理后台',
+            '/problem-manage': '题目管理'
+        }
+
+        const title = pathMap[location.pathname]
+        if (title) {
+            document.title = `${title} - SSOJ`
+        } else if (location.pathname.startsWith('/submission/')) {
+            document.title = `提交详情 - SSOJ`
+        } else if (location.pathname.startsWith('/submit/')) {
+            document.title = `提交题目 - SSOJ`
+        }
+
         return () => clearTimeout(timer)
     }, [location])
 

@@ -45,8 +45,9 @@ export default function Register() {
 
     const submit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!username.trim() || username.length < 3) {
-            setError('用户名长度至少为 3 个字符')
+        const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/
+        if (!usernameRegex.test(username)) {
+            setError('用户名格式不正确（仅允许3-20位字母、数字或下划线）')
             return
         }
         if (!email.includes('@')) {

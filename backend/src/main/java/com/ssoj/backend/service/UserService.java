@@ -34,6 +34,10 @@ public class UserService {
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("用户名不能为空");
         }
+        // 校验用户名格式：仅允许字母、数字、下划线，长度 3-20
+        if (!username.matches("^[a-zA-Z0-9_]{3,20}$")) {
+            throw new IllegalArgumentException("用户名格式不正确（仅允许3-20位字母、数字或下划线）");
+        }
         if (password == null || password.trim().isEmpty()) {
             throw new IllegalArgumentException("密码不能为空");
         }

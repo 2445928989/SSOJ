@@ -26,6 +26,7 @@ export default function UserProfile() {
                 setUser(profileRes.data)
                 setFormData(profileRes.data)
                 setHeatmap(heatmapRes.data.data || {})
+                document.title = `${profileRes.data.nickname || profileRes.data.username} - SSOJ`
             })
             .catch(e => setError(e.response?.data?.error || '加载失败'))
             .finally(() => setLoading(false))

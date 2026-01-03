@@ -23,6 +23,7 @@ export default function OtherUserProfile() {
             .then(([userRes, heatmapRes]) => {
                 setUser(userRes.data)
                 setHeatmap(heatmapRes.data.data || {})
+                document.title = `${userRes.data.nickname || userRes.data.username} - SSOJ`
             })
             .catch(e => setError(e.response?.data?.error || '加载失败'))
             .finally(() => setLoading(false))

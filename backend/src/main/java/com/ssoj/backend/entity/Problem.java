@@ -16,6 +16,7 @@ public class Problem {
     private String outputFormat;
     private String sampleInput;
     private String sampleOutput;
+    private String sampleExplanation; // 样例说明
     private String difficulty;
     private Double timeLimit;
     private Integer memoryLimit;

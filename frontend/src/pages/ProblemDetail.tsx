@@ -24,7 +24,10 @@ export default function ProblemDetail() {
     useEffect(() => {
         if (!id) return
         api.get(`/api/problem/${id}`)
-            .then(res => setProblem(res.data))
+            .then(res => {
+                setProblem(res.data)
+                document.title = `${res.data.title} - SSOJ`
+            })
             .catch(e => setError(e.response?.data?.error || '加载失败'))
             .finally(() => setLoading(false))
     }, [id])
@@ -128,17 +131,40 @@ export default function ProblemDetail() {
                 {/* 样例 */}
                 <section className="content-section">
                     <h2>样例</h2>
-                    <div className="samples-wrapper">
-                        <div className="sample-group">
-                            <h3>输入</h3>
-                            <pre className="sample-box">{problem.sampleInput || '暂无'}</pre>
-                        </div>
-                        <div className="sample-group">
-                            <h3>输出</h3>
-                            <pre className="sample-box">{problem.sampleOutput || '暂无'}</pre>
-                        </div>
-                    </div>
+                    {(() => {
+                        const inputs = (problem.sampleInput || '').split('---').map(s => s.trim()).filter(s => s !== '');
+                        const outputs = (problem.sampleOutput || '').split('---').map(s => s.trim()).filter(s => s !== '');
+                        const count = Math.max(inputs.length, outputs.length);
+
+                        if (count === 0) return <p className="placeholder">暂无样例</p>;
+
+                        return Array.from({ length: count }).map((_, i) => (
+                            <div key={i} className="samples-wrapper" style={{ marginBottom: '20px' }}>
+                                <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#4a5568' }}>样例 {i + 1}</div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                    <div className="sample-group">
+                                        <h3>输入</h3>
+                                        <pre className="sample-box">{inputs[i] || ''}</pre>
+                                    </div>
+                                    <div className="sample-group">
+                                        <h3>输出</h3>
+                                        <pre className="sample-box">{outputs[i] || ''}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        ));
+                    })()}
                 </section>
+
+                {/* 样例说明 */}
+                {problem.sampleExplanation && (
+                    <section className="content-section">
+                        <h2>样例说明</h2>
+                        <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                            {problem.sampleExplanation}
+                        </ReactMarkdown>
+                    </section>
+                )}
             </div>
 
             <style>{`

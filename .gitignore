@@ -35,6 +35,9 @@ judger/tests/temp_*
 # Logs
 *.log
 
+# maker data
+maker/data/
+
 # docs
 docs/
 

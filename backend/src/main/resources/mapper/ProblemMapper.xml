@@ -11,6 +11,7 @@
         <result property="outputFormat" column="output_format" />
         <result property="sampleInput" column="sample_input" />
         <result property="sampleOutput" column="sample_output" />
+        <result property="sampleExplanation" column="sample_explanation" />
         <result property="difficulty" column="difficulty" />
         <result property="timeLimit" column="time_limit" />
         <result property="memoryLimit" column="memory_limit" />
@@ -35,17 +36,18 @@
     <!-- 插入新题目 -->
     <insert id="insert" parameterType="com.ssoj.backend.entity.Problem"
         useGeneratedKeys="true" keyProperty="id"> INSERT INTO problem ( title, description,
-        input_format, output_format, sample_input, sample_output, difficulty, time_limit,
-        memory_limit, author_id, number_of_submissions, number_of_accepted, created_at, updated_at )
-        VALUES ( #{title}, #{description}, #{inputFormat}, #{outputFormat}, #{sampleInput},
-        #{sampleOutput}, #{difficulty}, #{timeLimit}, #{memoryLimit}, #{authorId}, 0, 0, NOW(),
-        NOW() ) </insert>
+        input_format, output_format, sample_input, sample_output, sample_explanation, difficulty,
+        time_limit, memory_limit, author_id, number_of_submissions, number_of_accepted, created_at,
+        updated_at ) VALUES ( #{title}, #{description}, #{inputFormat}, #{outputFormat},
+        #{sampleInput}, #{sampleOutput}, #{sampleExplanation}, #{difficulty}, #{timeLimit},
+        #{memoryLimit}, #{authorId}, 0, 0, NOW(), NOW() ) </insert>
 
     <!-- 更新题目 -->
     <update id="update"> UPDATE problem SET title = #{title}, description = #{description},
         input_format = #{inputFormat}, output_format = #{outputFormat}, sample_input =
-        #{sampleInput}, sample_output = #{sampleOutput}, difficulty = #{difficulty}, time_limit =
-        #{timeLimit}, memory_limit = #{memoryLimit}, updated_at = NOW() WHERE id = #{id} </update>
+        #{sampleInput}, sample_output = #{sampleOutput}, sample_explanation = #{sampleExplanation},
+        difficulty = #{difficulty}, time_limit = #{timeLimit}, memory_limit = #{memoryLimit},
+        updated_at = NOW() WHERE id = #{id} </update>
 
     <!-- 删除题目 -->
     <delete id="deleteById"> DELETE FROM problem WHERE id = #{id} </delete>

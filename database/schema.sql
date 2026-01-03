@@ -25,6 +25,7 @@ CREATE TABLE problem(
     output_format TEXT,
     sample_input TEXT,
     sample_output TEXT,
+    sample_explanation TEXT,
     difficulty VARCHAR(20) NOT NULL,
     time_limit DOUBLE DEFAULT 1.0 COMMENT '时间限制(秒)',
     memory_limit INT DEFAULT 262144 COMMENT '内存限制(KB)',
