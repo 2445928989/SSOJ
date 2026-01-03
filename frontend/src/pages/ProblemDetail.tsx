@@ -13,6 +13,9 @@ export default function ProblemDetail() {
     const [error, setError] = useState('')
     const [showTags, setShowTags] = useState(false)
     const [copyStatus, setCopyStatus] = useState<Record<string, boolean>>({})
+    const [discussions, setDiscussions] = useState<any[]>([])
+    const [newDiscussion, setNewDiscussion] = useState('')
+    const [submittingDiscussion, setSubmittingDiscussion] = useState(false)
 
     // 格式化内存大小显示（超过1MB用MB单位）
     const formatMemory = (kb: number) => {
@@ -40,7 +43,37 @@ export default function ProblemDetail() {
             })
             .catch(e => setError(e.response?.data?.error || '加载失败'))
             .finally(() => setLoading(false))
+
+        fetchDiscussions()
     }, [id])
+
+    const fetchDiscussions = () => {
+        if (!id) return
+        api.get(`/api/discussion/problem/${id}`)
+            .then(res => setDiscussions(res.data))
+            .catch(() => { })
+    }
+
+    const handleAddDiscussion = async () => {
+        if (!newDiscussion.trim()) return
+        setSubmittingDiscussion(true)
+        try {
+            const res = await api.post('/api/discussion/add', {
+                problemId: id,
+                content: newDiscussion
+            })
+            if (res.data.success) {
+                setNewDiscussion('')
+                fetchDiscussions()
+            } else {
+                alert(res.data.message || '发布失败')
+            }
+        } catch (e: any) {
+            alert(e.response?.data?.message || '发布失败，请先登录')
+        } finally {
+            setSubmittingDiscussion(false)
+        }
+    }
 
     if (loading) return <div className="container loading-container">
         <div className="loading-spinner"></div>
@@ -191,6 +224,55 @@ export default function ProblemDetail() {
                         </ReactMarkdown>
                     </section>
                 )}
+
+                {/* 讨论区 */}
+                <section className="content-section discussion-section">
+                    <h2>讨论区</h2>
+                    <div className="discussion-input">
+                        <textarea
+                            placeholder="发表你的看法..."
+                            value={newDiscussion}
+                            onChange={(e) => setNewDiscussion(e.target.value)}
+                        />
+                        <button
+                            onClick={handleAddDiscussion}
+                            disabled={submittingDiscussion}
+                        >
+                            {submittingDiscussion ? '发布中...' : '发布评论'}
+                        </button>
+                    </div>
+
+                    <div className="discussion-list">
+                        {discussions.length === 0 ? (
+                            <p className="placeholder">暂无讨论，快来抢沙发吧！</p>
+                        ) : (
+                            discussions.map((d) => (
+                                <div key={d.id} className="discussion-item">
+                                    <div className="discussion-avatar">
+                                        {d.avatar ? (
+                                            <img src={d.avatar} alt="" />
+                                        ) : (
+                                            <div className="default-avatar">
+                                                {(d.nickname || d.username || '?').charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="discussion-body">
+                                        <div className="discussion-meta">
+                                            <span className="discussion-author">{d.nickname || d.username}</span>
+                                            <span className="discussion-time">
+                                                {new Date(d.createdAt).toLocaleString()}
+                                            </span>
+                                        </div>
+                                        <div className="discussion-content">
+                                            {d.content}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </section>
             </div>
 
             <style>{`
@@ -519,6 +601,113 @@ export default function ProblemDetail() {
 
                 .content-section a:hover {
                     text-decoration: underline;
+                }
+
+                /* 讨论区样式 */
+                .discussion-section {
+                    border-top: 1px solid #eee;
+                    padding-top: 30px;
+                }
+
+                .discussion-input {
+                    margin-bottom: 30px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                }
+
+                .discussion-input textarea {
+                    width: 100%;
+                    min-height: 100px;
+                    padding: 12px;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 8px;
+                    font-family: inherit;
+                    resize: vertical;
+                    transition: border-color 0.2s;
+                }
+
+                .discussion-input textarea:focus {
+                    outline: none;
+                    border-color: #667eea;
+                }
+
+                .discussion-input button {
+                    align-self: flex-end;
+                    background: #667eea;
+                    color: white;
+                    border: none;
+                    padding: 8px 20px;
+                    border-radius: 6px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                }
+
+                .discussion-input button:hover {
+                    background: #764ba2;
+                }
+
+                .discussion-input button:disabled {
+                    background: #cbd5e1;
+                    cursor: not-allowed;
+                }
+
+                .discussion-item {
+                    display: flex;
+                    gap: 15px;
+                    padding: 20px 0;
+                    border-bottom: 1px solid #f1f5f9;
+                }
+
+                .discussion-item:last-child {
+                    border-bottom: none;
+                }
+
+                .discussion-avatar img, .discussion-avatar .default-avatar {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                }
+
+                .discussion-avatar .default-avatar {
+                    background: #edf2f7;
+                    color: #718096;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    font-size: 16px;
+                }
+
+                .discussion-body {
+                    flex: 1;
+                }
+
+                .discussion-meta {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    margin-bottom: 8px;
+                }
+
+                .discussion-author {
+                    font-weight: 600;
+                    color: #2d3748;
+                    font-size: 14px;
+                }
+
+                .discussion-time {
+                    color: #a0aec0;
+                    font-size: 12px;
+                }
+
+                .discussion-content {
+                    color: #4a5568;
+                    font-size: 15px;
+                    line-height: 1.6;
+                    white-space: pre-wrap;
                 }
 
                 @media (max-width: 768px) {

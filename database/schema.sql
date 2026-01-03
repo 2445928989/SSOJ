@@ -109,3 +109,15 @@ CREATE TABLE announcement (
     FOREIGN KEY (author_id) REFERENCES user(id) ON DELETE
     SET NULL
 );
+CREATE TABLE discussion (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    problem_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (problem_id) REFERENCES problem(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+    INDEX idx_problem_id (problem_id),
+    INDEX idx_created_at (created_at)
+);

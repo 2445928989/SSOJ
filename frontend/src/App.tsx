@@ -16,6 +16,7 @@ import ProblemManage from './pages/ProblemManage'
 import Dashboard from './pages/Dashboard'
 import Leaderboard from './pages/Leaderboard'
 import Announcements from './pages/Announcements'
+import DiscussionList from './pages/DiscussionList'
 
 export default function App() {
     const [user, setUser] = useState<any>(null)
@@ -56,6 +57,7 @@ export default function App() {
             '/problems': '题目列表',
             '/submissions': '提交记录',
             '/leaderboard': '排名',
+            '/discussions': '讨论区',
             '/announcements': '公告',
             '/dashboard': '管理后台',
             '/problem-manage': '题目管理'
@@ -88,6 +90,7 @@ export default function App() {
                     <Link to="/problems">题目</Link>
                     <Link to="/submissions">提交</Link>
                     <Link to="/leaderboard">排行榜</Link>
+                    <Link to="/discussions">讨论</Link>
                 </div>
                 <div className="nav-right">
                     {user ? (
@@ -127,6 +130,7 @@ export default function App() {
                     <Route path="/user/:userId" element={<OtherUserProfile />} />
                     <Route path="/profile" element={<UserProfile />} />
                     <Route path="/leaderboard" element={<Leaderboard />} />
+                    <Route path="/discussions" element={<DiscussionList />} />
                     <Route path="/announcements" element={<Announcements />} />
                     <Route path="/admin/problems" element={<ProblemManage />} />
                 </Routes>
