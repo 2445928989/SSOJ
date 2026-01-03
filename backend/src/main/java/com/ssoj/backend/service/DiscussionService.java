@@ -12,12 +12,38 @@ public class DiscussionService {
     private DiscussionMapper discussionMapper;
 
     public List<Discussion> getDiscussionsByProblemId(Long problemId) {
-        return discussionMapper.findByProblemId(problemId);
+        List<Discussion> allDiscussions = discussionMapper.findByProblemId(problemId);
+        return buildTree(allDiscussions);
     }
 
     public List<Discussion> getAllDiscussions(int page, int size, String keyword) {
         int offset = (page - 1) * size;
-        return discussionMapper.findAllPaged(offset, size, keyword);
+        List<Discussion> discussions = discussionMapper.findAllPaged(offset, size, keyword);
+        // 列表页通常只显示顶层讨论
+        return discussions.stream()
+                .filter(d -> d.getParentId() == null)
+                .toList();
+    }
+
+    public Discussion getDiscussionById(Long id) {
+        Discussion discussion = discussionMapper.findById(id);
+        if (discussion != null) {
+            discussion.setReplies(discussionMapper.findByParentId(id));
+        }
+        return discussion;
+    }
+
+    private List<Discussion> buildTree(List<Discussion> discussions) {
+        List<Discussion> rootDiscussions = discussions.stream()
+                .filter(d -> d.getParentId() == null)
+                .toList();
+
+        for (Discussion root : rootDiscussions) {
+            root.setReplies(discussions.stream()
+                    .filter(d -> root.getId().equals(d.getParentId()))
+                    .toList());
+        }
+        return rootDiscussions;
     }
 
     public int getTotalDiscussionCount(String keyword) {

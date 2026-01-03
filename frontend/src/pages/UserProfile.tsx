@@ -104,8 +104,8 @@ export default function UserProfile() {
         const file = e.target.files?.[0]
         if (!file) return
 
-        if (file.size > 5 * 1024 * 1024) {
-            setError('背景图文件不能超过 5MB')
+        if (file.size > 10 * 1024 * 1024) {
+            setError('背景图文件不能超过 10MB')
             return
         }
 
@@ -124,7 +124,11 @@ export default function UserProfile() {
                 setTimeout(() => setSuccessMsg(''), 3000)
             }
         } catch (e: any) {
-            setError(e.response?.data?.message || '上传失败')
+            if (e.response?.status === 413) {
+                setError('文件太大，服务器拒绝处理 (最大 10MB)')
+            } else {
+                setError(e.response?.data?.message || '上传失败')
+            }
         } finally {
             setIsUploadingBg(false)
         }
@@ -183,26 +187,35 @@ export default function UserProfile() {
                         alignItems: 'flex-start',
                         padding: '30px'
                     }}
+                >                    <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: '80px',
+                    background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.2))',
+                    backdropFilter: 'blur(2px)',
+                    pointerEvents: 'none'
+                }}></div>                    <label
+                    htmlFor="bg-input"
+                    className="bg-upload-btn"
+                    title="支持 JPG/PNG 格式，最大 10MB"
+                    style={{
+                        position: 'absolute',
+                        top: '20px',
+                        right: '20px',
+                        background: 'rgba(0,0,0,0.3)',
+                        color: 'white',
+                        padding: '8px 15px',
+                        borderRadius: '20px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        backdropFilter: 'blur(5px)',
+                        border: '1px solid rgba(255,255,255,0.3)',
+                        transition: 'all 0.3s'
+                    }}
                 >
-                    <label
-                        htmlFor="bg-input"
-                        className="bg-upload-btn"
-                        style={{
-                            position: 'absolute',
-                            top: '20px',
-                            right: '20px',
-                            background: 'rgba(0,0,0,0.3)',
-                            color: 'white',
-                            padding: '8px 15px',
-                            borderRadius: '20px',
-                            cursor: 'pointer',
-                            fontSize: '14px',
-                            backdropFilter: 'blur(5px)',
-                            border: '1px solid rgba(255,255,255,0.3)',
-                            transition: 'all 0.3s'
-                        }}
-                    >
-                        {isUploadingBg ? '上传中...' : '🖼️ 更换背景'}
+                        {isUploadingBg ? '上传中...' : '更换背景 (最大 10MB)'}
                         <input id="bg-input" type="file" accept="image/*" onChange={handleBackgroundUpload} style={{ display: 'none' }} disabled={isUploadingBg} />
                     </label>
 
@@ -216,7 +229,9 @@ export default function UserProfile() {
                                         {user.username.charAt(0).toUpperCase()}
                                     </div>
                                 )}
-                                <label htmlFor="avatar-input" style={{ position: 'absolute', bottom: '5px', right: '5px', background: 'white', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.3)', fontSize: '16px' }}>
+                                <label htmlFor="avatar-input"
+                                    title="支持 JPG/PNG 格式，最大 2MB"
+                                    style={{ position: 'absolute', bottom: '5px', right: '5px', background: 'white', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.3)', fontSize: '16px' }}>
                                     📷
                                     <input id="avatar-input" type="file" accept="image/*" onChange={handleAvatarUpload} style={{ display: 'none' }} disabled={isUploading} />
                                 </label>

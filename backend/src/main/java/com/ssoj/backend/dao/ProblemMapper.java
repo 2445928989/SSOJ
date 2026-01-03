@@ -38,6 +38,10 @@ public interface ProblemMapper {
      */
     int update(Problem problem);
 
+    void updateLikes(@Param("id") Long id, @Param("delta") int delta);
+
+    void updateDislikes(@Param("id") Long id, @Param("delta") int delta);
+
     /**
      * 删除题目
      */

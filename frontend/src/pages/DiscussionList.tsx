@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import api from '../api'
+import { ThumbsUp, ThumbsDown, MessageSquare, User as UserIcon } from 'lucide-react'
 
 export default function DiscussionList() {
     const [searchParams, setSearchParams] = useSearchParams()
@@ -73,7 +74,7 @@ export default function DiscussionList() {
                                 display: 'flex',
                                 gap: '15px'
                             }}>
-                                <div className="avatar">
+                                <Link to={`/profile/${d.userId}`} className="avatar">
                                     {d.avatar ? (
                                         <img src={d.avatar} alt="" style={{ width: '45px', height: '45px', borderRadius: '50%', objectFit: 'cover' }} />
                                     ) : (
@@ -91,26 +92,44 @@ export default function DiscussionList() {
                                             {(d.nickname || d.username || '?').charAt(0).toUpperCase()}
                                         </div>
                                     )}
-                                </div>
+                                </Link>
                                 <div style={{ flex: 1 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <span style={{ fontWeight: '600', color: '#2d3748' }}>{d.nickname || d.username}</span>
+                                            <Link to={`/profile/${d.userId}`} style={{ fontWeight: '600', color: '#2d3748', textDecoration: 'none' }}>
+                                                {d.nickname || d.username}
+                                            </Link>
                                             <span style={{ color: '#a0aec0', fontSize: '12px' }}>{new Date(d.createdAt).toLocaleString()}</span>
                                         </div>
-                                        <Link to={`/problems/${d.problemId}`} style={{
-                                            fontSize: '13px',
-                                            color: '#667eea',
-                                            textDecoration: 'none',
-                                            background: '#f0f4ff',
-                                            padding: '2px 10px',
-                                            borderRadius: '12px'
-                                        }}>
-                                            #{d.problemId} {d.problemTitle}
-                                        </Link>
+                                        {d.problemId && (
+                                            <Link to={`/problem/${d.problemId}`} style={{
+                                                fontSize: '13px',
+                                                color: '#667eea',
+                                                textDecoration: 'none',
+                                                background: '#f0f4ff',
+                                                padding: '2px 10px',
+                                                borderRadius: '12px'
+                                            }}>
+                                                #{d.problemId} {d.problemTitle}
+                                            </Link>
+                                        )}
                                     </div>
-                                    <div style={{ color: '#4a5568', fontSize: '15px', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
+                                    <div style={{ color: '#4a5568', fontSize: '15px', lineHeight: '1.6', whiteSpace: 'pre-wrap', marginBottom: '12px' }}>
                                         {d.content}
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '20px', color: '#94a3b8', fontSize: '13px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <ThumbsUp size={14} />
+                                            <span>{d.likes || 0}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <ThumbsDown size={14} />
+                                            <span>{d.dislikes || 0}</span>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <MessageSquare size={14} />
+                                            <span>{d.repliesCount || 0} 回复</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -139,6 +158,41 @@ export default function DiscussionList() {
                     ))}
                 </div>
             )}
+
+            <style>{`
+                .submit-btn {
+                    background: #667eea;
+                    color: white;
+                    border: none;
+                    border-radius: 6px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                }
+
+                .submit-btn:hover {
+                    background: #5a67d8;
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+                }
+
+                .submit-btn:active {
+                    transform: translateY(0);
+                }
+
+                .discussion-list-item:hover {
+                    background-color: #f8fafc !important;
+                }
+
+                .error-msg {
+                    background: #fff5f5;
+                    color: #c53030;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    margin-bottom: 20px;
+                    border: 1px solid #feb2b2;
+                }
+            `}</style>
         </div>
     )
 }

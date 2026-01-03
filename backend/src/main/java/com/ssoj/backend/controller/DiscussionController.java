@@ -37,6 +37,15 @@ public class DiscussionController {
                 "size", size);
     }
 
+    @GetMapping("/{id}")
+    public Object getDiscussion(@PathVariable Long id) {
+        Discussion discussion = discussionService.getDiscussionById(id);
+        if (discussion == null) {
+            return Map.of("success", false, "message", "讨论不存在");
+        }
+        return Map.of("success", true, "data", discussion);
+    }
+
     @PostMapping("/add")
     public Object addDiscussion(@RequestBody Map<String, Object> request, HttpServletRequest httpRequest) {
         HttpSession session = httpRequest.getSession(false);
@@ -44,7 +53,9 @@ public class DiscussionController {
             return Map.of("success", false, "message", "未登录");
         }
         Long userId = (Long) session.getAttribute("userId");
-        Long problemId = Long.valueOf(request.get("problemId").toString());
+        Long problemId = request.get("problemId") != null ? Long.valueOf(request.get("problemId").toString()) : null;
+        Long parentId = request.get("parentId") != null ? Long.valueOf(request.get("parentId").toString()) : null;
+        String title = (String) request.get("title");
         String content = (String) request.get("content");
 
         if (content == null || content.trim().isEmpty()) {
@@ -53,8 +64,12 @@ public class DiscussionController {
 
         Discussion discussion = new Discussion();
         discussion.setProblemId(problemId);
+        discussion.setParentId(parentId);
         discussion.setUserId(userId);
+        discussion.setTitle(title);
         discussion.setContent(content);
+        discussion.setLikes(0);
+        discussion.setDislikes(0);
         discussionService.addDiscussion(discussion);
 
         return Map.of("success", true);

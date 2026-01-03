@@ -72,9 +72,17 @@ export default function ProblemManage() {
             if (testCaseFile && problemId) {
                 const formData = new FormData()
                 formData.append('file', testCaseFile)
-                await api.post(`/api/problem/${problemId}/testcases`, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                })
+                try {
+                    await api.post(`/api/problem/${problemId}/testcases`, formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    })
+                } catch (e: any) {
+                    if (e.response?.status === 413) {
+                        alert('测试用例文件太大 (最大 10MB)')
+                    } else {
+                        alert('测试用例上传失败: ' + (e.response?.data?.message || '未知错误'))
+                    }
+                }
             }
 
             setForm(initialForm)
@@ -350,6 +358,7 @@ export default function ProblemManage() {
                             />
                             <p style={{ fontSize: '12px', color: '#718096', marginTop: '8px' }}>
                                 请上传包含 .in 和 .out 文件的 ZIP 压缩包。文件名需对应（如 1.in, 1.out）。
+                                <strong> 最大限制 10MB。</strong>
                                 {editingId && " 如果不上传，将保留原有测试用例。"}
                             </p>
                         </div>

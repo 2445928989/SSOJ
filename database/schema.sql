@@ -33,6 +33,8 @@ CREATE TABLE problem(
     author_id BIGINT,
     number_of_submissions INT DEFAULT 0,
     number_of_accepted INT DEFAULT 0,
+    likes INT DEFAULT 0,
+    dislikes INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (author_id) REFERENCES user(id) ON DELETE
@@ -112,13 +114,29 @@ CREATE TABLE announcement (
 );
 CREATE TABLE discussion (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    problem_id BIGINT NOT NULL,
+    problem_id BIGINT COMMENT '关联题目ID，为NULL表示全局讨论',
     user_id BIGINT NOT NULL,
+    parent_id BIGINT DEFAULT NULL COMMENT '父讨论ID，用于回复',
+    title VARCHAR(200),
     content TEXT NOT NULL,
+    likes INT DEFAULT 0,
+    dislikes INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (problem_id) REFERENCES problem(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_id) REFERENCES discussion(id) ON DELETE CASCADE,
     INDEX idx_problem_id (problem_id),
-    INDEX idx_created_at (created_at)
+    INDEX idx_user_id (user_id),
+    INDEX idx_parent_id (parent_id)
+);
+CREATE TABLE vote (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    type VARCHAR(20) NOT NULL COMMENT 'PROBLEM or DISCUSSION',
+    target_id BIGINT NOT NULL,
+    vote_type TINYINT NOT NULL COMMENT '1 for up, -1 for down',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_user_target (user_id, type, target_id),
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );

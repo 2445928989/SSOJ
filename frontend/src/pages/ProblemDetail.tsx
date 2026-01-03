@@ -5,6 +5,7 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
 import api from '../api'
+import { ThumbsUp, ThumbsDown, MessageSquare, Send, User as UserIcon } from 'lucide-react'
 
 export default function ProblemDetail() {
     const { id } = useParams()
@@ -16,6 +17,8 @@ export default function ProblemDetail() {
     const [discussions, setDiscussions] = useState<any[]>([])
     const [newDiscussion, setNewDiscussion] = useState('')
     const [submittingDiscussion, setSubmittingDiscussion] = useState(false)
+    const [voteStatus, setVoteStatus] = useState<number>(0) // 0: none, 1: like, -1: dislike
+    const [replyTo, setReplyTo] = useState<any>(null)
 
     // 格式化内存大小显示（超过1MB用MB单位）
     const formatMemory = (kb: number) => {
@@ -26,12 +29,41 @@ export default function ProblemDetail() {
     }
 
     const handleCopy = (text: string, key: string) => {
-        navigator.clipboard.writeText(text).then(() => {
-            setCopyStatus({ ...copyStatus, [key]: true })
+        if (!text) return;
+
+        const doCopy = () => {
+            setCopyStatus(prev => ({ ...prev, [key]: true }));
             setTimeout(() => {
-                setCopyStatus(prev => ({ ...prev, [key]: false }))
-            }, 2000)
-        })
+                setCopyStatus(prev => ({ ...prev, [key]: false }));
+            }, 2000);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(doCopy).catch(() => {
+                // Fallback to traditional method if clipboard API fails
+                fallbackCopy(text, doCopy);
+            });
+        } else {
+            fallbackCopy(text, doCopy);
+        }
+    }
+
+    const fallbackCopy = (text: string, callback: () => void) => {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) callback();
+        } catch (err) {
+            console.error('Fallback copy failed', err);
+        }
+        document.body.removeChild(textArea);
     }
 
     useEffect(() => {
@@ -45,6 +77,7 @@ export default function ProblemDetail() {
             .finally(() => setLoading(false))
 
         fetchDiscussions()
+        fetchVoteStatus()
     }, [id])
 
     const fetchDiscussions = () => {
@@ -54,16 +87,42 @@ export default function ProblemDetail() {
             .catch(() => { })
     }
 
+    const fetchVoteStatus = () => {
+        if (!id) return
+        api.get(`/api/votes/status?type=PROBLEM&targetId=${id}`)
+            .then(res => setVoteStatus(res.data.data))
+            .catch(() => { })
+    }
+
+    const handleVote = async (voteType: number) => {
+        try {
+            const res = await api.post('/api/votes', {
+                type: 'PROBLEM',
+                targetId: id,
+                voteType: voteType
+            })
+            if (res.data.success) {
+                fetchVoteStatus()
+                // 重新获取题目信息以更新点赞数
+                api.get(`/api/problem/${id}`).then(res => setProblem(res.data))
+            }
+        } catch (e: any) {
+            alert('操作失败，请先登录')
+        }
+    }
+
     const handleAddDiscussion = async () => {
         if (!newDiscussion.trim()) return
         setSubmittingDiscussion(true)
         try {
             const res = await api.post('/api/discussion/add', {
                 problemId: id,
+                parentId: replyTo?.id || null,
                 content: newDiscussion
             })
             if (res.data.success) {
                 setNewDiscussion('')
+                setReplyTo(null)
                 fetchDiscussions()
             } else {
                 alert(res.data.message || '发布失败')
@@ -103,6 +162,25 @@ export default function ProblemDetail() {
                             problem.difficulty === 'MEDIUM' ? '中等' :
                                 problem.difficulty === 'HARD' ? '困难' : problem.difficulty}
                     </span>
+
+                    <div className="vote-buttons">
+                        <button
+                            className={`vote-btn like ${voteStatus === 1 ? 'active' : ''}`}
+                            onClick={() => handleVote(1)}
+                            title="点赞"
+                        >
+                            <ThumbsUp size={16} />
+                            <span>{problem.likes || 0}</span>
+                        </button>
+                        <button
+                            className={`vote-btn dislike ${voteStatus === -1 ? 'active' : ''}`}
+                            onClick={() => handleVote(-1)}
+                            title="点踩"
+                        >
+                            <ThumbsDown size={16} />
+                            <span>{problem.dislikes || 0}</span>
+                        </button>
+                    </div>
 
                     {problem.categories && problem.categories.length > 0 && (
                         <button
@@ -229,8 +307,14 @@ export default function ProblemDetail() {
                 <section className="content-section discussion-section">
                     <h2>讨论区</h2>
                     <div className="discussion-input">
+                        {replyTo && (
+                            <div className="reply-indicator">
+                                <span>回复 @{replyTo.nickname || replyTo.username}</span>
+                                <button onClick={() => setReplyTo(null)}>取消</button>
+                            </div>
+                        )}
                         <textarea
-                            placeholder="发表你的看法..."
+                            placeholder={replyTo ? "写下你的回复..." : "发表你的看法..."}
                             value={newDiscussion}
                             onChange={(e) => setNewDiscussion(e.target.value)}
                         />
@@ -238,7 +322,7 @@ export default function ProblemDetail() {
                             onClick={handleAddDiscussion}
                             disabled={submittingDiscussion}
                         >
-                            {submittingDiscussion ? '发布中...' : '发布评论'}
+                            {submittingDiscussion ? '发布中...' : (replyTo ? '回复' : '发布评论')}
                         </button>
                     </div>
 
@@ -247,28 +331,12 @@ export default function ProblemDetail() {
                             <p className="placeholder">暂无讨论，快来抢沙发吧！</p>
                         ) : (
                             discussions.map((d) => (
-                                <div key={d.id} className="discussion-item">
-                                    <div className="discussion-avatar">
-                                        {d.avatar ? (
-                                            <img src={d.avatar} alt="" />
-                                        ) : (
-                                            <div className="default-avatar">
-                                                {(d.nickname || d.username || '?').charAt(0).toUpperCase()}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="discussion-body">
-                                        <div className="discussion-meta">
-                                            <span className="discussion-author">{d.nickname || d.username}</span>
-                                            <span className="discussion-time">
-                                                {new Date(d.createdAt).toLocaleString()}
-                                            </span>
-                                        </div>
-                                        <div className="discussion-content">
-                                            {d.content}
-                                        </div>
-                                    </div>
-                                </div>
+                                <DiscussionItem
+                                    key={d.id}
+                                    d={d}
+                                    onReply={setReplyTo}
+                                    onVote={() => fetchDiscussions()}
+                                />
                             ))
                         )}
                     </div>
@@ -276,6 +344,93 @@ export default function ProblemDetail() {
             </div>
 
             <style>{`
+                .vote-buttons {
+                    display: flex;
+                    gap: 8px;
+                    margin-left: 10px;
+                }
+
+                .vote-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    padding: 4px 10px;
+                    border-radius: 20px;
+                    border: 1px solid #e2e8f0;
+                    background: white;
+                    color: #64748b;
+                    font-size: 13px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .vote-btn:hover {
+                    background: #f8fafc;
+                    border-color: #cbd5e1;
+                }
+
+                .vote-btn.active.like {
+                    background: #f0fdf4;
+                    border-color: #22c55e;
+                    color: #16a34a;
+                }
+
+                .vote-btn.active.dislike {
+                    background: #fef2f2;
+                    border-color: #ef4444;
+                    color: #dc2626;
+                }
+
+                .reply-indicator {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    background: #f8fafc;
+                    padding: 8px 12px;
+                    border-radius: 6px;
+                    font-size: 13px;
+                    color: #64748b;
+                    border-left: 4px solid #667eea;
+                }
+
+                .reply-indicator button {
+                    background: none !important;
+                    color: #ef4444 !important;
+                    padding: 0 !important;
+                    font-size: 12px !important;
+                }
+
+                .discussion-replies {
+                    margin-left: 55px;
+                    border-left: 2px solid #f1f5f9;
+                    padding-left: 15px;
+                }
+
+                .discussion-actions {
+                    display: flex;
+                    gap: 15px;
+                    margin-top: 10px;
+                }
+
+                .action-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    background: none;
+                    border: none;
+                    color: #94a3b8;
+                    font-size: 12px;
+                    cursor: pointer;
+                    padding: 0;
+                    transition: color 0.2s;
+                }
+
+                .action-btn:hover {
+                    color: #667eea;
+                }
+
+                .action-btn.active.like { color: #22c55e; }
+                .action-btn.active.dislike { color: #ef4444; }
                 .problem-wrapper {
                     background: white;
                     min-height: calc(100vh - 76px);
@@ -485,10 +640,9 @@ export default function ProblemDetail() {
                     text-transform: uppercase;
                 }
 
-                .copy-btn:hover {
-                    background: #e2e8f0;
-                    color: #475569;
-                    border-color: #cbd5e1;
+                .copy-btn:active {
+                    transform: translateY(1px);
+                    background: #cbd5e1;
                 }
 
                 .sample-box {
@@ -740,4 +894,93 @@ export default function ProblemDetail() {
             `}</style>
         </div>
     )
+}
+
+function DiscussionItem({ d, onReply, onVote, isReply = false }: { d: any, onReply: any, onVote: any, isReply?: boolean }) {
+    const [voteStatus, setVoteStatus] = useState(0);
+
+    useEffect(() => {
+        api.get(`/api/votes/status?type=DISCUSSION&targetId=${d.id}`)
+            .then(res => setVoteStatus(res.data.data))
+            .catch(() => { });
+    }, [d.id]);
+
+    const handleVote = async (voteType: number) => {
+        try {
+            const res = await api.post('/api/votes', {
+                type: 'DISCUSSION',
+                targetId: d.id,
+                voteType: voteType
+            });
+            if (res.data.success) {
+                onVote();
+                api.get(`/api/votes/status?type=DISCUSSION&targetId=${d.id}`)
+                    .then(res => setVoteStatus(res.data.data));
+            }
+        } catch (e) {
+            alert('操作失败，请先登录');
+        }
+    };
+
+    return (
+        <div className={`discussion-item-container ${isReply ? 'is-reply' : ''}`}>
+            <div className="discussion-item">
+                <Link to={`/profile/${d.userId}`} className="discussion-avatar">
+                    {d.avatar ? (
+                        <img src={d.avatar} alt="" />
+                    ) : (
+                        <div className="default-avatar">
+                            {(d.nickname || d.username || '?').charAt(0).toUpperCase()}
+                        </div>
+                    )}
+                </Link>
+                <div className="discussion-body">
+                    <div className="discussion-meta">
+                        <Link to={`/profile/${d.userId}`} className="discussion-author">
+                            {d.nickname || d.username}
+                        </Link>
+                        <span className="discussion-time">
+                            {new Date(d.createdAt).toLocaleString()}
+                        </span>
+                    </div>
+                    <div className="discussion-content">
+                        {d.content}
+                    </div>
+                    <div className="discussion-actions">
+                        <button
+                            className={`action-btn like ${voteStatus === 1 ? 'active' : ''}`}
+                            onClick={() => handleVote(1)}
+                        >
+                            <ThumbsUp size={14} />
+                            <span>{d.likes || 0}</span>
+                        </button>
+                        <button
+                            className={`action-btn dislike ${voteStatus === -1 ? 'active' : ''}`}
+                            onClick={() => handleVote(-1)}
+                        >
+                            <ThumbsDown size={14} />
+                            <span>{d.dislikes || 0}</span>
+                        </button>
+                        <button className="action-btn" onClick={() => onReply(d)}>
+                            <MessageSquare size={14} />
+                            <span>回复</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {d.replies && d.replies.length > 0 && (
+                <div className="discussion-replies">
+                    {d.replies.map((reply: any) => (
+                        <DiscussionItem
+                            key={reply.id}
+                            d={reply}
+                            onReply={onReply}
+                            onVote={onVote}
+                            isReply={true}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
 }

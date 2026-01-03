@@ -23,6 +23,8 @@ public class Problem {
     private Long authorId;
     private Integer numberOfSubmissions;
     private Integer numberOfAccepted;
+    private Integer likes;
+    private Integer dislikes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<String> categories; // 题目的标签列表

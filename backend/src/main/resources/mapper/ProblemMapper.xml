@@ -18,6 +18,8 @@
         <result property="authorId" column="author_id" />
         <result property="numberOfSubmissions" column="number_of_submissions" />
         <result property="numberOfAccepted" column="number_of_accepted" />
+        <result property="likes" column="likes" />
+        <result property="dislikes" column="dislikes" />
         <result property="createdAt" column="created_at" />
         <result property="updatedAt" column="updated_at" />
     </resultMap>
@@ -71,6 +73,12 @@
     <!-- 增加题目的通过数 -->
     <update id="incrementAcceptedCount"> UPDATE problem SET number_of_accepted = number_of_accepted
         + 1 WHERE id = #{problemId} </update>
+
+    <!-- 更新点赞数 -->
+    <update id="updateLikes"> UPDATE problem SET likes = likes + #{delta} WHERE id = #{id} </update>
+
+    <!-- 更新点踩数 -->
+    <update id="updateDislikes"> UPDATE problem SET dislikes = dislikes + #{delta} WHERE id = #{id} </update>
 
     <!-- 根据标签查询题目 -->
     <select id="findByTag" resultMap="ProblemResultMap"> SELECT p.* FROM problem p JOIN problem_tag

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssoj.backend.dao.VoteMapper">
+
+    <resultMap id="VoteResultMap" type="com.ssoj.backend.entity.Vote">
+        <id property="id" column="id" />
+        <result property="userId" column="user_id" />
+        <result property="type" column="type" />
+        <result property="targetId" column="target_id" />
+        <result property="voteType" column="vote_type" />
+        <result property="createdAt" column="created_at" />
+    </resultMap>
+
+    <select id="findByUserAndTarget" resultMap="VoteResultMap"> SELECT * FROM vote WHERE user_id =
+        #{userId} AND type = #{type} AND target_id = #{targetId} </select>
+
+    <insert id="insert" parameterType="com.ssoj.backend.entity.Vote"> INSERT INTO vote (user_id,
+        type, target_id, vote_type, created_at) VALUES (#{userId}, #{type}, #{targetId},
+        #{voteType}, NOW()) </insert>
+
+    <update id="update" parameterType="com.ssoj.backend.entity.Vote"> UPDATE vote SET vote_type =
+        #{voteType} WHERE id = #{id} </update>
+
+    <delete id="delete"> DELETE FROM vote WHERE user_id = #{userId} AND type = #{type} AND target_id
+        = #{targetId} </delete>
+
+</mapper>

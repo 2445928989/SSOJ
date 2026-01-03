@@ -54,6 +54,16 @@ export default function OtherUserProfile() {
                         padding: '30px'
                     }}
                 >
+                    <div style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: '80px',
+                        background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.2))',
+                        backdropFilter: 'blur(2px)',
+                        pointerEvents: 'none'
+                    }}></div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                         {user.avatar ? (
                             <img src={user.avatar} alt="avatar" style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '4px solid white', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }} />
