@@ -99,12 +99,29 @@ public class SubmissionController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
         List<Submission> submissions = submissionService.getRecentSubmissions(page, size);
-        int total = submissionService.getRecentSubmissionCount();
+        int total = submissionService.getTotalSubmissionCount();
         return Map.of(
                 "success", true,
                 "data", submissions,
                 "total", total,
                 "page", page,
                 "size", size);
+    }
+
+    /**
+     * GET /api/submission/latest?problemId=1
+     * 获取用户在某题目的最后一次提交
+     */
+    @GetMapping("/latest")
+    public Object getLatestSubmission(
+            @RequestParam Long problemId,
+            jakarta.servlet.http.HttpServletRequest httpRequest) {
+        jakarta.servlet.http.HttpSession session = httpRequest.getSession(false);
+        if (session == null || session.getAttribute("userId") == null) {
+            return Map.of("success", false, "message", "未登录");
+        }
+        Long userId = (Long) session.getAttribute("userId");
+        Submission submission = submissionService.getLatestSubmission(userId, problemId);
+        return submission != null ? submission : Map.of();
     }
 }

@@ -139,9 +139,9 @@ export default function ProblemDetail() {
                         if (count === 0) return <p className="placeholder">暂无样例</p>;
 
                         return Array.from({ length: count }).map((_, i) => (
-                            <div key={i} className="samples-wrapper" style={{ marginBottom: '20px' }}>
+                            <div key={i} className="samples-wrapper">
                                 <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#4a5568' }}>样例 {i + 1}</div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                <div className="sample-grid">
                                     <div className="sample-group">
                                         <h3>输入</h3>
                                         <pre className="sample-box">{inputs[i] || ''}</pre>
@@ -326,6 +326,10 @@ export default function ProblemDetail() {
                 }
 
                 .samples-wrapper {
+                    margin-bottom: 20px;
+                }
+
+                .sample-grid {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
                     gap: 20px;
@@ -474,11 +478,11 @@ export default function ProblemDetail() {
                         gap: 10px;
                     }
 
-                    .submit-link {
+                    .submit-btn {
                         align-self: flex-end;
                     }
 
-                    .samples-wrapper {
+                    .sample-grid {
                         grid-template-columns: 1fr;
                     }
                 }

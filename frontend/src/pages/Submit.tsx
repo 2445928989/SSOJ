@@ -42,6 +42,24 @@ export default function SubmitPage() {
         }
     }, [id])
 
+    // 获取上次提交的代码
+    useEffect(() => {
+        if (id) {
+            api.get(`/api/submission/latest?problemId=${id}`)
+                .then(res => {
+                    if (res.data && res.data.code) {
+                        setCode(res.data.code)
+                        if (res.data.language) {
+                            setLanguage(res.data.language)
+                        }
+                    }
+                })
+                .catch(() => {
+                    // 忽略错误，可能是未登录或没有提交记录
+                })
+        }
+    }, [id])
+
     const handleEditorMount = (editor: any, monaco: Monaco) => {
         // 注册 C++ 补全提供器
         monaco.languages.registerCompletionItemProvider('cpp', {

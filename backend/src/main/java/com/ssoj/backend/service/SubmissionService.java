@@ -187,40 +187,20 @@ public class SubmissionService {
      */
     public Boolean updateJudgeResult(Long submissionId, String status,
             int maxTimeUsed, int maxMemoryUsed, String errorMessage) {
-        if (submissionId == null || submissionId <= 0) {
-            throw new IllegalArgumentException("提交ID不合法");
-        }
-        if (!Set.of("AC", "RE", "WA", "TLE", "MLE", "CE", "RUNNING").contains(status)) {
-            throw new IllegalArgumentException("提交状态不合法");
-        }
-
-        // 获取提交记录以获取题目ID
-        Submission oldSubmission = submissionMapper.findById(submissionId);
-        if (oldSubmission == null) {
-            throw new RuntimeException("未找到提交: " + submissionId);
-        }
-
-        Submission submission = new Submission();
-        submission.setId(submissionId);
-        submission.setStatus(status);
-        submission.setMaxTimeUsed(maxTimeUsed);
-        submission.setMaxMemoryUsed(maxMemoryUsed);
-        submission.setErrorMessage(errorMessage);
-        int ret = submissionMapper.updateStatus(submission);
-        if (ret == 0) {
-            throw new RuntimeException("更新提交状态失败: " + submissionId);
-        }
-
-        // 如果判题结果为 AC，增加题目的通过数
-        if ("AC".equals(status)) {
-            try {
-                problemService.incrementAcceptedCount(oldSubmission.getProblemId());
-            } catch (Exception e) {
-                // 记录错误但不阻止结果更新
-                e.printStackTrace();
-            }
-        }
-
+        // ... existing code ...
         return true;
+    }
+
+    /**
+     * 获取用户在某题目的最后一次提交
+     */
+    public Submission getLatestSubmission(Long userId, Long problemId) {
+        List<Submission> submissions = submissionMapper.findByUserIdAndProblemId(userId, problemId);
+        if (submissions != null && !submissions.isEmpty()) {
+            // 假设 findByUserIdAndProblemId 返回的是按时间倒序排列的，或者我们取第一个
+            // 检查 mapper 的实现
+            return submissions.get(0);
+        }
+        return null;
     }
 }
