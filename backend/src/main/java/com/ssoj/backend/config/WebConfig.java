@@ -26,6 +26,6 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(
             org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/api/user/avatar/**")
-                .addResourceLocations("file:" + uploadPath);
+                .addResourceLocations("file://" + uploadPath);
     }
 }
