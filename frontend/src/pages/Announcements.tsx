@@ -4,8 +4,50 @@ import { Link } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, ChevronDown, ChevronUp } from 'lucide-react'
 
+function FoldableContent({ content, limit = 300 }: { content: string, limit?: number }) {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const isLongContent = content.length > limit;
+    const displayContent = (isLongContent && !isExpanded) ? content.substring(0, limit) + '...' : content;
+
+    return (
+        <div>
+            <div className="markdown-body" style={{ whiteSpace: 'pre-wrap' }}>
+                <ReactMarkdown
+                    remarkPlugins={[remarkMath]}
+                    rehypePlugins={[rehypeKatex]}
+                >
+                    {displayContent}
+                </ReactMarkdown>
+            </div>
+            {isLongContent && (
+                <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        background: 'none',
+                        border: 'none',
+                        color: '#667eea',
+                        fontSize: '13px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        padding: '4px 0',
+                        marginTop: '4px'
+                    }}
+                >
+                    {isExpanded ? (
+                        <><ChevronUp size={14} /> 收起</>
+                    ) : (
+                        <><ChevronDown size={14} /> 展开全文</>
+                    )}
+                </button>
+            )}
+        </div>
+    );
+}
 
 export default function Announcements() {
     const [announcements, setAnnouncements] = useState<any[]>([])
@@ -62,12 +104,7 @@ export default function Announcements() {
                             wordBreak: 'break-all',
                             overflowWrap: 'break-word'
                         }}>
-                            <ReactMarkdown
-                                remarkPlugins={[remarkMath]}
-                                rehypePlugins={[rehypeKatex]}
-                            >
-                                {ann.content}
-                            </ReactMarkdown>
+                            <FoldableContent content={ann.content} />
                         </div>
                         <div style={{ marginTop: '15px', fontSize: '0.85rem', color: '#a0aec0', textAlign: 'right' }}>
                             发布者: {ann.authorName || '管理员'}

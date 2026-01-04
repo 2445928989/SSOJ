@@ -13,7 +13,7 @@ function MarkdownContent({ content }: { content: string }) {
     const processedContent = content.replace(/@(\w+)/g, '[@$1](/user/profile?username=$1)');
 
     return (
-        <div className="markdown-body">
+        <div className="markdown-body" style={{ whiteSpace: 'pre-wrap' }}>
             <ReactMarkdown
                 remarkPlugins={[remarkMath]}
                 rehypePlugins={[rehypeKatex]}
@@ -33,6 +33,42 @@ function MarkdownContent({ content }: { content: string }) {
     );
 }
 
+function FoldableContent({ content, limit = 300 }: { content: string, limit?: number }) {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const isLongContent = content.length > limit;
+    const displayContent = (isLongContent && !isExpanded) ? content.substring(0, limit) + '...' : content;
+
+    return (
+        <div>
+            <MarkdownContent content={displayContent} />
+            {isLongContent && (
+                <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        background: 'none',
+                        border: 'none',
+                        color: '#667eea',
+                        fontSize: '13px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        padding: '4px 0',
+                        marginTop: '4px'
+                    }}
+                >
+                    {isExpanded ? (
+                        <><ChevronUp size={14} /> 收起</>
+                    ) : (
+                        <><ChevronDown size={14} /> 展开全文</>
+                    )}
+                </button>
+            )}
+        </div>
+    );
+}
+
 function DiscussionListItem({ d, onVote, onReplySuccess, currentUser }: { d: any, onVote: () => void, onReplySuccess: () => void, currentUser: any }) {
     const [voteStatus, setVoteStatus] = useState(0);
     const [showReplyInput, setShowReplyInput] = useState(false);
@@ -42,9 +78,6 @@ function DiscussionListItem({ d, onVote, onReplySuccess, currentUser }: { d: any
     const [replies, setReplies] = useState<any[]>([]);
     const [loadingReplies, setLoadingReplies] = useState(false);
     const [replyTo, setReplyTo] = useState<{ id: number, username: string } | null>(null);
-    const [isExpanded, setIsExpanded] = useState(false);
-    const CONTENT_LIMIT = 300;
-    const isLongContent = d.content.length > CONTENT_LIMIT;
 
     useEffect(() => {
         api.get(`/api/votes/status?type=DISCUSSION&targetId=${d.id}`)
@@ -191,33 +224,7 @@ function DiscussionListItem({ d, onVote, onReplySuccess, currentUser }: { d: any
                         )}
                     </div>
                     <div style={{ color: '#4a5568', fontSize: '15px', lineHeight: '1.6', marginBottom: '12px' }}>
-                        <div className={`content-wrapper ${isLongContent && !isExpanded ? 'collapsed' : ''}`}>
-                            <MarkdownContent content={isLongContent && !isExpanded ? d.content.slice(0, CONTENT_LIMIT) + '...' : d.content} />
-                        </div>
-                        {isLongContent && (
-                            <button
-                                onClick={() => setIsExpanded(!isExpanded)}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '4px',
-                                    background: 'none',
-                                    border: 'none',
-                                    color: '#667eea',
-                                    fontSize: '13px',
-                                    fontWeight: '500',
-                                    cursor: 'pointer',
-                                    padding: '4px 0',
-                                    marginTop: '4px'
-                                }}
-                            >
-                                {isExpanded ? (
-                                    <><ChevronUp size={14} /> 收起</>
-                                ) : (
-                                    <><ChevronDown size={14} /> 展开全文</>
-                                )}
-                            </button>
-                        )}
+                        <FoldableContent content={d.content} />
                     </div>
                     <div style={{ display: 'flex', gap: '20px', color: '#94a3b8', fontSize: '13px' }}>
                         <button
@@ -457,7 +464,7 @@ function DiscussionListItem({ d, onVote, onReplySuccess, currentUser }: { d: any
                                                         回复 <Link to={`/user/${reply.replyToUserId}`} style={{ color: '#667eea', textDecoration: 'none' }}>@{reply.replyToUsername}</Link> :
                                                     </span>
                                                 )}
-                                                <MarkdownContent content={reply.content} />
+                                                <FoldableContent content={reply.content} limit={150} />
                                             </div>
                                         </div>
                                     </div>
