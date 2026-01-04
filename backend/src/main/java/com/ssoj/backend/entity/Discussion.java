@@ -23,6 +23,10 @@ public class Discussion {
     private String avatar;
     private String problemTitle;
 
+    // 回复对象信息
+    private Long replyToUserId;
+    private String replyToUsername;
+
     // 子回复列表
     private Integer repliesCount;
     private List<Discussion> replies;

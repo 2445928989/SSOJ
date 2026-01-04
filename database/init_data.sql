@@ -147,3 +147,47 @@ VALUES (
         '欢迎使用 **SSOJ**(Simple School Online Judge) 在线判题系统！本系统支持多种编程语言，提供丰富的题目练习。',
         1
     );
+
+-- 7. 插入初始讨论
+INSERT INTO discussion (id, problem_id, user_id, parent_id, title, content, likes)
+VALUES (
+        1,
+        NULL,
+        1,
+        NULL,
+        '关于系统使用的建议',
+        '大家在使用过程中如果遇到 Bug 或者有功能建议，欢迎在这里留言！\n\n目前支持：\n- Markdown 语法\n- 代码高亮\n- 数学公式 $E=mc^2$',
+        5
+    ),
+    (
+        2,
+        1,
+        1,
+        NULL,
+        'A+B 问题太简单了？',
+        '虽然是入门题，但也要注意数据范围哦。',
+        2
+    ),
+    (
+        3,
+        1,
+        1,
+        2,
+        NULL,
+        '确实，新手容易忽略整数溢出。',
+        1
+    ),
+    (
+        4,
+        1,
+        1,
+        3,
+        NULL,
+        '@admin 没错，不过这题 $10^9$ 还在 `int` 范围内。',
+        0
+    );
+
+-- 8. 插入初始投票
+INSERT INTO vote (user_id, type, target_id, vote_type)
+VALUES (1, 'DISCUSSION', 1, 1),
+    (1, 'DISCUSSION', 2, 1);

@@ -13,6 +13,8 @@ public interface DiscussionMapper {
 
     Discussion findById(@Param("id") Long id);
 
+    List<Discussion> findDescendants(@Param("id") Long id);
+
     List<Discussion> findAllPaged(@Param("offset") int offset, @Param("limit") int limit,
             @Param("keyword") String keyword);
 

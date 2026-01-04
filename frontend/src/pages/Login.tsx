@@ -55,7 +55,7 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
                 maxWidth: '400px'
             }}>
                 <h2 style={{ textAlign: 'center', marginBottom: '30px', color: '#333' }}>登录</h2>
-                {error && <div className="error" style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#ffebee', color: '#c62828', borderRadius: '4px' }}>{error}</div>}
+                {error && <div className="error">{error}</div>}
                 <input
                     name="username"
                     value={username}

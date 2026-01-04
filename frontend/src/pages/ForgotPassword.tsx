@@ -100,8 +100,8 @@ export default function ForgotPassword() {
                 maxWidth: '400px'
             }}>
                 <h2 style={{ textAlign: 'center', marginBottom: '30px', color: '#333' }}>找回密码</h2>
-                {error && <div className="error" style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#ffebee', color: '#c62828', borderRadius: '4px' }}>{error}</div>}
-                {message && <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#e8f5e9', color: '#2e7d32', borderRadius: '4px' }}>{message}</div>}
+                {error && <div className="error">{error}</div>}
+                {message && <div className="success-msg">{message}</div>}
 
                 <input
                     name="email"

@@ -186,7 +186,7 @@ export default function SubmitPage() {
                     )}
                 </div>
 
-                {error && <div className="error-msg">{error}</div>}
+                {error && <div className="error">{error}</div>}
 
                 <form className="submit-form" onSubmit={submit}>
                     <div className="form-group">

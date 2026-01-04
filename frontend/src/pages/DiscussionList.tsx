@@ -1,7 +1,37 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import api from '../api'
-import { ThumbsUp, ThumbsDown, MessageSquare, User as UserIcon } from 'lucide-react'
+import { ThumbsUp, ThumbsDown, MessageSquare, User as UserIcon, Send } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import 'katex/dist/katex.min.css'
+
+function MarkdownContent({ content }: { content: string }) {
+    // 处理 @username 格式，将其转换为链接
+    // 链接到 /user/profile?username=xxx，由 UserProfile 页面处理
+    const processedContent = content.replace(/@(\w+)/g, '[@$1](/user/profile?username=$1)');
+
+    return (
+        <div className="markdown-body">
+            <ReactMarkdown
+                remarkPlugins={[remarkMath]}
+                rehypePlugins={[rehypeKatex]}
+                components={{
+                    a: ({ node, ...props }) => {
+                        const href = props.href || '#';
+                        if (href.startsWith('/')) {
+                            return <Link to={href} style={{ color: '#667eea', fontWeight: '500', textDecoration: 'none' }}>{props.children}</Link>;
+                        }
+                        return <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: '#667eea', fontWeight: '500' }}>{props.children}</a>;
+                    }
+                }}
+            >
+                {processedContent}
+            </ReactMarkdown>
+        </div>
+    );
+}
 
 function DiscussionListItem({ d, onVote, onReplySuccess }: { d: any, onVote: () => void, onReplySuccess: () => void }) {
     const [voteStatus, setVoteStatus] = useState(0);
@@ -11,6 +41,7 @@ function DiscussionListItem({ d, onVote, onReplySuccess }: { d: any, onVote: () 
     const [showReplies, setShowReplies] = useState(false);
     const [replies, setReplies] = useState<any[]>([]);
     const [loadingReplies, setLoadingReplies] = useState(false);
+    const [replyTo, setReplyTo] = useState<{ id: number, username: string } | null>(null);
 
     useEffect(() => {
         api.get(`/api/votes/status?type=DISCUSSION&targetId=${d.id}`)
@@ -60,12 +91,13 @@ function DiscussionListItem({ d, onVote, onReplySuccess }: { d: any, onVote: () 
         try {
             const res = await api.post('/api/discussion/add', {
                 problemId: d.problemId,
-                parentId: d.id,
+                parentId: replyTo ? replyTo.id : d.id,
                 content: replyContent
             });
             if (res.data.success) {
                 setReplyContent('');
                 setShowReplyInput(false);
+                setReplyTo(null);
                 onReplySuccess();
                 // 如果回复列表已展开，刷新回复列表
                 if (showReplies) {
@@ -82,6 +114,12 @@ function DiscussionListItem({ d, onVote, onReplySuccess }: { d: any, onVote: () 
         } finally {
             setSubmitting(false);
         }
+    };
+
+    const startReply = (targetId: number, targetUsername: string) => {
+        setReplyTo({ id: targetId, username: targetUsername });
+        setShowReplyInput(true);
+        setReplyContent('');
     };
 
     return (
@@ -131,8 +169,8 @@ function DiscussionListItem({ d, onVote, onReplySuccess }: { d: any, onVote: () 
                             </Link>
                         )}
                     </div>
-                    <div style={{ color: '#4a5568', fontSize: '15px', lineHeight: '1.6', whiteSpace: 'pre-wrap', marginBottom: '12px' }}>
-                        {d.content}
+                    <div style={{ color: '#4a5568', fontSize: '15px', lineHeight: '1.6', marginBottom: '12px' }}>
+                        <MarkdownContent content={d.content} />
                     </div>
                     <div style={{ display: 'flex', gap: '20px', color: '#94a3b8', fontSize: '13px' }}>
                         <button
@@ -186,7 +224,14 @@ function DiscussionListItem({ d, onVote, onReplySuccess }: { d: any, onVote: () 
                             <span>{d.repliesCount || 0} 回复</span>
                         </button>
                         <button
-                            onClick={() => setShowReplyInput(!showReplyInput)}
+                            onClick={() => {
+                                if (showReplyInput && !replyTo) {
+                                    setShowReplyInput(false);
+                                } else {
+                                    setReplyTo(null);
+                                    setShowReplyInput(true);
+                                }
+                            }}
                             style={{
                                 background: 'none',
                                 border: 'none',
@@ -197,7 +242,7 @@ function DiscussionListItem({ d, onVote, onReplySuccess }: { d: any, onVote: () 
                                 fontWeight: '500'
                             }}
                         >
-                            {showReplyInput ? '取消回复' : '回复'}
+                            {(showReplyInput && !replyTo) ? '取消回复' : '回复'}
                         </button>
                     </div>
 
@@ -206,7 +251,7 @@ function DiscussionListItem({ d, onVote, onReplySuccess }: { d: any, onVote: () 
                             <textarea
                                 value={replyContent}
                                 onChange={(e) => setReplyContent(e.target.value)}
-                                placeholder="写下你的回复..."
+                                placeholder={replyTo ? `回复 @${replyTo.username}...` : "写下你的回复..."}
                                 style={{
                                     width: '100%',
                                     minHeight: '80px',
@@ -218,23 +263,43 @@ function DiscussionListItem({ d, onVote, onReplySuccess }: { d: any, onVote: () 
                                     resize: 'vertical'
                                 }}
                             />
-                            <button
-                                onClick={handleReply}
-                                disabled={submitting || !replyContent.trim()}
-                                style={{
-                                    alignSelf: 'flex-end',
-                                    padding: '6px 20px',
-                                    background: '#667eea',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    fontSize: '13px',
-                                    opacity: (submitting || !replyContent.trim()) ? 0.7 : 1
-                                }}
-                            >
-                                {submitting ? '提交中...' : '提交回复'}
-                            </button>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '12px', color: '#94a3b8' }}>支持 Markdown 语法</span>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    {replyTo && (
+                                        <button
+                                            onClick={() => { setShowReplyInput(false); setReplyTo(null); }}
+                                            style={{
+                                                padding: '6px 15px',
+                                                background: '#f1f5f9',
+                                                color: '#475569',
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                fontSize: '13px'
+                                            }}
+                                        >
+                                            取消
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={handleReply}
+                                        disabled={submitting || !replyContent.trim()}
+                                        style={{
+                                            padding: '6px 20px',
+                                            background: '#667eea',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            fontSize: '13px',
+                                            opacity: (submitting || !replyContent.trim()) ? 0.7 : 1
+                                        }}
+                                    >
+                                        {submitting ? '提交中...' : '提交回复'}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     )}
 
@@ -274,14 +339,34 @@ function DiscussionListItem({ d, onVote, onReplySuccess }: { d: any, onVote: () 
                                             )}
                                         </Link>
                                         <div style={{ flex: 1 }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                                                <Link to={`/user/${reply.userId}`} style={{ fontWeight: '600', color: '#2d3748', textDecoration: 'none', fontSize: '13px' }}>
-                                                    {reply.nickname || reply.username}
-                                                </Link>
-                                                <span style={{ color: '#a0aec0', fontSize: '11px' }}>{new Date(reply.createdAt).toLocaleString()}</span>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <Link to={`/user/${reply.userId}`} style={{ fontWeight: '600', color: '#2d3748', textDecoration: 'none', fontSize: '13px' }}>
+                                                        {reply.nickname || reply.username}
+                                                    </Link>
+                                                    <span style={{ color: '#a0aec0', fontSize: '11px' }}>{new Date(reply.createdAt).toLocaleString()}</span>
+                                                </div>
+                                                <button
+                                                    onClick={() => startReply(reply.id, reply.nickname || reply.username)}
+                                                    style={{
+                                                        background: 'none',
+                                                        border: 'none',
+                                                        color: '#667eea',
+                                                        fontSize: '12px',
+                                                        cursor: 'pointer',
+                                                        padding: '2px 5px'
+                                                    }}
+                                                >
+                                                    回复
+                                                </button>
                                             </div>
                                             <div style={{ color: '#4a5568', fontSize: '14px', lineHeight: '1.5' }}>
-                                                {reply.content}
+                                                {reply.replyToUsername && reply.parentId !== d.id && (
+                                                    <span style={{ color: '#667eea', marginRight: '8px', fontWeight: '500' }}>
+                                                        回复 <Link to={`/user/${reply.replyToUserId}`} style={{ color: '#667eea', textDecoration: 'none' }}>@{reply.replyToUsername}</Link> :
+                                                    </span>
+                                                )}
+                                                <MarkdownContent content={reply.content} />
                                             </div>
                                         </div>
                                     </div>
@@ -438,7 +523,7 @@ export default function DiscussionList() {
                 </div>
             )}
 
-            {error && <div className="error-msg">{error}</div>}
+            {error && <div className="error" style={{ marginBottom: '20px' }}>{error}</div>}
 
             <div className="discussion-list-card">
                 {discussions.length === 0 ? (

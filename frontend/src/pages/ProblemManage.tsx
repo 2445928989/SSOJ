@@ -234,7 +234,7 @@ export default function ProblemManage() {
                 </div>
             </div>
 
-            {error && <div className="error-message" style={{ marginBottom: '20px' }}>{error}</div>}
+            {error && <div className="error" style={{ marginBottom: '20px' }}>{error}</div>}
 
             {showForm && (
                 <div className="card" style={{ marginBottom: '40px', padding: '30px' }}>

@@ -330,6 +330,22 @@ public class UserController {
     }
 
     /**
+     * GET /api/user/by-username/{username}
+     * 根据用户名获取用户信息
+     */
+    @GetMapping("/by-username/{username}")
+    public User getUserByUsername(@PathVariable String username) {
+        User user = userService.getUserByUsername(username);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        user.setPassword(null);
+        user.setEmail(null);
+        user.setPhone(null);
+        return user;
+    }
+
+    /**
      * GET /api/user/{userId}/submission-heatmap
      * 获取指定用户的做题热力图数据（公开，无需登录）
      * 返回 {yyyy-MM-dd: count, ...}

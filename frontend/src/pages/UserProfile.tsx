@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
+import { AlertCircle } from 'lucide-react'
 
 export default function UserProfile() {
     const [user, setUser] = useState<any>(null)
@@ -163,12 +164,26 @@ export default function UserProfile() {
         }
     }
 
-    if (loading) return <div className="container loading-container">
-        <div className="loading-spinner"></div>
-        <div className="loading-text">正在加载个人资料...</div>
-    </div>
-    if (error && !user) return <div className="error-msg">{error}</div>
-    if (!user) return <div className="empty-state">未登录</div>
+    if (loading) return (
+        <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <div className="loading-text">正在加载个人资料...</div>
+        </div>
+    )
+
+    if (error && !user) return (
+        <div className="error-container">
+            <AlertCircle size={48} className="error-icon" style={{ color: 'var(--danger-color)', marginBottom: '16px' }} />
+            <div className="error-msg">{error}</div>
+        </div>
+    )
+
+    if (!user) return (
+        <div className="error-container">
+            <AlertCircle size={48} className="error-icon" style={{ color: 'var(--text-secondary)', marginBottom: '16px' }} />
+            <div className="error-msg" style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-color)', backgroundColor: '#f8f9fa' }}>未登录</div>
+        </div>
+    )
 
     return (
         <div className="profile-container">

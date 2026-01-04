@@ -127,6 +127,7 @@ export default function App() {
                     <Route path="/submissions" element={<Submissions />} />
                     <Route path="/submissions/:id" element={<SubmissionDetail />} />
                     <Route path="/user/:userId" element={<OtherUserProfile />} />
+                    <Route path="/user/profile" element={<OtherUserProfile />} />
                     <Route path="/profile" element={<UserProfile />} />
                     <Route path="/leaderboard" element={<Leaderboard />} />
                     <Route path="/discussions" element={<DiscussionList />} />

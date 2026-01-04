@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/atom-one-dark.css'
 import api from '../api'
+import { AlertCircle } from 'lucide-react'
 
 export default function SubmissionDetail() {
     const { id } = useParams()
@@ -72,12 +73,26 @@ export default function SubmissionDetail() {
         return () => clearInterval(interval)
     }, [id, isPolling])
 
-    if (loading) return <div className="container loading-container">
-        <div className="loading-spinner"></div>
-        <div className="loading-text">正在加载提交详情...</div>
-    </div>
-    if (error) return <div className="error">{error}</div>
-    if (!submission) return <div>Not found</div>
+    if (loading) return (
+        <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <div className="loading-text">正在加载提交详情...</div>
+        </div>
+    )
+
+    if (error) return (
+        <div className="error-container">
+            <AlertCircle size={48} className="error-icon" style={{ color: 'var(--danger-color)', marginBottom: '16px' }} />
+            <div className="error-msg">{error}</div>
+        </div>
+    )
+
+    if (!submission) return (
+        <div className="error-container">
+            <AlertCircle size={48} className="error-icon" style={{ color: 'var(--text-secondary)', marginBottom: '16px' }} />
+            <div className="error-msg" style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-color)', backgroundColor: '#f8f9fa' }}>提交记录不存在</div>
+        </div>
+    )
 
     return (
         <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>

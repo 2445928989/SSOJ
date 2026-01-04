@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import api from '../api'
 import { Link } from 'react-router-dom'
+import { AlertCircle } from 'lucide-react'
 
 export default function ProblemList() {
     const [problems, setProblems] = useState<any[]>([])
@@ -143,7 +144,12 @@ export default function ProblemList() {
 
     const totalPages = Math.ceil(total / size)
 
-    if (error) return <div className="container error">{error}</div>
+    if (error) return (
+        <div className="error-container">
+            <AlertCircle size={48} className="error-icon" style={{ color: 'var(--danger-color)', marginBottom: '16px' }} />
+            <div className="error-msg">{error}</div>
+        </div>
+    )
 
     return (
         <div className="problems-wrapper">

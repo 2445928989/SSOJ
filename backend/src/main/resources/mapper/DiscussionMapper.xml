@@ -16,29 +16,78 @@
         <result property="username" column="username" />
         <result property="nickname" column="nickname" />
         <result property="avatar" column="avatar" />
+        <result property="replyToUserId" column="reply_to_user_id" />
+        <result property="replyToUsername" column="reply_to_username" />
     </resultMap>
 
-    <select id="findByProblemId" resultMap="DiscussionResultMap"> SELECT d.*, u.username,
-        u.nickname, u.avatar FROM discussion d LEFT JOIN user u ON d.user_id = u.id WHERE
-        d.problem_id = #{problemId} ORDER BY d.created_at DESC </select>
+    <select id="findByProblemId" resultMap="DiscussionResultMap"> 
+        SELECT d.*, u.username, u.nickname, u.avatar, 
+               pu.id as reply_to_user_id, pu.username as reply_to_username
+        FROM discussion d 
+        LEFT JOIN user u ON d.user_id = u.id 
+        LEFT JOIN discussion p ON d.parent_id = p.id
+        LEFT JOIN user pu ON p.user_id = pu.id
+        WHERE d.problem_id = #{problemId} 
+        ORDER BY d.created_at DESC 
+    </select>
 
-    <select id="findByParentId" resultMap="DiscussionResultMap"> SELECT d.*, u.username, u.nickname,
-        u.avatar FROM discussion d LEFT JOIN user u ON d.user_id = u.id WHERE d.parent_id =
-        #{parentId} ORDER BY d.created_at ASC </select>
+    <select id="findByParentId" resultMap="DiscussionResultMap"> 
+        SELECT d.*, u.username, u.nickname, u.avatar,
+               pu.id as reply_to_user_id, pu.username as reply_to_username
+        FROM discussion d 
+        LEFT JOIN user u ON d.user_id = u.id 
+        LEFT JOIN discussion p ON d.parent_id = p.id
+        LEFT JOIN user pu ON p.user_id = pu.id
+        WHERE d.parent_id = #{parentId} 
+        ORDER BY d.created_at ASC 
+    </select>
 
-    <select id="findById" resultMap="DiscussionResultMap"> SELECT d.*, u.username, u.nickname,
-        u.avatar FROM discussion d LEFT JOIN user u ON d.user_id = u.id WHERE d.id = #{id} </select>
+    <select id="findById" resultMap="DiscussionResultMap"> 
+        SELECT d.*, u.username, u.nickname, u.avatar,
+               pu.id as reply_to_user_id, pu.username as reply_to_username
+        FROM discussion d 
+        LEFT JOIN user u ON d.user_id = u.id 
+        LEFT JOIN discussion p ON d.parent_id = p.id
+        LEFT JOIN user pu ON p.user_id = pu.id
+        WHERE d.id = #{id} 
+    </select>
 
-    <select id="findAllPaged" resultMap="DiscussionResultMap"> SELECT d.*, u.username, u.nickname,
-        u.avatar, p.title as problemTitle, (SELECT COUNT(*) FROM discussion r WHERE r.parent_id =
-        d.id) as repliesCount FROM discussion d LEFT JOIN user u ON d.user_id = u.id LEFT JOIN
-        problem p ON d.problem_id = p.id <where> d.parent_id IS NULL <if
-                test="keyword != null and keyword != ''"> AND (d.content LIKE CONCAT('%',
-        #{keyword}, '%') OR u.username LIKE CONCAT('%', #{keyword}, '%') OR u.nickname LIKE
-        CONCAT('%', #{keyword}, '%') OR p.title LIKE CONCAT('%', #{keyword}, '%') OR
-        CAST(d.problem_id AS CHAR) = #{keyword}) </if>
-        </where> ORDER BY d.updated_at DESC
-        LIMIT #{offset}, #{limit} </select>
+    <select id="findDescendants" resultMap="DiscussionResultMap">
+        WITH RECURSIVE descendants AS (
+            SELECT * FROM discussion WHERE id = #{id}
+            UNION ALL
+            SELECT d.* FROM discussion d
+            INNER JOIN descendants ON d.parent_id = descendants.id
+        )
+        SELECT d.*, u.username, u.nickname, u.avatar, 
+               pu.id as reply_to_user_id, pu.username as reply_to_username
+        FROM descendants d
+        LEFT JOIN user u ON d.user_id = u.id
+        LEFT JOIN discussion p ON d.parent_id = p.id
+        LEFT JOIN user pu ON p.user_id = pu.id
+        WHERE d.id != #{id}
+        ORDER BY d.created_at ASC
+    </select>
+
+    <select id="findAllPaged" resultMap="DiscussionResultMap"> 
+        SELECT d.*, u.username, u.nickname, u.avatar, p.title as problemTitle, 
+               (SELECT COUNT(*) FROM discussion r WHERE r.parent_id = d.id) as repliesCount 
+        FROM discussion d 
+        LEFT JOIN user u ON d.user_id = u.id 
+        LEFT JOIN problem p ON d.problem_id = p.id 
+        <where> 
+            d.parent_id IS NULL 
+            <if test="keyword != null and keyword != ''"> 
+                AND (d.content LIKE CONCAT('%', #{keyword}, '%') 
+                OR u.username LIKE CONCAT('%', #{keyword}, '%') 
+                OR u.nickname LIKE CONCAT('%', #{keyword}, '%') 
+                OR p.title LIKE CONCAT('%', #{keyword}, '%') 
+                OR CAST(d.problem_id AS CHAR) = #{keyword}) 
+            </if>
+        </where> 
+        ORDER BY d.updated_at DESC
+        LIMIT #{offset}, #{limit} 
+    </select>
 
     <select id="countAll" resultType="int"> SELECT COUNT(*) FROM discussion d LEFT JOIN user u ON
         d.user_id = u.id LEFT JOIN problem p ON d.problem_id = p.id <where>

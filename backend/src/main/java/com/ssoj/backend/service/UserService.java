@@ -130,6 +130,22 @@ public class UserService {
     }
 
     /**
+     * 根据用户名获取用户信息
+     */
+    public User getUserByUsername(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("用户名不能为空");
+        }
+        User user = userMapper.findByUsername(username);
+        if (user != null) {
+            // 添加做题统计信息
+            user.setSubmissions(submissionMapper.countByUserId(user.getId()));
+            user.setSolved(submissionMapper.countSolvedProblemsByUserId(user.getId()));
+        }
+        return user;
+    }
+
+    /**
      * 重置密码
      */
     public void resetPassword(String email, String newPassword) {

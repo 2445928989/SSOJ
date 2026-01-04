@@ -16,44 +16,59 @@ public class DiscussionService {
 
     public List<Discussion> getDiscussionsByProblemId(Long problemId) {
         List<Discussion> allDiscussions = discussionMapper.findByProblemId(problemId);
-        return buildTree(allDiscussions);
+        return buildTwoLevelTree(allDiscussions);
     }
 
     public List<Discussion> getAllDiscussions(int page, int size, String keyword) {
         int offset = (page - 1) * size;
-        List<Discussion> discussions = discussionMapper.findAllPaged(offset, size, keyword);
-        // 列表页通常只显示顶层讨论
-        return discussions.stream()
-                .filter(d -> d.getParentId() == null)
-                .toList();
+        return discussionMapper.findAllPaged(offset, size, keyword);
     }
 
     public Discussion getDiscussionById(Long id) {
         Discussion discussion = discussionMapper.findById(id);
         if (discussion != null) {
-            discussion.setReplies(discussionMapper.findByParentId(id));
+            discussion.setReplies(discussionMapper.findDescendants(id));
         }
         return discussion;
     }
 
-    private List<Discussion> buildTree(List<Discussion> discussions) {
+    private List<Discussion> buildTwoLevelTree(List<Discussion> discussions) {
         Map<Long, Discussion> map = discussions.stream()
                 .collect(Collectors.toMap(Discussion::getId, d -> d));
         List<Discussion> roots = new ArrayList<>();
+        
+        // 首先找出所有根节点
         for (Discussion d : discussions) {
             if (d.getParentId() == null) {
+                d.setReplies(new ArrayList<>());
                 roots.add(d);
-            } else {
-                Discussion parent = map.get(d.getParentId());
-                if (parent != null) {
-                    if (parent.getReplies() == null) {
-                        parent.setReplies(new ArrayList<>());
+            }
+        }
+        
+        // 将所有非根节点归类到其所属的根节点下
+        for (Discussion d : discussions) {
+            if (d.getParentId() != null) {
+                Discussion root = findRoot(d, map);
+                if (root != null) {
+                    if (root.getReplies() == null) {
+                        root.setReplies(new ArrayList<>());
                     }
-                    parent.getReplies().add(d);
+                    root.getReplies().add(d);
                 }
             }
         }
         return roots;
+    }
+
+    private Discussion findRoot(Discussion d, Map<Long, Discussion> map) {
+        Discussion current = d;
+        int depth = 0;
+        while (current.getParentId() != null && depth < 100) {
+            current = map.get(current.getParentId());
+            if (current == null) return null;
+            depth++;
+        }
+        return current;
     }
 
     public int getTotalDiscussionCount(String keyword) {

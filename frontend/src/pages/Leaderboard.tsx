@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../api'
+import { AlertCircle } from 'lucide-react'
 
 interface UserStats {
     id: number
@@ -38,11 +39,19 @@ export default function Leaderboard() {
             .finally(() => setLoading(false))
     }, [])
 
-    if (loading) return <div className="container loading-container">
-        <div className="loading-spinner"></div>
-        <div className="loading-text">正在加载排行榜...</div>
-    </div>
-    if (error) return <div className="container error-message">{error}</div>
+    if (loading) return (
+        <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <div className="loading-text">正在加载排行榜...</div>
+        </div>
+    )
+
+    if (error) return (
+        <div className="error-container">
+            <AlertCircle size={48} className="error-icon" style={{ color: 'var(--danger-color)', marginBottom: '16px' }} />
+            <div className="error-msg">{error}</div>
+        </div>
+    )
 
     return (
         <div className="container" style={{ paddingTop: '60px', paddingBottom: '60px' }}>

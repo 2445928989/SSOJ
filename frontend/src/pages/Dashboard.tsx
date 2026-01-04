@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
+import { AlertCircle } from 'lucide-react'
 
 export default function Dashboard() {
     const [user, setUser] = useState<any>(null)
@@ -75,11 +76,19 @@ export default function Dashboard() {
         }
     }
 
-    if (loading) return <div className="container loading-container">
-        <div className="loading-spinner"></div>
-        <div className="loading-text">正在加载仪表盘...</div>
-    </div>
-    if (error) return <div className="container error">{error}</div>
+    if (loading) return (
+        <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <div className="loading-text">正在加载仪表盘...</div>
+        </div>
+    )
+
+    if (error) return (
+        <div className="error-container">
+            <AlertCircle size={48} className="error-icon" style={{ color: 'var(--danger-color)', marginBottom: '16px' }} />
+            <div className="error-msg">{error}</div>
+        </div>
+    )
 
     return (
         <div className="dashboard">

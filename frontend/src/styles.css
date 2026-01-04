@@ -135,6 +135,28 @@ body {
     font-weight: 500;
 }
 
+/* 全局错误提示 */
+.error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    padding: 40px;
+    text-align: center;
+}
+
+.error-msg {
+    color: var(--danger-color);
+    background-color: #fff5f5;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    border: 1px solid #feb2b2;
+    font-weight: 500;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
 @keyframes spin {
     0% {
         transform: rotate(0deg);
@@ -337,13 +359,41 @@ h3 {
 }
 
 .error {
-    background-color: #fee;
+    background-color: #fff5f5;
     color: var(--danger-color);
-    padding: 1rem;
+    padding: 0.8rem 1rem;
     border-radius: 6px;
-    border-left: 4px solid var(--danger-color);
+    border: 1px solid #feb2b2;
     margin-bottom: 1rem;
     font-weight: 500;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.error::before {
+    content: '⚠️';
+    font-size: 1.1rem;
+}
+
+.success-msg {
+    background-color: #f0fff4;
+    color: var(--success-color);
+    padding: 0.8rem 1rem;
+    border-radius: 6px;
+    border: 1px solid #c6f6d5;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.success-msg::before {
+    content: '✅';
+    font-size: 1.1rem;
 }
 
 textarea {

@@ -5,7 +5,32 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
 import api from '../api'
-import { ThumbsUp, ThumbsDown, MessageSquare, Send, User as UserIcon } from 'lucide-react'
+import { ThumbsUp, ThumbsDown, MessageSquare, Send, User as UserIcon, AlertCircle } from 'lucide-react'
+
+function MarkdownContent({ content }: { content: string }) {
+    // 处理 @username 格式，将其转换为链接
+    const processedContent = content.replace(/@(\w+)/g, '[@$1](/user/profile?username=$1)');
+
+    return (
+        <div className="markdown-body">
+            <ReactMarkdown
+                remarkPlugins={[remarkMath]}
+                rehypePlugins={[rehypeKatex]}
+                components={{
+                    a: ({ node, ...props }) => {
+                        const href = props.href || '#';
+                        if (href.startsWith('/')) {
+                            return <Link to={href} style={{ color: '#667eea', fontWeight: '500', textDecoration: 'none' }}>{props.children}</Link>;
+                        }
+                        return <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: '#667eea', fontWeight: '500' }}>{props.children}</a>;
+                    }
+                }}
+            >
+                {processedContent}
+            </ReactMarkdown>
+        </div>
+    );
+}
 
 export default function ProblemDetail() {
     const { id } = useParams()
@@ -134,12 +159,26 @@ export default function ProblemDetail() {
         }
     }
 
-    if (loading) return <div className="container loading-container">
-        <div className="loading-spinner"></div>
-        <div className="loading-text">正在加载题目详情...</div>
-    </div>
-    if (error) return <div className="container error">{error}</div>
-    if (!problem) return <div className="container">题目不存在</div>
+    if (loading) return (
+        <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <div className="loading-text">正在加载题目详情...</div>
+        </div>
+    )
+
+    if (error) return (
+        <div className="error-container">
+            <AlertCircle size={48} className="error-icon" style={{ color: 'var(--danger-color)', marginBottom: '16px' }} />
+            <div className="error-msg">{error}</div>
+        </div>
+    )
+
+    if (!problem) return (
+        <div className="error-container">
+            <AlertCircle size={48} className="error-icon" style={{ color: 'var(--text-secondary)', marginBottom: '16px' }} />
+            <div className="error-msg" style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-color)', backgroundColor: '#f8f9fa' }}>题目不存在</div>
+        </div>
+    )
 
     const passRate = problem.numberOfSubmissions > 0
         ? ((problem.numberOfAccepted / problem.numberOfSubmissions) * 100).toFixed(1)
@@ -336,6 +375,7 @@ export default function ProblemDetail() {
                                     d={d}
                                     onReply={setReplyTo}
                                     onVote={() => fetchDiscussions()}
+                                    rootId={d.id}
                                 />
                             ))
                         )}
@@ -896,7 +936,7 @@ export default function ProblemDetail() {
     )
 }
 
-function DiscussionItem({ d, onReply, onVote, isReply = false }: { d: any, onReply: any, onVote: any, isReply?: boolean }) {
+function DiscussionItem({ d, onReply, onVote, isReply = false, rootId }: { d: any, onReply: any, onVote: any, isReply?: boolean, rootId?: number }) {
     const [voteStatus, setVoteStatus] = useState(0);
 
     useEffect(() => {
@@ -944,7 +984,12 @@ function DiscussionItem({ d, onReply, onVote, isReply = false }: { d: any, onRep
                         </span>
                     </div>
                     <div className="discussion-content">
-                        {d.content}
+                        {d.replyToUsername && d.parentId !== rootId && (
+                            <span style={{ color: '#667eea', marginRight: '8px', fontWeight: '500' }}>
+                                回复 <Link to={`/user/${d.replyToUserId}`} style={{ color: '#667eea', textDecoration: 'none' }}>@{d.replyToUsername}</Link> :
+                            </span>
+                        )}
+                        <MarkdownContent content={d.content} />
                     </div>
                     <div className="discussion-actions">
                         <button
@@ -977,6 +1022,7 @@ function DiscussionItem({ d, onReply, onVote, isReply = false }: { d: any, onRep
                             onReply={onReply}
                             onVote={onVote}
                             isReply={true}
+                            rootId={d.id}
                         />
                     ))}
                 </div>

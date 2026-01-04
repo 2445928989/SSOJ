@@ -1,40 +1,72 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import api from '../api'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
+import { AlertCircle } from 'lucide-react'
 
 export default function OtherUserProfile() {
     const { userId } = useParams()
+    const [searchParams] = useSearchParams()
+    const username = searchParams.get('username')
     const [user, setUser] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [heatmap, setHeatmap] = useState<Record<string, number>>({})
 
     useEffect(() => {
-        if (!userId) return
+        const fetchUser = async () => {
+            setLoading(true)
+            setError('')
+            try {
+                let userRes;
+                if (userId) {
+                    userRes = await api.get(`/api/user/${userId}`);
+                } else if (username) {
+                    userRes = await api.get(`/api/user/by-username/${username}`);
+                } else {
+                    return;
+                }
 
-        Promise.all([
-            api.get(`/api/user/${userId}`),
-            api.get(`/api/user/${userId}/submission-heatmap`)
-        ])
-            .then(([userRes, heatmapRes]) => {
-                setUser(userRes.data)
-                setHeatmap(heatmapRes.data.data || {})
-                document.title = `${userRes.data.nickname || userRes.data.username} - SSOJ`
-            })
-            .catch(e => setError(e.response?.data?.error || '加载失败'))
-            .finally(() => setLoading(false))
-    }, [userId])
+                const userData = userRes.data;
+                setUser(userData);
+                document.title = `${userData.nickname || userData.username} - SSOJ`;
 
-    if (loading) return <div className="container loading-container">
-        <div className="loading-spinner"></div>
-        <div className="loading-text">正在加载用户信息...</div>
-    </div>
-    if (error) return <div className="error-msg">{error}</div>
-    if (!user) return <div className="empty-state">用户不存在</div>
+                // 获取热力图
+                const heatmapRes = await api.get(`/api/user/${userData.id}/submission-heatmap`);
+                setHeatmap(heatmapRes.data.data || {});
+            } catch (e: any) {
+                setError(e.response?.data?.error || e.response?.data?.message || '加载失败');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUser();
+    }, [userId, username])
+
+    if (loading) return (
+        <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <div className="loading-text">正在加载用户信息...</div>
+        </div>
+    )
+
+    if (error) return (
+        <div className="error-container">
+            <AlertCircle size={48} className="error-icon" style={{ color: 'var(--danger-color)', marginBottom: '16px' }} />
+            <div className="error-msg">{error}</div>
+        </div>
+    )
+
+    if (!user) return (
+        <div className="error-container">
+            <AlertCircle size={48} className="error-icon" style={{ color: 'var(--text-secondary)', marginBottom: '16px' }} />
+            <div className="error-msg" style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-color)', backgroundColor: '#f8f9fa' }}>用户不存在</div>
+        </div>
+    )
 
     return (
         <div className="profile-container">
