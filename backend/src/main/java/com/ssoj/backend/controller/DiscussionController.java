@@ -74,4 +74,27 @@ public class DiscussionController {
 
         return Map.of("success", true);
     }
+
+    @DeleteMapping("/{id}")
+    public Object deleteDiscussion(@PathVariable Long id, HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
+        if (session == null || session.getAttribute("userId") == null) {
+            return Map.of("success", false, "message", "未登录");
+        }
+        Long userId = (Long) session.getAttribute("userId");
+        String role = (String) session.getAttribute("role");
+
+        Discussion discussion = discussionService.getDiscussionById(id);
+        if (discussion == null) {
+            return Map.of("success", false, "message", "讨论不存在");
+        }
+
+        // 只有作者或管理员可以删除
+        if (!discussion.getUserId().equals(userId) && !"ADMIN".equals(role)) {
+            return Map.of("success", false, "message", "无权删除此讨论");
+        }
+
+        discussionService.deleteDiscussion(id);
+        return Map.of("success", true);
+    }
 }

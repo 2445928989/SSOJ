@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import api from '../api'
-import { ThumbsUp, ThumbsDown, MessageSquare, User as UserIcon, Send } from 'lucide-react'
+import { ThumbsUp, ThumbsDown, MessageSquare, User as UserIcon, Send, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
@@ -33,7 +33,7 @@ function MarkdownContent({ content }: { content: string }) {
     );
 }
 
-function DiscussionListItem({ d, onVote, onReplySuccess }: { d: any, onVote: () => void, onReplySuccess: () => void }) {
+function DiscussionListItem({ d, onVote, onReplySuccess, currentUser }: { d: any, onVote: () => void, onReplySuccess: () => void, currentUser: any }) {
     const [voteStatus, setVoteStatus] = useState(0);
     const [showReplyInput, setShowReplyInput] = useState(false);
     const [replyContent, setReplyContent] = useState('');
@@ -42,6 +42,9 @@ function DiscussionListItem({ d, onVote, onReplySuccess }: { d: any, onVote: () 
     const [replies, setReplies] = useState<any[]>([]);
     const [loadingReplies, setLoadingReplies] = useState(false);
     const [replyTo, setReplyTo] = useState<{ id: number, username: string } | null>(null);
+    const [isExpanded, setIsExpanded] = useState(false);
+    const CONTENT_LIMIT = 300;
+    const isLongContent = d.content.length > CONTENT_LIMIT;
 
     useEffect(() => {
         api.get(`/api/votes/status?type=DISCUSSION&targetId=${d.id}`)
@@ -63,6 +66,24 @@ function DiscussionListItem({ d, onVote, onReplySuccess }: { d: any, onVote: () 
             }
         } catch (e) {
             alert('操作失败，请先登录');
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        if (!window.confirm('确定要删除这条讨论吗？')) return;
+        try {
+            const res = await api.delete(`/api/discussion/${id}`);
+            if (res.data.success) {
+                onVote();
+                if (showReplies) {
+                    const res2 = await api.get(`/api/discussion/${d.id}`);
+                    if (res2.data.success) setReplies(res2.data.data.replies || []);
+                }
+            } else {
+                alert(res.data.message || '删除失败');
+            }
+        } catch (e) {
+            alert('删除失败');
         }
     };
 
@@ -170,7 +191,33 @@ function DiscussionListItem({ d, onVote, onReplySuccess }: { d: any, onVote: () 
                         )}
                     </div>
                     <div style={{ color: '#4a5568', fontSize: '15px', lineHeight: '1.6', marginBottom: '12px' }}>
-                        <MarkdownContent content={d.content} />
+                        <div className={`content-wrapper ${isLongContent && !isExpanded ? 'collapsed' : ''}`}>
+                            <MarkdownContent content={isLongContent && !isExpanded ? d.content.slice(0, CONTENT_LIMIT) + '...' : d.content} />
+                        </div>
+                        {isLongContent && (
+                            <button
+                                onClick={() => setIsExpanded(!isExpanded)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#667eea',
+                                    fontSize: '13px',
+                                    fontWeight: '500',
+                                    cursor: 'pointer',
+                                    padding: '4px 0',
+                                    marginTop: '4px'
+                                }}
+                            >
+                                {isExpanded ? (
+                                    <><ChevronUp size={14} /> 收起</>
+                                ) : (
+                                    <><ChevronDown size={14} /> 展开全文</>
+                                )}
+                            </button>
+                        )}
                     </div>
                     <div style={{ display: 'flex', gap: '20px', color: '#94a3b8', fontSize: '13px' }}>
                         <button
@@ -244,6 +291,27 @@ function DiscussionListItem({ d, onVote, onReplySuccess }: { d: any, onVote: () 
                         >
                             {(showReplyInput && !replyTo) ? '取消回复' : '回复'}
                         </button>
+                        {(currentUser && (currentUser.id === d.userId || currentUser.role === 'ADMIN')) && (
+                            <button
+                                onClick={() => handleDelete(d.id)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: '#94a3b8',
+                                    padding: 0,
+                                    transition: 'color 0.2s'
+                                }}
+                                onMouseOver={(e) => e.currentTarget.style.color = '#ef4444'}
+                                onMouseOut={(e) => e.currentTarget.style.color = '#94a3b8'}
+                            >
+                                <Trash2 size={14} />
+                                <span>删除</span>
+                            </button>
+                        )}
                     </div>
 
                     {showReplyInput && (
@@ -346,19 +414,42 @@ function DiscussionListItem({ d, onVote, onReplySuccess }: { d: any, onVote: () 
                                                     </Link>
                                                     <span style={{ color: '#a0aec0', fontSize: '11px' }}>{new Date(reply.createdAt).toLocaleString()}</span>
                                                 </div>
-                                                <button
-                                                    onClick={() => startReply(reply.id, reply.nickname || reply.username)}
-                                                    style={{
-                                                        background: 'none',
-                                                        border: 'none',
-                                                        color: '#667eea',
-                                                        fontSize: '12px',
-                                                        cursor: 'pointer',
-                                                        padding: '2px 5px'
-                                                    }}
-                                                >
-                                                    回复
-                                                </button>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <button
+                                                        onClick={() => startReply(reply.id, reply.nickname || reply.username)}
+                                                        style={{
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            color: '#667eea',
+                                                            fontSize: '12px',
+                                                            cursor: 'pointer',
+                                                            padding: '2px 5px'
+                                                        }}
+                                                    >
+                                                        回复
+                                                    </button>
+                                                    {(currentUser && (currentUser.id === reply.userId || currentUser.role === 'ADMIN')) && (
+                                                        <button
+                                                            onClick={() => handleDelete(reply.id)}
+                                                            style={{
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                color: '#94a3b8',
+                                                                fontSize: '12px',
+                                                                cursor: 'pointer',
+                                                                padding: '2px 5px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                gap: '2px'
+                                                            }}
+                                                            onMouseOver={(e) => e.currentTarget.style.color = '#ef4444'}
+                                                            onMouseOut={(e) => e.currentTarget.style.color = '#94a3b8'}
+                                                        >
+                                                            <Trash2 size={12} />
+                                                            删除
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                             <div style={{ color: '#4a5568', fontSize: '14px', lineHeight: '1.5' }}>
                                                 {reply.replyToUsername && reply.parentId !== d.id && (
@@ -389,6 +480,7 @@ export default function DiscussionList() {
     const [showNewPost, setShowNewPost] = useState(false)
     const [newPostContent, setNewPostContent] = useState('')
     const [submitting, setSubmitting] = useState(false)
+    const [currentUser, setCurrentUser] = useState<any>(null)
 
     const page = parseInt(searchParams.get('page') || '1')
     const size = 20
@@ -403,6 +495,11 @@ export default function DiscussionList() {
             })
             .catch(e => setError(e.response?.data?.error || '加载讨论失败'))
             .finally(() => setLoading(false))
+
+        // 获取当前用户信息
+        api.get('/api/user/profile')
+            .then(res => setCurrentUser(res.data))
+            .catch(() => setCurrentUser(null))
     }, [page, keyword])
 
     const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
@@ -533,7 +630,7 @@ export default function DiscussionList() {
                 ) : (
                     <div style={{ background: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                         {discussions.map((d) => (
-                            <DiscussionListItem key={d.id} d={d} onVote={refreshDiscussions} onReplySuccess={refreshDiscussions} />
+                            <DiscussionListItem key={d.id} d={d} onVote={refreshDiscussions} onReplySuccess={refreshDiscussions} currentUser={currentUser} />
                         ))}
                     </div>
                 )}

@@ -5,7 +5,7 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
 import api from '../api'
-import { ThumbsUp, ThumbsDown, MessageSquare, Send, User as UserIcon, AlertCircle } from 'lucide-react'
+import { ThumbsUp, ThumbsDown, MessageSquare, Send, User as UserIcon, AlertCircle, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
 
 function MarkdownContent({ content }: { content: string }) {
     // 处理 @username 格式，将其转换为链接
@@ -44,6 +44,7 @@ export default function ProblemDetail() {
     const [submittingDiscussion, setSubmittingDiscussion] = useState(false)
     const [voteStatus, setVoteStatus] = useState<number>(0) // 0: none, 1: like, -1: dislike
     const [replyTo, setReplyTo] = useState<any>(null)
+    const [currentUser, setCurrentUser] = useState<any>(null)
 
     // 格式化内存大小显示（超过1MB用MB单位）
     const formatMemory = (kb: number) => {
@@ -103,6 +104,11 @@ export default function ProblemDetail() {
 
         fetchDiscussions()
         fetchVoteStatus()
+
+        // 获取当前用户信息
+        api.get('/api/user/profile')
+            .then(res => setCurrentUser(res.data))
+            .catch(() => setCurrentUser(null))
     }, [id])
 
     const fetchDiscussions = () => {
@@ -376,6 +382,7 @@ export default function ProblemDetail() {
                                     onReply={setReplyTo}
                                     onVote={() => fetchDiscussions()}
                                     rootId={d.id}
+                                    currentUser={currentUser}
                                 />
                             ))
                         )}
@@ -467,6 +474,28 @@ export default function ProblemDetail() {
 
                 .action-btn:hover {
                     color: #667eea;
+                }
+
+                .action-btn.delete:hover {
+                    color: #ef4444;
+                }
+
+                .expand-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    background: none;
+                    border: none;
+                    color: #667eea;
+                    font-size: 13px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    padding: 4px 0;
+                    margin-top: 4px;
+                }
+
+                .expand-btn:hover {
+                    text-decoration: underline;
                 }
 
                 .action-btn.active.like { color: #22c55e; }
@@ -936,8 +965,11 @@ export default function ProblemDetail() {
     )
 }
 
-function DiscussionItem({ d, onReply, onVote, isReply = false, rootId }: { d: any, onReply: any, onVote: any, isReply?: boolean, rootId?: number }) {
+function DiscussionItem({ d, onReply, onVote, isReply = false, rootId, currentUser }: { d: any, onReply: any, onVote: any, isReply?: boolean, rootId?: number, currentUser: any }) {
     const [voteStatus, setVoteStatus] = useState(0);
+    const [isExpanded, setIsExpanded] = useState(false);
+    const CONTENT_LIMIT = 300;
+    const isLongContent = d.content.length > CONTENT_LIMIT;
 
     useEffect(() => {
         api.get(`/api/votes/status?type=DISCUSSION&targetId=${d.id}`)
@@ -959,6 +991,20 @@ function DiscussionItem({ d, onReply, onVote, isReply = false, rootId }: { d: an
             }
         } catch (e) {
             alert('操作失败，请先登录');
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!window.confirm('确定要删除这条讨论吗？')) return;
+        try {
+            const res = await api.delete(`/api/discussion/${d.id}`);
+            if (res.data.success) {
+                onVote(); // 刷新列表
+            } else {
+                alert(res.data.message || '删除失败');
+            }
+        } catch (e) {
+            alert('删除失败');
         }
     };
 
@@ -989,7 +1035,21 @@ function DiscussionItem({ d, onReply, onVote, isReply = false, rootId }: { d: an
                                 回复 <Link to={`/user/${d.replyToUserId}`} style={{ color: '#667eea', textDecoration: 'none' }}>@{d.replyToUsername}</Link> :
                             </span>
                         )}
-                        <MarkdownContent content={d.content} />
+                        <div className={`content-wrapper ${isLongContent && !isExpanded ? 'collapsed' : ''}`}>
+                            <MarkdownContent content={isLongContent && !isExpanded ? d.content.slice(0, CONTENT_LIMIT) + '...' : d.content} />
+                        </div>
+                        {isLongContent && (
+                            <button
+                                className="expand-btn"
+                                onClick={() => setIsExpanded(!isExpanded)}
+                            >
+                                {isExpanded ? (
+                                    <><ChevronUp size={14} /> 收起</>
+                                ) : (
+                                    <><ChevronDown size={14} /> 展开全文</>
+                                )}
+                            </button>
+                        )}
                     </div>
                     <div className="discussion-actions">
                         <button
@@ -1010,6 +1070,12 @@ function DiscussionItem({ d, onReply, onVote, isReply = false, rootId }: { d: an
                             <MessageSquare size={14} />
                             <span>回复</span>
                         </button>
+                        {(currentUser && (currentUser.id === d.userId || currentUser.role === 'ADMIN')) && (
+                            <button className="action-btn delete" onClick={handleDelete}>
+                                <Trash2 size={14} />
+                                <span>删除</span>
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -1023,6 +1089,7 @@ function DiscussionItem({ d, onReply, onVote, isReply = false, rootId }: { d: an
                             onVote={onVote}
                             isReply={true}
                             rootId={d.id}
+                            currentUser={currentUser}
                         />
                     ))}
                 </div>
