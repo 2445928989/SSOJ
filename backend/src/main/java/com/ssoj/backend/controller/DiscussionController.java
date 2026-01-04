@@ -26,8 +26,9 @@ public class DiscussionController {
     public Object listDiscussions(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String keyword) {
-        List<Discussion> discussions = discussionService.getAllDiscussions(page, size, keyword);
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "newest") String sort) {
+        List<Discussion> discussions = discussionService.getAllDiscussions(page, size, keyword, sort);
         int total = discussionService.getTotalDiscussionCount(keyword);
         return Map.of(
                 "success", true,

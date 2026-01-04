@@ -14,6 +14,7 @@ public class Discussion {
     private String content;
     private Integer likes;
     private Integer dislikes;
+    private Boolean isDeleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import api from '../api'
 import { ThumbsUp, ThumbsDown, MessageSquare, User as UserIcon, Send, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
@@ -78,6 +78,7 @@ function DiscussionListItem({ d, onVote, onReplySuccess, currentUser }: { d: any
     const [replies, setReplies] = useState<any[]>([]);
     const [loadingReplies, setLoadingReplies] = useState(false);
     const [replyTo, setReplyTo] = useState<{ id: number, username: string } | null>(null);
+    const replyInputRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         api.get(`/api/votes/status?type=DISCUSSION&targetId=${d.id}`)
@@ -174,6 +175,10 @@ function DiscussionListItem({ d, onVote, onReplySuccess, currentUser }: { d: any
         setReplyTo({ id: targetId, username: targetUsername });
         setShowReplyInput(true);
         setReplyContent('');
+        setTimeout(() => {
+            replyInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            replyInputRef.current?.querySelector('textarea')?.focus();
+        }, 100);
     };
 
     return (
@@ -224,83 +229,18 @@ function DiscussionListItem({ d, onVote, onReplySuccess, currentUser }: { d: any
                         )}
                     </div>
                     <div style={{ color: '#4a5568', fontSize: '15px', lineHeight: '1.6', marginBottom: '12px' }}>
-                        <FoldableContent content={d.content} />
+                        {d.isDeleted ? (
+                            <div style={{ color: '#94a3b8', fontStyle: 'italic', background: '#f8fafc', padding: '10px', borderRadius: '6px', border: '1px dashed #e2e8f0' }}>
+                                该评论已删除
+                            </div>
+                        ) : (
+                            <FoldableContent content={d.content} />
+                        )}
                     </div>
-                    <div style={{ display: 'flex', gap: '20px', color: '#94a3b8', fontSize: '13px' }}>
-                        <button
-                            onClick={() => handleVote(1)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                color: voteStatus === 1 ? '#667eea' : '#94a3b8',
-                                padding: 0,
-                                transition: 'color 0.2s'
-                            }}
-                        >
-                            <ThumbsUp size={14} fill={voteStatus === 1 ? 'currentColor' : 'none'} />
-                            <span>{d.likes || 0}</span>
-                        </button>
-                        <button
-                            onClick={() => handleVote(-1)}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                color: voteStatus === -1 ? '#e53e3e' : '#94a3b8',
-                                padding: 0,
-                                transition: 'color 0.2s'
-                            }}
-                        >
-                            <ThumbsDown size={14} fill={voteStatus === -1 ? 'currentColor' : 'none'} />
-                            <span>{d.dislikes || 0}</span>
-                        </button>
-                        <button
-                            onClick={fetchReplies}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                color: showReplies ? '#667eea' : '#94a3b8',
-                                padding: 0
-                            }}
-                        >
-                            <MessageSquare size={14} />
-                            <span>{d.repliesCount || 0} 回复</span>
-                        </button>
-                        <button
-                            onClick={() => {
-                                if (showReplyInput && !replyTo) {
-                                    setShowReplyInput(false);
-                                } else {
-                                    setReplyTo(null);
-                                    setShowReplyInput(true);
-                                }
-                            }}
-                            style={{
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                color: '#667eea',
-                                padding: 0,
-                                fontSize: '13px',
-                                fontWeight: '500'
-                            }}
-                        >
-                            {(showReplyInput && !replyTo) ? '取消回复' : '回复'}
-                        </button>
-                        {(currentUser && (currentUser.id === d.userId || currentUser.role === 'ADMIN')) && (
+                    {!d.isDeleted && (
+                        <div style={{ display: 'flex', gap: '20px', color: '#94a3b8', fontSize: '13px' }}>
                             <button
-                                onClick={() => handleDelete(d.id)}
+                                onClick={() => handleVote(1)}
                                 style={{
                                     display: 'flex',
                                     alignItems: 'center',
@@ -308,21 +248,98 @@ function DiscussionListItem({ d, onVote, onReplySuccess, currentUser }: { d: any
                                     background: 'none',
                                     border: 'none',
                                     cursor: 'pointer',
-                                    color: '#94a3b8',
+                                    color: voteStatus === 1 ? '#667eea' : '#94a3b8',
                                     padding: 0,
                                     transition: 'color 0.2s'
                                 }}
-                                onMouseOver={(e) => e.currentTarget.style.color = '#ef4444'}
-                                onMouseOut={(e) => e.currentTarget.style.color = '#94a3b8'}
                             >
-                                <Trash2 size={14} />
-                                <span>删除</span>
+                                <ThumbsUp size={14} fill={voteStatus === 1 ? 'currentColor' : 'none'} />
+                                <span>{d.likes || 0}</span>
                             </button>
-                        )}
-                    </div>
+                            <button
+                                onClick={() => handleVote(-1)}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: voteStatus === -1 ? '#e53e3e' : '#94a3b8',
+                                    padding: 0,
+                                    transition: 'color 0.2s'
+                                }}
+                            >
+                                <ThumbsDown size={14} fill={voteStatus === -1 ? 'currentColor' : 'none'} />
+                                <span>{d.dislikes || 0}</span>
+                            </button>
+                            <button
+                                onClick={fetchReplies}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: showReplies ? '#667eea' : '#94a3b8',
+                                    padding: 0
+                                }}
+                            >
+                                <MessageSquare size={14} />
+                                <span>{d.repliesCount || 0} 回复</span>
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (showReplyInput && !replyTo) {
+                                        setShowReplyInput(false);
+                                    } else {
+                                        setReplyTo(null);
+                                        setShowReplyInput(true);
+                                        setTimeout(() => {
+                                            replyInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            replyInputRef.current?.querySelector('textarea')?.focus();
+                                        }, 100);
+                                    }
+                                }}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: '#667eea',
+                                    padding: 0,
+                                    fontSize: '13px',
+                                    fontWeight: '500'
+                                }}
+                            >
+                                {(showReplyInput && !replyTo) ? '取消回复' : '回复'}
+                            </button>
+                            {(currentUser && (currentUser.id === d.userId || currentUser.role === 'ADMIN')) && (
+                                <button
+                                    onClick={() => handleDelete(d.id)}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        color: '#94a3b8',
+                                        padding: 0,
+                                        transition: 'color 0.2s'
+                                    }}
+                                    onMouseOver={(e) => e.currentTarget.style.color = '#ef4444'}
+                                    onMouseOut={(e) => e.currentTarget.style.color = '#94a3b8'}
+                                >
+                                    <Trash2 size={14} />
+                                    <span>删除</span>
+                                </button>
+                            )}
+                        </div>
+                    )}
 
                     {showReplyInput && (
-                        <div style={{ marginTop: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div ref={replyInputRef} style={{ marginTop: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             <textarea
                                 value={replyContent}
                                 onChange={(e) => setReplyContent(e.target.value)}
@@ -421,50 +438,58 @@ function DiscussionListItem({ d, onVote, onReplySuccess, currentUser }: { d: any
                                                     </Link>
                                                     <span style={{ color: '#a0aec0', fontSize: '11px' }}>{new Date(reply.createdAt).toLocaleString()}</span>
                                                 </div>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    <button
-                                                        onClick={() => startReply(reply.id, reply.nickname || reply.username)}
-                                                        style={{
-                                                            background: 'none',
-                                                            border: 'none',
-                                                            color: '#667eea',
-                                                            fontSize: '12px',
-                                                            cursor: 'pointer',
-                                                            padding: '2px 5px'
-                                                        }}
-                                                    >
-                                                        回复
-                                                    </button>
-                                                    {(currentUser && (currentUser.id === reply.userId || currentUser.role === 'ADMIN')) && (
+                                                {!reply.isDeleted && (
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                         <button
-                                                            onClick={() => handleDelete(reply.id)}
+                                                            onClick={() => startReply(reply.id, reply.nickname || reply.username)}
                                                             style={{
                                                                 background: 'none',
                                                                 border: 'none',
-                                                                color: '#94a3b8',
+                                                                color: '#667eea',
                                                                 fontSize: '12px',
                                                                 cursor: 'pointer',
-                                                                padding: '2px 5px',
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                gap: '2px'
+                                                                padding: '2px 5px'
                                                             }}
-                                                            onMouseOver={(e) => e.currentTarget.style.color = '#ef4444'}
-                                                            onMouseOut={(e) => e.currentTarget.style.color = '#94a3b8'}
                                                         >
-                                                            <Trash2 size={12} />
-                                                            删除
+                                                            回复
                                                         </button>
-                                                    )}
-                                                </div>
+                                                        {(currentUser && (currentUser.id === reply.userId || currentUser.role === 'ADMIN')) && (
+                                                            <button
+                                                                onClick={() => handleDelete(reply.id)}
+                                                                style={{
+                                                                    background: 'none',
+                                                                    border: 'none',
+                                                                    color: '#94a3b8',
+                                                                    fontSize: '12px',
+                                                                    cursor: 'pointer',
+                                                                    padding: '2px 5px',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '2px'
+                                                                }}
+                                                                onMouseOver={(e) => e.currentTarget.style.color = '#ef4444'}
+                                                                onMouseOut={(e) => e.currentTarget.style.color = '#94a3b8'}
+                                                            >
+                                                                <Trash2 size={12} />
+                                                                删除
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
                                             <div style={{ color: '#4a5568', fontSize: '14px', lineHeight: '1.5' }}>
-                                                {reply.replyToUsername && reply.parentId !== d.id && (
-                                                    <span style={{ color: '#667eea', marginRight: '8px', fontWeight: '500' }}>
-                                                        回复 <Link to={`/user/${reply.replyToUserId}`} style={{ color: '#667eea', textDecoration: 'none' }}>@{reply.replyToUsername}</Link> :
-                                                    </span>
+                                                {reply.isDeleted ? (
+                                                    <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '13px' }}>该评论已删除</span>
+                                                ) : (
+                                                    <>
+                                                        {reply.replyToUsername && reply.parentId !== d.id && (
+                                                            <span style={{ color: '#667eea', marginRight: '8px', fontWeight: '500' }}>
+                                                                回复 <Link to={`/user/${reply.replyToUserId}`} style={{ color: '#667eea', textDecoration: 'none' }}>@{reply.replyToUsername}</Link> :
+                                                            </span>
+                                                        )}
+                                                        <FoldableContent content={reply.content} limit={150} />
+                                                    </>
                                                 )}
-                                                <FoldableContent content={reply.content} limit={150} />
                                             </div>
                                         </div>
                                     </div>
@@ -492,10 +517,11 @@ export default function DiscussionList() {
     const page = parseInt(searchParams.get('page') || '1')
     const size = 20
     const keyword = searchParams.get('keyword') || ''
+    const sort = searchParams.get('sort') || 'newest'
 
     useEffect(() => {
         setLoading(true)
-        api.get(`/api/discussion/list?page=${page}&size=${size}&keyword=${keyword}`)
+        api.get(`/api/discussion/list?page=${page}&size=${size}&keyword=${keyword}&sort=${sort}`)
             .then(res => {
                 setDiscussions(res.data.data)
                 setTotal(res.data.total)
@@ -507,7 +533,7 @@ export default function DiscussionList() {
         api.get('/api/user/profile')
             .then(res => setCurrentUser(res.data))
             .catch(() => setCurrentUser(null))
-    }, [page, keyword])
+    }, [page, keyword, sort])
 
     const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -540,7 +566,7 @@ export default function DiscussionList() {
     const totalPages = Math.ceil(total / size)
 
     const refreshDiscussions = () => {
-        api.get(`/api/discussion/list?page=${page}&size=${size}&keyword=${keyword}`)
+        api.get(`/api/discussion/list?page=${page}&size=${size}&keyword=${keyword}&sort=${sort}`)
             .then(res => {
                 setDiscussions(res.data.data)
                 setTotal(res.data.total)
@@ -554,7 +580,43 @@ export default function DiscussionList() {
         <div className="container" style={{ paddingTop: '40px', paddingBottom: '60px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                 <h1 style={{ fontSize: '2rem', fontWeight: '700', margin: 0 }}>讨论区</h1>
-                <div style={{ display: 'flex', gap: '15px' }}>
+                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', background: '#f1f5f9', padding: '4px', borderRadius: '8px', gap: '4px' }}>
+                        <button
+                            onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), sort: 'newest', page: '1' })}
+                            style={{
+                                padding: '6px 12px',
+                                borderRadius: '6px',
+                                border: 'none',
+                                background: sort === 'newest' ? 'white' : 'transparent',
+                                color: sort === 'newest' ? '#1a202c' : '#64748b',
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                boxShadow: sort === 'newest' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            最新发布
+                        </button>
+                        <button
+                            onClick={() => setSearchParams({ ...Object.fromEntries(searchParams), sort: 'activity', page: '1' })}
+                            style={{
+                                padding: '6px 12px',
+                                borderRadius: '6px',
+                                border: 'none',
+                                background: sort === 'activity' ? 'white' : 'transparent',
+                                color: sort === 'activity' ? '#1a202c' : '#64748b',
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                boxShadow: sort === 'activity' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            最近活跃
+                        </button>
+                    </div>
                     <button
                         onClick={() => setShowNewPost(!showNewPost)}
                         style={{

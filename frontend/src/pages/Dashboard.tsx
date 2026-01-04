@@ -6,6 +6,7 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
 import { AlertCircle } from 'lucide-react'
+import { FoldableContent } from './Announcements'
 
 export default function Dashboard() {
     const [user, setUser] = useState<any>(null)
@@ -160,16 +161,7 @@ export default function Dashboard() {
                                 <span className="announcement-date">{new Date(announcement.createdAt).toLocaleDateString('zh-CN')}</span>
                             </div>
                             <div className="announcement-content">
-                                <div className="markdown-body">
-                                    <ReactMarkdown
-                                        remarkPlugins={[remarkMath]}
-                                        rehypePlugins={[rehypeKatex]}
-                                    >
-                                        {announcement.content.length > 100
-                                            ? announcement.content.substring(0, 100) + '...'
-                                            : announcement.content}
-                                    </ReactMarkdown>
-                                </div>
+                                <FoldableContent content={announcement.content} limit={100} />
                             </div>
                         </div>
                     ))}

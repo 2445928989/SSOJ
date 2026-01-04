@@ -166,6 +166,10 @@ body {
     }
 }
 
+.spin {
+    animation: spin 1s linear infinite;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -815,4 +819,31 @@ pre {
 
 .markdown-body p:last-child {
     margin-bottom: 0;
+}
+
+/* 关注/粉丝数 hover 特效 */
+.follow-stat-item {
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.follow-stat-item:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+/* 消息铃铛 hover 下划线渐变特效 */
+.notification-bell-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+.notification-bell-btn:hover::after {
+    width: 100%;
 }

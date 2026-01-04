@@ -69,6 +69,7 @@ export default function NotificationDropdown() {
     return (
         <div className="notification-dropdown-container" ref={dropdownRef} style={{ position: 'relative' }}>
             <button
+                className="notification-bell-btn"
                 onClick={() => setIsOpen(!isOpen)}
                 style={{
                     background: 'none',

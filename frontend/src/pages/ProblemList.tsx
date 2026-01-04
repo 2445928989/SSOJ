@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import api from '../api'
 import { Link } from 'react-router-dom'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle2 } from 'lucide-react'
 
 export default function ProblemList() {
     const [problems, setProblems] = useState<any[]>([])
@@ -266,7 +266,9 @@ export default function ProblemList() {
                                                 }}
                                                 onClick={() => window.location.href = `/problems/${p.id}`}
                                             >
-                                                <td>{isSolved ? '✓ ' : ''}</td>
+                                                <td style={{ textAlign: 'center' }}>
+                                                    {isSolved ? <CheckCircle2 size={18} color="#48bb78" /> : ''}
+                                                </td>
                                                 <td>#{p.id}</td>
                                                 <td>
                                                     <Link to={`/problems/${p.id}`} className="problem-title">

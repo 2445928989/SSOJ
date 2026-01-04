@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
@@ -43,7 +43,6 @@ export default function ProblemDetail() {
     const [newDiscussion, setNewDiscussion] = useState('')
     const [submittingDiscussion, setSubmittingDiscussion] = useState(false)
     const [voteStatus, setVoteStatus] = useState<number>(0) // 0: none, 1: like, -1: dislike
-    const [replyTo, setReplyTo] = useState<any>(null)
     const [currentUser, setCurrentUser] = useState<any>(null)
 
     // 格式化内存大小显示（超过1MB用MB单位）
@@ -148,12 +147,11 @@ export default function ProblemDetail() {
         try {
             const res = await api.post('/api/discussion/add', {
                 problemId: id,
-                parentId: replyTo?.id || null,
+                parentId: null,
                 content: newDiscussion
             })
             if (res.data.success) {
                 setNewDiscussion('')
-                setReplyTo(null)
                 fetchDiscussions()
             } else {
                 alert(res.data.message || '发布失败')
@@ -352,14 +350,8 @@ export default function ProblemDetail() {
                 <section className="content-section discussion-section">
                     <h2>讨论区</h2>
                     <div className="discussion-input">
-                        {replyTo && (
-                            <div className="reply-indicator">
-                                <span>回复 @{replyTo.nickname || replyTo.username}</span>
-                                <button onClick={() => setReplyTo(null)}>取消</button>
-                            </div>
-                        )}
                         <textarea
-                            placeholder={replyTo ? "写下你的回复..." : "发表你的看法..."}
+                            placeholder="发表你的看法..."
                             value={newDiscussion}
                             onChange={(e) => setNewDiscussion(e.target.value)}
                         />
@@ -367,7 +359,7 @@ export default function ProblemDetail() {
                             onClick={handleAddDiscussion}
                             disabled={submittingDiscussion}
                         >
-                            {submittingDiscussion ? '发布中...' : (replyTo ? '回复' : '发布评论')}
+                            {submittingDiscussion ? '发布中...' : '发布评论'}
                         </button>
                     </div>
 
@@ -379,10 +371,10 @@ export default function ProblemDetail() {
                                 <DiscussionItem
                                     key={d.id}
                                     d={d}
-                                    onReply={setReplyTo}
                                     onVote={() => fetchDiscussions()}
                                     rootId={d.id}
                                     currentUser={currentUser}
+                                    problemId={parseInt(id || '0')}
                                 />
                             ))
                         )}
@@ -965,17 +957,23 @@ export default function ProblemDetail() {
     )
 }
 
-function DiscussionItem({ d, onReply, onVote, isReply = false, rootId, currentUser }: { d: any, onReply: any, onVote: any, isReply?: boolean, rootId?: number, currentUser: any }) {
+function DiscussionItem({ d, onVote, isReply = false, rootId, currentUser, problemId }: { d: any, onVote: any, isReply?: boolean, rootId?: number, currentUser: any, problemId: number }) {
     const [voteStatus, setVoteStatus] = useState(0);
     const [isExpanded, setIsExpanded] = useState(false);
+    const [showReplyInput, setShowReplyInput] = useState(false);
+    const [replyContent, setReplyContent] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    const replyInputRef = useRef<HTMLDivElement>(null);
     const CONTENT_LIMIT = 300;
     const isLongContent = d.content.length > CONTENT_LIMIT;
 
     useEffect(() => {
-        api.get(`/api/votes/status?type=DISCUSSION&targetId=${d.id}`)
-            .then(res => setVoteStatus(res.data.data))
-            .catch(() => { });
-    }, [d.id]);
+        if (!d.isDeleted) {
+            api.get(`/api/votes/status?type=DISCUSSION&targetId=${d.id}`)
+                .then(res => setVoteStatus(res.data.data))
+                .catch(() => { });
+        }
+    }, [d.id, d.isDeleted]);
 
     const handleVote = async (voteType: number) => {
         try {
@@ -1008,6 +1006,39 @@ function DiscussionItem({ d, onReply, onVote, isReply = false, rootId, currentUs
         }
     };
 
+    const handleReply = async () => {
+        if (!replyContent.trim()) return;
+        setSubmitting(true);
+        try {
+            const res = await api.post('/api/discussion/add', {
+                problemId: problemId,
+                parentId: d.id,
+                content: replyContent
+            });
+            if (res.data.success) {
+                setReplyContent('');
+                setShowReplyInput(false);
+                onVote();
+            } else {
+                alert(res.data.message || '回复失败');
+            }
+        } catch (e: any) {
+            alert(e.response?.data?.message || '回复失败，请先登录');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const toggleReply = () => {
+        setShowReplyInput(!showReplyInput);
+        if (!showReplyInput) {
+            setTimeout(() => {
+                replyInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                replyInputRef.current?.querySelector('textarea')?.focus();
+            }, 100);
+        }
+    };
+
     return (
         <div className={`discussion-item-container ${isReply ? 'is-reply' : ''}`}>
             <div className="discussion-item">
@@ -1030,53 +1061,88 @@ function DiscussionItem({ d, onReply, onVote, isReply = false, rootId, currentUs
                         </span>
                     </div>
                     <div className="discussion-content">
-                        {d.replyToUsername && d.parentId !== rootId && (
-                            <span style={{ color: '#667eea', marginRight: '8px', fontWeight: '500' }}>
-                                回复 <Link to={`/user/${d.replyToUserId}`} style={{ color: '#667eea', textDecoration: 'none' }}>@{d.replyToUsername}</Link> :
-                            </span>
-                        )}
-                        <div className={`content-wrapper ${isLongContent && !isExpanded ? 'collapsed' : ''}`}>
-                            <MarkdownContent content={isLongContent && !isExpanded ? d.content.slice(0, CONTENT_LIMIT) + '...' : d.content} />
-                        </div>
-                        {isLongContent && (
-                            <button
-                                className="expand-btn"
-                                onClick={() => setIsExpanded(!isExpanded)}
-                            >
-                                {isExpanded ? (
-                                    <><ChevronUp size={14} /> 收起</>
-                                ) : (
-                                    <><ChevronDown size={14} /> 展开全文</>
+                        {d.isDeleted ? (
+                            <div style={{ color: '#94a3b8', fontStyle: 'italic', background: '#f8fafc', padding: '10px', borderRadius: '6px', border: '1px dashed #e2e8f0', fontSize: '14px' }}>
+                                该评论已删除
+                            </div>
+                        ) : (
+                            <>
+                                {d.replyToUsername && d.parentId !== rootId && (
+                                    <span style={{ color: '#667eea', marginRight: '8px', fontWeight: '500' }}>
+                                        回复 <Link to={`/user/${d.replyToUserId}`} style={{ color: '#667eea', textDecoration: 'none' }}>@{d.replyToUsername}</Link> :
+                                    </span>
                                 )}
-                            </button>
+                                <div className={`content-wrapper ${isLongContent && !isExpanded ? 'collapsed' : ''}`}>
+                                    <MarkdownContent content={isLongContent && !isExpanded ? d.content.slice(0, CONTENT_LIMIT) + '...' : d.content} />
+                                </div>
+                                {isLongContent && (
+                                    <button
+                                        className="expand-btn"
+                                        onClick={() => setIsExpanded(!isExpanded)}
+                                    >
+                                        {isExpanded ? (
+                                            <><ChevronUp size={14} /> 收起</>
+                                        ) : (
+                                            <><ChevronDown size={14} /> 展开全文</>
+                                        )}
+                                    </button>
+                                )}
+                            </>
                         )}
                     </div>
-                    <div className="discussion-actions">
-                        <button
-                            className={`action-btn like ${voteStatus === 1 ? 'active' : ''}`}
-                            onClick={() => handleVote(1)}
-                        >
-                            <ThumbsUp size={14} />
-                            <span>{d.likes || 0}</span>
-                        </button>
-                        <button
-                            className={`action-btn dislike ${voteStatus === -1 ? 'active' : ''}`}
-                            onClick={() => handleVote(-1)}
-                        >
-                            <ThumbsDown size={14} />
-                            <span>{d.dislikes || 0}</span>
-                        </button>
-                        <button className="action-btn" onClick={() => onReply(d)}>
-                            <MessageSquare size={14} />
-                            <span>回复</span>
-                        </button>
-                        {(currentUser && (currentUser.id === d.userId || currentUser.role === 'ADMIN')) && (
-                            <button className="action-btn delete" onClick={handleDelete}>
-                                <Trash2 size={14} />
-                                <span>删除</span>
+                    {!d.isDeleted && (
+                        <div className="discussion-actions">
+                            <button
+                                className={`action-btn like ${voteStatus === 1 ? 'active' : ''}`}
+                                onClick={() => handleVote(1)}
+                            >
+                                <ThumbsUp size={14} />
+                                <span>{d.likes || 0}</span>
                             </button>
-                        )}
-                    </div>
+                            <button
+                                className={`action-btn dislike ${voteStatus === -1 ? 'active' : ''}`}
+                                onClick={() => handleVote(-1)}
+                            >
+                                <ThumbsDown size={14} />
+                                <span>{d.dislikes || 0}</span>
+                            </button>
+                            <button className="action-btn" onClick={toggleReply}>
+                                <MessageSquare size={14} />
+                                <span>回复</span>
+                            </button>
+                            {(currentUser && (currentUser.id === d.userId || currentUser.role === 'ADMIN')) && (
+                                <button className="action-btn delete" onClick={handleDelete}>
+                                    <Trash2 size={14} />
+                                    <span>删除</span>
+                                </button>
+                            )}
+                        </div>
+                    )}
+
+                    {showReplyInput && (
+                        <div ref={replyInputRef} className="discussion-input" style={{ marginTop: '15px', border: '1px solid #e2e8f0', padding: '15px', borderRadius: '8px', background: '#f8fafc' }}>
+                            <textarea
+                                placeholder={`回复 @${d.nickname || d.username}...`}
+                                value={replyContent}
+                                onChange={(e) => setReplyContent(e.target.value)}
+                                style={{ minHeight: '80px', marginBottom: '10px' }}
+                            />
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                                <button
+                                    onClick={() => setShowReplyInput(false)}
+                                    style={{ background: '#e2e8f0', color: '#4a5568' }}
+                                >
+                                    取消
+                                </button>
+                                <button
+                                    onClick={handleReply}
+                                    disabled={submitting || !replyContent.trim()}
+                                >
+                                    {submitting ? '发布中...' : '回复'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
             {d.replies && d.replies.length > 0 && (
@@ -1085,11 +1151,11 @@ function DiscussionItem({ d, onReply, onVote, isReply = false, rootId, currentUs
                         <DiscussionItem
                             key={reply.id}
                             d={reply}
-                            onReply={onReply}
                             onVote={onVote}
                             isReply={true}
                             rootId={d.id}
                             currentUser={currentUser}
+                            problemId={problemId}
                         />
                     ))}
                 </div>

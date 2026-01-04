@@ -16,7 +16,9 @@ public interface DiscussionMapper {
     List<Discussion> findDescendants(@Param("id") Long id);
 
     List<Discussion> findAllPaged(@Param("offset") int offset, @Param("limit") int limit,
-            @Param("keyword") String keyword);
+            @Param("keyword") String keyword, @Param("sort") String sort);
+
+    void updateUpdatedAt(@Param("id") Long id);
 
     int countAll(@Param("keyword") String keyword);
 
@@ -25,6 +27,8 @@ public interface DiscussionMapper {
     void updateLikes(@Param("id") Long id, @Param("delta") int delta);
 
     void updateDislikes(@Param("id") Long id, @Param("delta") int delta);
+
+    int softDeleteById(@Param("id") Long id);
 
     int deleteById(@Param("id") Long id);
 }

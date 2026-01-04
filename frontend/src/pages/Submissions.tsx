@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../api'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle2, XCircle, Clock, AlertTriangle, Loader2, FileCode } from 'lucide-react'
 
 export default function Submissions() {
     const [subs, setSubs] = useState<any[]>([])
@@ -71,10 +71,19 @@ export default function Submissions() {
                                                 backgroundColor: s.status === 'AC' ? '#48bb78' : s.status === 'WA' ? '#f56565' : s.status === 'TLE' ? '#ed8936' : s.status === 'RE' ? '#e53e3e' : '#9f7aea',
                                                 color: 'white',
                                                 cursor: 'pointer',
-                                                display: 'inline-block',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '4px',
                                                 minWidth: '40px',
                                                 textAlign: 'center'
                                             }}>
+                                            {s.status === 'AC' ? <CheckCircle2 size={14} /> :
+                                                s.status === 'WA' ? <XCircle size={14} /> :
+                                                    s.status === 'TLE' ? <Clock size={14} /> :
+                                                        s.status === 'RE' ? <AlertTriangle size={14} /> :
+                                                            s.status === 'CE' ? <FileCode size={14} /> :
+                                                                s.status === 'RUNNING' ? <Loader2 size={14} className="spin" /> :
+                                                                    null}
                                             {s.status}
                                         </span>
                                     </Link>

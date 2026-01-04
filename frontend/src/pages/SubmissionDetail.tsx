@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/atom-one-dark.css'
 import api from '../api'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle2, XCircle, Clock, AlertTriangle, FileCode, Loader2 } from 'lucide-react'
 
 export default function SubmissionDetail() {
     const { id } = useParams()
@@ -117,8 +117,14 @@ export default function SubmissionDetail() {
                     alignItems: 'center'
                 }}>
                     <div>
-                        <h3 style={{ margin: 0 }}>
-                            {submission.status === 'AC' ? '✓ 通过' : submission.status === 'WA' ? '✗ 错误答案' : submission.status === 'TLE' ? '⏱ 时间超限' : submission.status === 'RE' ? '⚠ 运行错误' : submission.status === 'RUNNING' ? '⚙ 评测中' : submission.status === 'CE' ? '✎ 编译错误' : submission.status}
+                        <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {submission.status === 'AC' ? <><CheckCircle2 size={24} /> 通过</> :
+                                submission.status === 'WA' ? <><XCircle size={24} /> 错误答案</> :
+                                    submission.status === 'TLE' ? <><Clock size={24} /> 时间超限</> :
+                                        submission.status === 'RE' ? <><AlertTriangle size={24} /> 运行错误</> :
+                                            submission.status === 'RUNNING' ? <><Loader2 size={24} className="spin" /> 评测中</> :
+                                                submission.status === 'CE' ? <><FileCode size={24} /> 编译错误</> :
+                                                    submission.status}
                         </h3>
                     </div>
                     <div style={{ fontSize: '2em', fontWeight: 'bold' }}>{submission.status}</div>
@@ -210,8 +216,18 @@ export default function SubmissionDetail() {
                                                     borderRadius: '4px',
                                                     fontWeight: 'bold',
                                                     backgroundColor: r.status === 'AC' ? '#4caf50' : r.status === 'WA' ? '#f44336' : r.status === 'TLE' ? '#ff9800' : r.status === 'RE' ? '#e91e63' : r.status === 'PENDING' ? '#bdbdbd' : '#9c27b0',
-                                                    color: 'white'
+                                                    color: 'white',
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: '4px'
                                                 }}>
+                                                {r.status === 'AC' ? <CheckCircle2 size={14} /> :
+                                                    r.status === 'WA' ? <XCircle size={14} /> :
+                                                        r.status === 'TLE' ? <Clock size={14} /> :
+                                                            r.status === 'RE' ? <AlertTriangle size={14} /> :
+                                                                r.status === 'PENDING' ? <Loader2 size={14} className="spin" /> :
+                                                                    r.status === 'RUNNING' ? <Loader2 size={14} className="spin" /> :
+                                                                        null}
                                                 {r.status}
                                             </span>
                                         </td>

@@ -6,7 +6,7 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import { AlertCircle, ChevronDown, ChevronUp } from 'lucide-react'
 
-function FoldableContent({ content, limit = 300 }: { content: string, limit?: number }) {
+export function FoldableContent({ content, limit = 300 }: { content: string, limit?: number }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const isLongContent = content.length > limit;
     const displayContent = (isLongContent && !isExpanded) ? content.substring(0, limit) + '...' : content;

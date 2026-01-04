@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import api from '../api'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
@@ -9,6 +9,7 @@ import { AlertCircle } from 'lucide-react'
 
 export default function OtherUserProfile() {
     const { userId } = useParams()
+    const navigate = useNavigate()
     const [searchParams] = useSearchParams()
     const username = searchParams.get('username')
     const [user, setUser] = useState<any>(null)
@@ -26,16 +27,32 @@ export default function OtherUserProfile() {
             setLoading(true)
             setError('')
             try {
+                // 获取当前登录用户，检查是否是自己
+                const profileRes = await api.get('/api/user/profile').catch(() => ({ data: null }));
+                const currentUser = profileRes.data;
+
                 let userRes;
                 if (userId) {
+                    if (currentUser && currentUser.id.toString() === userId) {
+                        navigate('/profile');
+                        return;
+                    }
                     userRes = await api.get(`/api/user/${userId}`);
                 } else if (username) {
+                    if (currentUser && currentUser.username === username) {
+                        navigate('/profile');
+                        return;
+                    }
                     userRes = await api.get(`/api/user/by-username/${username}`);
                 } else {
                     return;
                 }
 
                 const userData = userRes.data;
+                if (currentUser && userData.id === currentUser.id) {
+                    navigate('/profile');
+                    return;
+                }
                 setUser(userData);
                 document.title = `${userData.nickname || userData.username} - SSOJ`;
 
@@ -159,31 +176,34 @@ export default function OtherUserProfile() {
                             <h1 style={{ margin: 0, color: 'white', fontSize: '2.5em' }}>{user.nickname || user.username}</h1>
                             <p className="username" style={{ margin: 0, color: 'rgba(255,255,255,0.9)', fontSize: '1.2em' }}>@{user.username}</p>
                             <div style={{ display: 'flex', gap: '20px', marginTop: '10px', color: 'white' }}>
-                                <div style={{ cursor: 'pointer' }} onClick={() => fetchFollowList('following')}>
+                                <div className="follow-stat-item" onClick={() => fetchFollowList('following')}>
                                     <span style={{ fontWeight: 'bold' }}>{followCounts.following}</span> 关注
                                 </div>
-                                <div style={{ cursor: 'pointer' }} onClick={() => fetchFollowList('followers')}>
+                                <div className="follow-stat-item" onClick={() => fetchFollowList('followers')}>
                                     <span style={{ fontWeight: 'bold' }}>{followCounts.followers}</span> 粉丝
                                 </div>
                             </div>
                         </div>
                         <div style={{ marginLeft: 'auto' }}>
-                            <button
-                                onClick={handleFollow}
-                                style={{
-                                    padding: '8px 24px',
-                                    borderRadius: '20px',
-                                    border: 'none',
-                                    background: isFollowing ? 'rgba(255,255,255,0.2)' : '#667eea',
-                                    color: 'white',
-                                    fontWeight: 'bold',
-                                    cursor: 'pointer',
-                                    backdropFilter: 'blur(5px)',
-                                    transition: 'all 0.3s'
-                                }}
-                            >
-                                {isFollowing ? '已关注' : '+ 关注'}
-                            </button>
+                            {user && (
+                                <button
+                                    onClick={handleFollow}
+                                    style={{
+                                        padding: '8px 24px',
+                                        borderRadius: '20px',
+                                        border: isFollowing ? '1.5px solid rgba(255,255,255,0.8)' : 'none',
+                                        background: isFollowing ? 'rgba(255,255,255,0.25)' : '#667eea',
+                                        color: 'white',
+                                        fontWeight: 'bold',
+                                        cursor: 'pointer',
+                                        backdropFilter: 'blur(8px)',
+                                        transition: 'all 0.3s',
+                                        boxShadow: isFollowing ? 'none' : '0 4px 12px rgba(102, 126, 234, 0.4)'
+                                    }}
+                                >
+                                    {isFollowing ? '已关注' : '+ 关注'}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

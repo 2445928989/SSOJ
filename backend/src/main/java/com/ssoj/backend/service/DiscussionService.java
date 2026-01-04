@@ -22,9 +22,9 @@ public class DiscussionService {
         return buildTwoLevelTree(allDiscussions);
     }
 
-    public List<Discussion> getAllDiscussions(int page, int size, String keyword) {
+    public List<Discussion> getAllDiscussions(int page, int size, String keyword, String sort) {
         int offset = (page - 1) * size;
-        return discussionMapper.findAllPaged(offset, size, keyword);
+        return discussionMapper.findAllPaged(offset, size, keyword, sort);
     }
 
     public Discussion getDiscussionById(Long id) {
@@ -86,6 +86,16 @@ public class DiscussionService {
         return current;
     }
 
+    private Discussion findRootForUpdate(Long id) {
+        Discussion current = discussionMapper.findById(id);
+        int depth = 0;
+        while (current != null && current.getParentId() != null && depth < 100) {
+            current = discussionMapper.findById(current.getParentId());
+            depth++;
+        }
+        return current;
+    }
+
     public int getTotalDiscussionCount(String keyword) {
         return discussionMapper.countAll(keyword);
     }
@@ -93,10 +103,16 @@ public class DiscussionService {
     public void addDiscussion(Discussion discussion) {
         discussionMapper.insert(discussion);
 
-        // 如果是回复，发送通知给父讨论的作者
+        // 如果是回复，发送通知给父讨论的作者，并更新根讨论的活跃时间
         if (discussion.getParentId() != null) {
             Discussion parent = discussionMapper.findById(discussion.getParentId());
             if (parent != null) {
+                // 找到根讨论并更新其 updated_at
+                Discussion root = findRootForUpdate(discussion.getParentId());
+                if (root != null) {
+                    discussionMapper.updateUpdatedAt(root.getId());
+                }
+
                 String preview = discussion.getContent();
                 if (preview.length() > 50)
                     preview = preview.substring(0, 50) + "...";
@@ -111,6 +127,13 @@ public class DiscussionService {
     }
 
     public void deleteDiscussion(Long id) {
-        discussionMapper.deleteById(id);
+        Discussion d = discussionMapper.findById(id);
+        if (d != null && d.getParentId() == null) {
+            // 如果是根讨论，直接硬删除（级联删除所有回复）
+            discussionMapper.deleteById(id);
+        } else {
+            // 如果是回复，软删除（保留节点以维持树结构）
+            discussionMapper.softDeleteById(id);
+        }
     }
 }

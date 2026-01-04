@@ -92,11 +92,12 @@ export default function App() {
                     <Link to="/submissions">提交</Link>
                     <Link to="/leaderboard">排行榜</Link>
                     <Link to="/discussions">讨论</Link>
+                    <Link to="/announcements">公告</Link>
+                    {user && <NotificationDropdown />}
                 </div>
                 <div className="nav-right">
                     {user ? (
                         <>
-                            <NotificationDropdown />
                             <Link to="/profile" className="nav-user-info" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: 'inherit' }}>
                                 {user.avatar ? (
                                     <img src={user.avatar} alt="avatar" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #eee' }} />

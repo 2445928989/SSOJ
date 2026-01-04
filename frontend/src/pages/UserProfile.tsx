@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, Camera } from 'lucide-react'
 
 export default function UserProfile() {
     const [user, setUser] = useState<any>(null)
@@ -282,8 +282,8 @@ export default function UserProfile() {
                                 )}
                                 <label htmlFor="avatar-input"
                                     title="支持 JPG/PNG 格式，最大 2MB"
-                                    style={{ position: 'absolute', bottom: '5px', right: '5px', background: 'white', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.3)', fontSize: '16px' }}>
-                                    📷
+                                    style={{ position: 'absolute', bottom: '5px', right: '5px', background: 'white', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.3)', color: '#666' }}>
+                                    <Camera size={16} />
                                     <input id="avatar-input" type="file" accept="image/*" onChange={handleAvatarUpload} style={{ display: 'none' }} disabled={isUploading} />
                                 </label>
                                 {isUploading && (
@@ -296,10 +296,10 @@ export default function UserProfile() {
                                 <h1 style={{ margin: 0, color: 'white', fontSize: '2.5em' }}>{user.nickname || user.username}</h1>
                                 <p className="username" style={{ margin: 0, color: 'rgba(255,255,255,0.9)', fontSize: '1.2em' }}>@{user.username}</p>
                                 <div style={{ display: 'flex', gap: '20px', marginTop: '10px', color: 'white' }}>
-                                    <div style={{ cursor: 'pointer' }} onClick={() => fetchFollowList('following')}>
+                                    <div className="follow-stat-item" onClick={() => fetchFollowList('following')}>
                                         <span style={{ fontWeight: 'bold' }}>{followCounts.following}</span> 关注
                                     </div>
-                                    <div style={{ cursor: 'pointer' }} onClick={() => fetchFollowList('followers')}>
+                                    <div className="follow-stat-item" onClick={() => fetchFollowList('followers')}>
                                         <span style={{ fontWeight: 'bold' }}>{followCounts.followers}</span> 粉丝
                                     </div>
                                 </div>
