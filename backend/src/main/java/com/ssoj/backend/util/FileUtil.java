@@ -90,6 +90,21 @@ public class FileUtil {
         }
     }
 
+    /**
+     * 删除目录及其内容
+     */
+    public static void deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            File[] files = dir.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    deleteDir(f);
+                }
+            }
+        }
+        dir.delete();
+    }
+
     private static String getLanguageExtension(String language) {
         return switch (language) {
             case "cpp", "c++" -> "cpp";

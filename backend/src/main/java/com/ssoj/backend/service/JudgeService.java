@@ -85,7 +85,24 @@ public class JudgeService {
             // 2. 保存代码到临时文件
             String codePath = FileUtil.saveSubmissionCode(submissionId, submission.getCode(), submission.getLanguage());
 
-            // 3. 获取所有测试用例
+            // 3. 编译代码（如果是编译型语言）
+            String executablePath = null;
+            if (submission.getLanguage().equals("cpp") || submission.getLanguage().equals("c")
+                    || submission.getLanguage().equals("c++")) {
+                String compileResultJson = judgerInvoker.compile(FileUtil.getAbsolutePath(codePath),
+                        submission.getLanguage());
+                JsonNode compileNode = judgerInvoker.parseResult(compileResultJson);
+                if (!compileNode.get("status").asText().equals("OK")) {
+                    String compilerMessage = compileNode.has("compiler_message")
+                            ? compileNode.get("compiler_message").asText()
+                            : "Compilation failed";
+                    submissionService.updateJudgeResult(submissionId, "CE", 0, 0, compilerMessage);
+                    return;
+                }
+                executablePath = compileNode.get("executable_path").asText();
+            }
+
+            // 4. 获取所有测试用例
             List<TestCase> testCases = testCaseMapper.findByProblemId(submission.getProblemId());
 
             if (testCases.isEmpty()) {
@@ -98,7 +115,8 @@ public class JudgeService {
             AtomicReference<String> overallStatus = new AtomicReference<>("AC");
             AtomicReference<String> overallErrorMessage = new AtomicReference<>(null);
 
-            // 4. 并行运行测试用例
+            // 5. 并行运行测试用例
+            final String finalExePath = executablePath;
             List<CompletableFuture<Result>> futures = testCases.stream()
                     .map(tc -> CompletableFuture.supplyAsync(() -> {
                         String inputPath = FileUtil.getAbsolutePath(tc.getInputPath());
@@ -111,7 +129,8 @@ public class JudgeService {
                                     inputPath,
                                     outputPath,
                                     problem.getTimeLimit(),
-                                    problem.getMemoryLimit());
+                                    problem.getMemoryLimit(),
+                                    finalExePath);
 
                             JsonNode resultNode = judgerInvoker.parseResult(jsonResult);
                             String status = resultNode.get("status").asText();
@@ -172,7 +191,16 @@ public class JudgeService {
             // 等待所有测试点完成
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
-            // 5. 更新最终结果
+            // 6. 清理编译产生的可执行文件及其目录
+            if (finalExePath != null) {
+                java.io.File exeFile = new java.io.File(finalExePath);
+                java.io.File tempDir = exeFile.getParentFile();
+                if (tempDir != null && tempDir.getName().startsWith("ssoj_")) {
+                    FileUtil.deleteDir(tempDir);
+                }
+            }
+
+            // 7. 更新最终结果
             submissionService.updateJudgeResult(submissionId, overallStatus.get(), (int) maxTimeUsed.get(),
                     (int) maxMemoryUsed.get(), overallErrorMessage.get());
 

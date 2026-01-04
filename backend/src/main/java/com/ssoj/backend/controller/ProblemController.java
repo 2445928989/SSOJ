@@ -205,6 +205,23 @@ public class ProblemController {
         }
     }
 
+    /**
+     * POST /api/problem/{id}/testcases/add
+     * 添加单个测试用例
+     */
+    @PostMapping("/api/problem/{id}/testcases/add")
+    public Object addTestCase(@PathVariable("id") Long id,
+            @RequestBody Map<String, String> body,
+            jakarta.servlet.http.HttpSession session) {
+        checkAdmin(session);
+        try {
+            problemService.addTestCase(id, body.get("inputContent"), body.get("outputContent"));
+            return Map.of("success", true);
+        } catch (Exception e) {
+            return Map.of("success", false, "error", e.getMessage());
+        }
+    }
+
     private void checkAdmin(jakarta.servlet.http.HttpSession session) {
         if (session == null || session.getAttribute("userId") == null) {
             throw new org.springframework.web.server.ResponseStatusException(

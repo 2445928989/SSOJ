@@ -262,11 +262,7 @@ public class ProblemService {
             try {
                 String input = FileUtil.readFile(tc.getInputPath());
                 String output = FileUtil.readFile(tc.getOutputPath());
-                // 限制长度
-                if (input.length() > 1000)
-                    input = input.substring(0, 1000) + "...";
-                if (output.length() > 1000)
-                    output = output.substring(0, 1000) + "...";
+                // 不再限制长度，让管理员看到完整内容
                 tc.setInputContent(input);
                 tc.setOutputContent(output);
             } catch (Exception e) {
@@ -424,5 +420,28 @@ public class ProblemService {
 
         // 删除数据库记录
         testCaseMapper.deleteById(testCaseId);
+    }
+
+    /**
+     * 添加单个测试用例
+     */
+    public void addTestCase(Long problemId, String inputContent, String outputContent) throws IOException {
+        Problem problem = problemMapper.findById(problemId);
+        if (problem == null) {
+            throw new RuntimeException("题目不存在: " + problemId);
+        }
+
+        // 生成唯一标识符
+        String identifier = "manual_" + System.currentTimeMillis();
+        String inputPath = FileUtil.saveTestCaseFile(problemId, identifier, "in",
+                (inputContent != null ? inputContent : "").getBytes());
+        String outputPath = FileUtil.saveTestCaseFile(problemId, identifier, "out",
+                (outputContent != null ? outputContent : "").getBytes());
+
+        TestCase tc = new TestCase();
+        tc.setProblemId(problemId);
+        tc.setInputPath(inputPath);
+        tc.setOutputPath(outputPath);
+        testCaseMapper.insert(tc);
     }
 }

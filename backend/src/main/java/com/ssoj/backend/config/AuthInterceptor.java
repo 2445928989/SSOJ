@@ -25,15 +25,24 @@ public class AuthInterceptor implements HandlerInterceptor {
         if (path.equals("/api/user/login") || path.equals("/api/user/register") || path.equals("/api/user/list")
                 || path.startsWith("/api/user/avatar/") || path.startsWith("/api/problem/")
                 || path.startsWith("/api/tag")
-                || path.startsWith("/api/submission") || path.equals("/api/announcement/list")) {
+                || path.startsWith("/api/submission") || path.equals("/api/announcement/list")
+                || path.startsWith("/api/discussion/problem/") || path.equals("/api/discussion/list")
+                || path.matches("/api/discussion/\\d+") || path.equals("/api/votes/status")
+                || path.matches("/api/user/\\d+") || path.matches("/api/user/\\d+/submission-heatmap")) {
             return true;
         }
 
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write("{\"success\":false,\"message\":\"请先登录\",\"error\":\"Unauthorized\"}");
+            // 如果是 API 请求，返回 JSON 格式的 401 错误
+            if (path.startsWith("/api/")) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"success\":false,\"message\":\"请先登录\",\"error\":\"Unauthorized\"}");
+                return false;
+            }
+            // 其他请求（如果有的话）
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "请先登录");
             return false;
         }
         return true;

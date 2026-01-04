@@ -20,7 +20,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/api/**")
                 .excludePathPatterns("/api/user/login", "/api/user/register", "/api/problem/**", "/api/submission/**",
                         "/api/tag/**", "/api/announcement/list", "/api/user/avatar/**", "/api/discussion/problem/**",
-                        "/api/discussion/list", "/error");
+                        "/api/discussion/list", "/api/discussion/{id}", "/api/votes/status", "/api/user/list",
+                        "/api/user/{userId}", "/api/user/{userId}/submission-heatmap", "/error");
     }
 
     @Override

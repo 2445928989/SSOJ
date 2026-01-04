@@ -5,24 +5,39 @@ using namespace std;
 void solve() {
     int n;
     cin >> n;
-    int f0 = 1, f1 = 1;
-    if (n <= 2) {
-        cout << 1;
-        return;
+    bool ok = 0;
+    int cnt = 0;
+    for (int i = 0; i < n; i++) {
+        int t;
+        cin >> t;
+        if (t == 1) {
+            if (!ok) {
+                cnt++;
+            }
+        } else {
+            ok = 1;
+        }
     }
-    for (int i = 3; i <= n; i++) {
-        int t = f1;
-        f1 = f1 + f0;
-        f0 = t;
+    if (cnt == n) {
+        if (cnt % 2) {
+            cout << "CandidateMaster\n";
+        } else {
+            cout << "LegendaryGrandmaster\n";
+        }
+    } else {
+        if (cnt % 2) {
+            cout << "LegendaryGrandmaster\n";
+        } else {
+            cout << "CandidateMaster\n";
+        }
     }
-    cout << f1;
 }
 
 signed main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
     int T = 1;
-    // cin >> T;
+    cin >> T;
     while (T--) {
         solve();
     }
