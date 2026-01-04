@@ -4,7 +4,16 @@ import com.ssoj.backend.dao.DiscussionMapper;
 import com.ssoj.backend.entity.Discussion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+package com.ssoj.backend.service;
+
+import com.ssoj.backend.dao.DiscussionMapper;
+import com.ssoj.backend.entity.Discussion;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class DiscussionService {
@@ -34,16 +43,23 @@ public class DiscussionService {
     }
 
     private List<Discussion> buildTree(List<Discussion> discussions) {
-        List<Discussion> rootDiscussions = discussions.stream()
-                .filter(d -> d.getParentId() == null)
-                .toList();
-
-        for (Discussion root : rootDiscussions) {
-            root.setReplies(discussions.stream()
-                    .filter(d -> root.getId().equals(d.getParentId()))
-                    .toList());
+        Map<Long, Discussion> map = discussions.stream()
+                .collect(Collectors.toMap(Discussion::getId, d -> d));
+        List<Discussion> roots = new ArrayList<>();
+        for (Discussion d : discussions) {
+            if (d.getParentId() == null) {
+                roots.add(d);
+            } else {
+                Discussion parent = map.get(d.getParentId());
+                if (parent != null) {
+                    if (parent.getReplies() == null) {
+                        parent.setReplies(new ArrayList<>());
+                    }
+                    parent.getReplies().add(d);
+                }
+            }
         }
-        return rootDiscussions;
+        return roots;
     }
 
     public int getTotalDiscussionCount(String keyword) {

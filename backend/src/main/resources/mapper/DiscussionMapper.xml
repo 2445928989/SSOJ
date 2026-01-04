@@ -20,7 +20,7 @@
 
     <select id="findByProblemId" resultMap="DiscussionResultMap"> SELECT d.*, u.username,
         u.nickname, u.avatar FROM discussion d LEFT JOIN user u ON d.user_id = u.id WHERE
-        d.problem_id = #{problemId} AND d.parent_id IS NULL ORDER BY d.created_at DESC </select>
+        d.problem_id = #{problemId} ORDER BY d.created_at DESC </select>
 
     <select id="findByParentId" resultMap="DiscussionResultMap"> SELECT d.*, u.username, u.nickname,
         u.avatar FROM discussion d LEFT JOIN user u ON d.user_id = u.id WHERE d.parent_id =

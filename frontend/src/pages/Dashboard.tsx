@@ -10,6 +10,7 @@ export default function Dashboard() {
     const [user, setUser] = useState<any>(null)
     const [announcements, setAnnouncements] = useState<any[]>([])
     const [problemStats, setProblemStats] = useState<any>(null)
+    const [heatmap, setHeatmap] = useState<Record<string, number>>({})
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [showAnnForm, setShowAnnForm] = useState(false)
@@ -21,15 +22,17 @@ export default function Dashboard() {
         Promise.all([
             api.get('/api/user/profile').catch(() => ({ data: null })),
             api.get('/api/problem/list?page=1&size=5'),
-            api.get('/api/announcement/list')
+            api.get('/api/announcement/list'),
+            api.get('/api/user/submission-heatmap').catch(() => ({ data: {} }))
         ])
-            .then(([userRes, probRes, annRes]) => {
+            .then(([userRes, probRes, annRes, heatmapRes]) => {
                 setUser(userRes.data)
                 setProblemStats({
                     total: probRes.data.total,
                     problems: probRes.data.data || []
                 })
                 setAnnouncements(annRes.data.data || [])
+                setHeatmap(heatmapRes.data.data || {})
             })
             .catch(e => setError(e.response?.data?.error || '加载失败'))
             .finally(() => setLoading(false))
@@ -200,19 +203,61 @@ export default function Dashboard() {
                 {user && (
                     <div className="section">
                         <h2>个人信息</h2>
-                        <div className="user-info-card">
-                            <div className="user-info-item">
-                                <span className="label">用户名：</span>
-                                <span className="value">{user.username}</span>
+                        <div className="user-dashboard-card">
+                            <div className="user-card-header" style={{
+                                backgroundImage: user.backgroundImage ? `url(${user.backgroundImage})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                height: '100px',
+                                borderRadius: '8px 8px 0 0',
+                                position: 'relative'
+                            }}>
+                                <div className="user-card-avatar-wrapper">
+                                    {user.avatar ? (
+                                        <img src={user.avatar} alt="avatar" className="user-card-avatar" />
+                                    ) : (
+                                        <div className="user-card-avatar-placeholder">
+                                            {user.username.charAt(0).toUpperCase()}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                            <div className="user-info-item">
-                                <span className="label">邮箱：</span>
-                                <span className="value">{user.email}</span>
+                            <div className="user-card-body">
+                                <div className="user-card-info">
+                                    <h3 className="user-card-name">{user.nickname || user.username}</h3>
+                                    <p className="user-card-username">@{user.username}</p>
+                                    {user.role === 'ADMIN' && (
+                                        <div className="admin-badge">管理员</div>
+                                    )}
+                                </div>
+
+                                {Object.keys(heatmap).length > 0 && (
+                                    <div className="dashboard-heatmap-container">
+                                        <div className="heatmap-grid">
+                                            {Object.entries(heatmap)
+                                                .sort()
+                                                .slice(-90) // 只显示最近90天，避免在侧边栏太长
+                                                .map(([date, count]) => {
+                                                    const intensity = Math.min(count / 5, 1)
+                                                    const colors = ['#ebedf0', '#c6e48b', '#7bc96f', '#239a3b', '#196127']
+                                                    const colorIdx = Math.floor(intensity * (colors.length - 1))
+                                                    return (
+                                                        <div
+                                                            key={date}
+                                                            className="heatmap-cell"
+                                                            style={{ backgroundColor: colors[colorIdx] }}
+                                                            title={`${date}: ${count} 次提交`}
+                                                        />
+                                                    )
+                                                })}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="user-card-actions">
+                                    <Link to="/profile" className="edit-profile-btn">个人主页</Link>
+                                </div>
                             </div>
-                            {user.role === 'ADMIN' && (
-                                <div className="admin-badge">管理员</div>
-                            )}
-                            <Link to="/profile" className="edit-profile-btn">编辑资料</Link>
                         </div>
                     </div>
                 )}
@@ -395,26 +440,82 @@ export default function Dashboard() {
                     padding: 20px;
                 }
 
-                .user-info-card {
+                .user-dashboard-card {
+                    background: white;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                }
+
+                .user-card-avatar-wrapper {
+                    position: absolute;
+                    bottom: -30px;
+                    left: 20px;
+                    padding: 3px;
+                    background: white;
+                    border-radius: 50%;
+                }
+
+                .user-card-avatar {
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    display: block;
+                }
+
+                .user-card-avatar-placeholder {
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 50%;
+                    background: #667eea;
+                    color: white;
                     display: flex;
-                    flex-direction: column;
-                    gap: 15px;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 24px;
+                    font-weight: bold;
                 }
 
-                .user-info-item {
-                    display: flex;
-                    justify-content: space-between;
-                    padding: 10px 0;
-                    border-bottom: 1px solid #e0e0e0;
+                .user-card-body {
+                    padding: 40px 20px 20px;
                 }
 
-                .user-info-item .label {
-                    color: #666;
-                    font-weight: 500;
-                }
-
-                .user-info-item .value {
+                .user-card-name {
+                    margin: 0;
+                    font-size: 1.2em;
                     color: #333;
+                }
+
+                .user-card-username {
+                    margin: 0;
+                    color: #666;
+                    font-size: 0.9em;
+                }
+
+                .dashboard-heatmap-container {
+                    margin: 15px 0;
+                    padding: 10px;
+                    background: #f8f9fa;
+                    border-radius: 4px;
+                }
+
+                .heatmap-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, 12px);
+                    gap: 3px;
+                    justify-content: center;
+                }
+
+                .heatmap-cell {
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 2px;
+                }
+
+                .user-card-actions {
+                    margin-top: 15px;
                 }
 
                 .admin-badge {

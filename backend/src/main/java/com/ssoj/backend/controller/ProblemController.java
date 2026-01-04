@@ -1,11 +1,16 @@
 package com.ssoj.backend.controller;
 
 import com.ssoj.backend.entity.Problem;
+import com.ssoj.backend.entity.User;
 import com.ssoj.backend.service.ProblemService;
+import com.ssoj.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +24,7 @@ public class ProblemController {
     private ProblemService problemService;
 
     @Autowired
-    private com.ssoj.backend.service.UserService userService;
+    private UserService userService;
 
     /**
      * POST /api/problem/{id}/testcases
@@ -30,7 +35,6 @@ public class ProblemController {
             @RequestParam("file") MultipartFile file,
             jakarta.servlet.http.HttpSession session) {
         checkAdmin(session);
-        System.out.println("DEBUG: Received upload request for problem: " + id);
         try {
             problemService.uploadTestCases(id, file);
             return Map.of("success", true);
@@ -222,16 +226,14 @@ public class ProblemController {
         }
     }
 
-    private void checkAdmin(jakarta.servlet.http.HttpSession session) {
+    private void checkAdmin(HttpSession session) {
         if (session == null || session.getAttribute("userId") == null) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                    org.springframework.http.HttpStatus.UNAUTHORIZED, "未登录");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "未登录");
         }
         Long userId = (Long) session.getAttribute("userId");
-        com.ssoj.backend.entity.User user = userService.getUserById(userId);
+        User user = userService.getUserById(userId);
         if (user == null || !"ADMIN".equals(user.getRole())) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                    org.springframework.http.HttpStatus.FORBIDDEN, "无权操作");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "无权操作");
         }
     }
 }

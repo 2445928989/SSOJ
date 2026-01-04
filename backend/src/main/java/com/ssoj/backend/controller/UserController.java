@@ -6,6 +6,14 @@ import com.ssoj.backend.service.EmailService;
 import com.ssoj.backend.service.VerificationCodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import MultipartFile;
+
+import HttpServletRequest;
+import HttpSession;
+import File;
+import Collections;
+import List;
+import Map;
 
 /**
  * 用户相关 REST API
@@ -32,21 +40,21 @@ public class UserController {
      */
     @PostMapping("/upload-avatar")
     public Object uploadAvatar(
-            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
-            jakarta.servlet.http.HttpServletRequest httpRequest) {
-        jakarta.servlet.http.HttpSession session = httpRequest.getSession(false);
+            @RequestParam("file") MultipartFile file,
+            HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
-            return java.util.Map.of("success", false, "message", "未登录");
+            return Map.of("success", false, "message", "未登录");
         }
         Long userId = (Long) session.getAttribute("userId");
 
         if (file.isEmpty()) {
-            return java.util.Map.of("success", false, "message", "文件不能为空");
+            return Map.of("success", false, "message", "文件不能为空");
         }
 
         try {
             // 确保目录存在
-            java.io.File dir = new java.io.File(uploadPath);
+            File dir = new File(uploadPath);
             if (!dir.exists()) {
                 dir.mkdirs();
             }
@@ -55,16 +63,16 @@ public class UserController {
             String originalFilename = file.getOriginalFilename();
             String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
             String filename = userId + "_" + System.currentTimeMillis() + extension;
-            java.io.File dest = new java.io.File(uploadPath + filename);
+            File dest = new File(uploadPath + filename);
             file.transferTo(dest);
 
             // 更新数据库
             String avatarUrl = "/api/user/avatar/" + filename;
             userService.updateAvatar(userId, avatarUrl);
 
-            return java.util.Map.of("success", true, "url", avatarUrl);
+            return Map.of("success", true, "url", avatarUrl);
         } catch (Exception e) {
-            return java.util.Map.of("success", false, "message", "上传失败: " + e.getMessage());
+            return Map.of("success", false, "message", "上传失败: " + e.getMessage());
         }
     }
 
@@ -74,21 +82,21 @@ public class UserController {
      */
     @PostMapping("/upload-background")
     public Object uploadBackground(
-            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
-            jakarta.servlet.http.HttpServletRequest httpRequest) {
-        jakarta.servlet.http.HttpSession session = httpRequest.getSession(false);
+            @RequestParam("file") MultipartFile file,
+            HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
-            return java.util.Map.of("success", false, "message", "未登录");
+            return Map.of("success", false, "message", "未登录");
         }
         Long userId = (Long) session.getAttribute("userId");
 
         if (file.isEmpty()) {
-            return java.util.Map.of("success", false, "message", "文件不能为空");
+            return Map.of("success", false, "message", "文件不能为空");
         }
 
         try {
             // 确保目录存在
-            java.io.File dir = new java.io.File(uploadPath);
+            File dir = new File(uploadPath);
             if (!dir.exists()) {
                 dir.mkdirs();
             }
@@ -97,16 +105,16 @@ public class UserController {
             String originalFilename = file.getOriginalFilename();
             String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
             String filename = "bg_" + userId + "_" + System.currentTimeMillis() + extension;
-            java.io.File dest = new java.io.File(uploadPath + filename);
+            File dest = new File(uploadPath + filename);
             file.transferTo(dest);
 
             // 更新数据库
             String backgroundUrl = "/api/user/avatar/" + filename; // 复用 avatar 的路径映射
             userService.updateBackgroundImage(userId, backgroundUrl);
 
-            return java.util.Map.of("success", true, "url", backgroundUrl);
+            return Map.of("success", true, "url", backgroundUrl);
         } catch (Exception e) {
-            return java.util.Map.of("success", false, "message", "上传失败: " + e.getMessage());
+            return Map.of("success", false, "message", "上传失败: " + e.getMessage());
         }
     }
 
@@ -115,17 +123,17 @@ public class UserController {
      * 发送注册验证码
      */
     @PostMapping("/send-code")
-    public Object sendCode(@RequestBody java.util.Map<String, String> request) {
+    public Object sendCode(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         if (email == null || !email.contains("@")) {
-            return java.util.Map.of("success", false, "message", "无效的邮箱地址");
+            return Map.of("success", false, "message", "无效的邮箱地址");
         }
         String code = verificationCodeService.generateCode(email);
         try {
             emailService.sendVerificationCode(email, code);
-            return java.util.Map.of("success", true, "message", "验证码已发送");
+            return Map.of("success", true, "message", "验证码已发送");
         } catch (Exception e) {
-            return java.util.Map.of("success", false, "message", "发送失败: " + e.getMessage());
+            return Map.of("success", false, "message", "发送失败: " + e.getMessage());
         }
     }
 
@@ -134,17 +142,17 @@ public class UserController {
      * 发送重置密码验证码
      */
     @PostMapping("/send-reset-code")
-    public Object sendResetCode(@RequestBody java.util.Map<String, String> request) {
+    public Object sendResetCode(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         if (email == null || !email.contains("@")) {
-            return java.util.Map.of("success", false, "message", "无效的邮箱地址");
+            return Map.of("success", false, "message", "无效的邮箱地址");
         }
         String code = verificationCodeService.generateCode(email);
         try {
             emailService.sendVerificationCode(email, code);
-            return java.util.Map.of("success", true, "message", "验证码已发送");
+            return Map.of("success", true, "message", "验证码已发送");
         } catch (Exception e) {
-            return java.util.Map.of("success", false, "message", "发送失败: " + e.getMessage());
+            return Map.of("success", false, "message", "发送失败: " + e.getMessage());
         }
     }
 
@@ -153,20 +161,20 @@ public class UserController {
      * 重置密码
      */
     @PostMapping("/reset-password")
-    public Object resetPassword(@RequestBody java.util.Map<String, String> request) {
+    public Object resetPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         String code = request.get("code");
         String newPassword = request.get("newPassword");
 
         if (!verificationCodeService.verifyCode(email, code)) {
-            return java.util.Map.of("success", false, "message", "验证码错误或已过期");
+            return Map.of("success", false, "message", "验证码错误或已过期");
         }
 
         try {
             userService.resetPassword(email, newPassword);
-            return java.util.Map.of("success", true, "message", "密码重置成功");
+            return Map.of("success", true, "message", "密码重置成功");
         } catch (Exception e) {
-            return java.util.Map.of("success", false, "message", e.getMessage());
+            return Map.of("success", false, "message", e.getMessage());
         }
     }
 
@@ -177,19 +185,19 @@ public class UserController {
      * Response: {success, message, data}
      */
     @PostMapping("/register")
-    public Object register(@RequestBody java.util.Map<String, String> request) {
+    public Object register(@RequestBody Map<String, String> request) {
         String username = request.get("username");
         String password = request.get("password");
         String email = request.get("email");
         String code = request.get("code");
 
         if (!verificationCodeService.verifyCode(email, code)) {
-            return java.util.Map.of("success", false, "message", "验证码错误或已过期");
+            return Map.of("success", false, "message", "验证码错误或已过期");
         }
 
         User user = userService.register(username, password, email);
         user.setPassword(null);
-        return java.util.Map.of("success", true, "user", user);
+        return Map.of("success", true, "user", user);
     }
 
     /**
@@ -199,16 +207,16 @@ public class UserController {
      * Response: {success, user}
      */
     @PostMapping("/login")
-    public Object login(@RequestBody java.util.Map<String, String> request,
-            jakarta.servlet.http.HttpServletRequest httpRequest) {
+    public Object login(@RequestBody Map<String, String> request,
+            HttpServletRequest httpRequest) {
         String identifier = request.get("username"); // 保持 key 为 username 以兼容前端，但逻辑上是 identifier
         String password = request.get("password");
         User user = userService.login(identifier, password);
         // 在 session 中存 userId
-        jakarta.servlet.http.HttpSession session = httpRequest.getSession(true);
+        HttpSession session = httpRequest.getSession(true);
         session.setAttribute("userId", user.getId());
         user.setPassword(null);
-        return java.util.Map.of("success", true, "user", user);
+        return Map.of("success", true, "user", user);
     }
 
     /**
@@ -216,15 +224,15 @@ public class UserController {
      * 获取当前用户信息（需要登录）
      */
     @GetMapping("/profile")
-    public Object getProfile(jakarta.servlet.http.HttpServletRequest httpRequest) {
-        jakarta.servlet.http.HttpSession session = httpRequest.getSession(false);
+    public Object getProfile(HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
-            return org.springframework.http.ResponseEntity.status(401).body(java.util.Map.of("error", "未登录"));
+            return org.springframework.http.ResponseEntity.status(401).body(Map.of("error", "未登录"));
         }
         Long userId = (Long) session.getAttribute("userId");
         User user = userService.getUserById(userId);
         if (user == null) {
-            return org.springframework.http.ResponseEntity.status(404).body(java.util.Map.of("error", "用户不存在"));
+            return org.springframework.http.ResponseEntity.status(404).body(Map.of("error", "用户不存在"));
         }
         user.setPassword(null);
         return user;
@@ -235,8 +243,8 @@ public class UserController {
      * 更新用户个人资料
      */
     @PutMapping("/profile")
-    public Object updateProfile(@RequestBody java.util.Map<String, String> request,
-            jakarta.servlet.http.HttpSession session) {
+    public Object updateProfile(@RequestBody Map<String, String> request,
+            HttpSession session) {
         if (session == null || session.getAttribute("userId") == null) {
             throw new org.springframework.web.server.ResponseStatusException(
                     org.springframework.http.HttpStatus.UNAUTHORIZED, "未登录");
@@ -248,7 +256,7 @@ public class UserController {
         String profile = request.get("profile");
 
         boolean ok = userService.updateProfile(userId, nickname, phone, profile);
-        return java.util.Map.of("success", ok);
+        return Map.of("success", ok);
     }
 
     /**
@@ -256,8 +264,8 @@ public class UserController {
      * 修改密码
      */
     @PutMapping("/change-password")
-    public Object changePassword(@RequestBody java.util.Map<String, String> request,
-            jakarta.servlet.http.HttpSession session) {
+    public Object changePassword(@RequestBody Map<String, String> request,
+            HttpSession session) {
         if (session == null || session.getAttribute("userId") == null) {
             throw new org.springframework.web.server.ResponseStatusException(
                     org.springframework.http.HttpStatus.UNAUTHORIZED, "未登录");
@@ -269,19 +277,19 @@ public class UserController {
 
         try {
             boolean ok = userService.changePassword(userId, oldPassword, newPassword);
-            return java.util.Map.of("success", ok);
+            return Map.of("success", ok);
         } catch (Exception e) {
-            return org.springframework.http.ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+            return org.springframework.http.ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
     @PostMapping("/logout")
-    public Object logout(jakarta.servlet.http.HttpServletRequest httpRequest) {
-        jakarta.servlet.http.HttpSession session = httpRequest.getSession(false);
+    public Object logout(HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
         if (session != null) {
             session.invalidate();
         }
-        return java.util.Map.of("success", true);
+        return Map.of("success", true);
     }
 
     /**
@@ -291,7 +299,7 @@ public class UserController {
      */
     @GetMapping("/list")
     public Object listUsers(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int size) {
-        java.util.List<User> users = userService.getAllUsers();
+        List<User> users = userService.getAllUsers();
         users.forEach(u -> {
             u.setPassword(null);
             u.setEmail(null);
@@ -301,9 +309,9 @@ public class UserController {
         int total = users.size();
         int start = (page - 1) * size;
         int end = Math.min(start + size, users.size());
-        java.util.List<User> paged = users.subList(start, end);
+        List<User> paged = users.subList(start, end);
 
-        return java.util.Map.of("data", paged, "total", total);
+        return Map.of("data", paged, "total", total);
     }
 
     /**
@@ -329,8 +337,8 @@ public class UserController {
      */
     @GetMapping("/{userId}/submission-heatmap")
     public Object getUserSubmissionHeatmap(@PathVariable Long userId) {
-        java.util.Map<String, Integer> heatmap = userService.getSubmissionHeatmap(userId);
-        return java.util.Map.of("data", heatmap);
+        Map<String, Integer> heatmap = userService.getSubmissionHeatmap(userId);
+        return Map.of("data", heatmap);
     }
 
     /**
@@ -338,15 +346,15 @@ public class UserController {
      * 获取当前用户已通过的题目ID列表（需要登录）
      */
     @GetMapping("/solved-problems")
-    public Object getSolvedProblems(jakarta.servlet.http.HttpServletRequest httpRequest) {
-        jakarta.servlet.http.HttpSession session = httpRequest.getSession(false);
+    public Object getSolvedProblems(HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
             // 未登录返回空列表
-            return java.util.Map.of("data", java.util.Collections.emptyList());
+            return Map.of("data", Collections.emptyList());
         }
         Long userId = (Long) session.getAttribute("userId");
-        java.util.List<Long> solvedProblemIds = userService.getSolvedProblems(userId);
-        return java.util.Map.of("data", solvedProblemIds);
+        List<Long> solvedProblemIds = userService.getSolvedProblems(userId);
+        return Map.of("data", solvedProblemIds);
     }
 
     /**
@@ -355,13 +363,13 @@ public class UserController {
      * 返回 {yyyy-MM-dd: count, ...}
      */
     @GetMapping("/submission-heatmap")
-    public Object getSubmissionHeatmap(jakarta.servlet.http.HttpServletRequest httpRequest) {
-        jakarta.servlet.http.HttpSession session = httpRequest.getSession(false);
+    public Object getSubmissionHeatmap(HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
             throw new RuntimeException("未登录");
         }
         Long userId = (Long) session.getAttribute("userId");
-        java.util.Map<String, Integer> heatmap = userService.getSubmissionHeatmap(userId);
-        return java.util.Map.of("data", heatmap);
+        Map<String, Integer> heatmap = userService.getSubmissionHeatmap(userId);
+        return Map.of("data", heatmap);
     }
 }

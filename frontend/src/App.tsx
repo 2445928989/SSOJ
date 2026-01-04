@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom'
 import api from './api'
-import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'

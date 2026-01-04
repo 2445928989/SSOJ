@@ -23,11 +23,6 @@ public interface UserMapper {
     User findByUsername(@Param("username") String username);
 
     /**
-     * 根据昵称查询用户
-     */
-    User findByNickname(@Param("nickname") String nickname);
-
-    /**
      * 根据邮箱查询用户
      */
     User findByEmail(@Param("email") String email);

@@ -1,6 +1,5 @@
 package com.ssoj.backend.controller;
 
-import com.ssoj.backend.entity.User;
 import com.ssoj.backend.entity.Vote;
 import com.ssoj.backend.service.VoteService;
 import jakarta.servlet.http.HttpSession;

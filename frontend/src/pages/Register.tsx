@@ -267,7 +267,7 @@ export default function Register() {
                         >
                             ×
                         </button>
-                        <h3 style={{ marginTop: 0, marginBottom: '20px', textAlign: 'center' }}>SSOJ - 网站使用免责声明</h3>
+                        <h3 style={{ marginTop: '20px', marginBottom: '20px', textAlign: 'center' }}>SSOJ - 网站使用免责声明</h3>
                         <div style={{ fontSize: '14px', lineHeight: '1.6', color: '#444', whiteSpace: 'pre-wrap' }}>
                             {`欢迎注册并使用本网站。本网站为个人技术学习与实验项目，请在使用前仔细阅读并同意以下全部条款。
 

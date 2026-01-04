@@ -2,6 +2,7 @@ package com.ssoj.backend.controller;
 
 import com.ssoj.backend.entity.Result;
 import com.ssoj.backend.dao.ResultMapper;
+import com.ssoj.backend.util.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,10 +48,10 @@ public class ResultController {
     private void populateResultContent(Result r) {
         try {
             if (r.getInput() != null) {
-                r.setInputContent(com.ssoj.backend.util.FileUtil.readFileContent(r.getInput()));
+                r.setInputContent(FileUtil.readFileContent(r.getInput()));
             }
             if (r.getExpectedOutput() != null) {
-                r.setExpectedOutputContent(com.ssoj.backend.util.FileUtil.readFileContent(r.getExpectedOutput()));
+                r.setExpectedOutputContent(FileUtil.readFileContent(r.getExpectedOutput()));
             }
             // actualOutputContent 已经由 MyBatis 从数据库加载，无需额外处理
         } catch (Exception e) {

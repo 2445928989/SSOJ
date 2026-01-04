@@ -5,6 +5,8 @@ import com.ssoj.backend.service.SubmissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
 
@@ -26,8 +28,8 @@ public class SubmissionController {
      */
     @PostMapping("/submit")
     public Object submit(@RequestBody Map<String, Object> request,
-            jakarta.servlet.http.HttpServletRequest httpRequest) {
-        jakarta.servlet.http.HttpSession session = httpRequest.getSession(false);
+            HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
             throw new RuntimeException("未登录");
         }
