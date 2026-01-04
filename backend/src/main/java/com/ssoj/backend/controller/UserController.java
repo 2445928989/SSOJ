@@ -6,14 +6,13 @@ import com.ssoj.backend.service.EmailService;
 import com.ssoj.backend.service.VerificationCodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import MultipartFile;
-
-import HttpServletRequest;
-import HttpSession;
-import File;
-import Collections;
-import List;
-import Map;
+import org.springframework.web.multipart.MultipartFile;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 用户相关 REST API
