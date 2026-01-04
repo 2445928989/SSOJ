@@ -1,6 +1,52 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import api from '../api'
 import { Link } from 'react-router-dom'
+
+// 专门处理大文本的编辑器组件，避免主组件频繁重绘
+function LargeTextEditor({ label, initialValue, onChange, isLarge }: { label: string, initialValue: string, onChange: (val: string) => void, isLarge: boolean }) {
+    const [localValue, setLocalValue] = useState(initialValue);
+    const timerRef = useRef<any>(null);
+
+    useEffect(() => {
+        setLocalValue(initialValue);
+    }, [initialValue]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const val = e.target.value;
+        setLocalValue(val);
+
+        // 防抖更新父组件状态
+        if (timerRef.current) clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(() => {
+            onChange(val);
+        }, 300);
+    };
+
+    return (
+        <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '11px', color: '#999', marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                <span>{label}</span>
+                {isLarge && <span style={{ color: '#e53e3e' }}>大文件模式 (已启用防抖)</span>}
+            </div>
+            <textarea
+                style={{
+                    width: '100%',
+                    height: '200px',
+                    fontSize: '13px',
+                    fontFamily: 'monospace',
+                    padding: '8px',
+                    border: isLarge ? '1px solid #feb2b2' : '1px solid #cbd5e0',
+                    borderRadius: '4px',
+                    background: isLarge ? '#fff5f5' : 'white',
+                    outline: 'none'
+                }}
+                value={localValue}
+                onChange={handleChange}
+                placeholder="请输入内容..."
+            />
+        </div>
+    );
+}
 
 export default function ProblemManage() {
     const [problems, setProblems] = useState<any[]>([])
@@ -15,6 +61,7 @@ export default function ProblemManage() {
     const [isUploadingZip, setIsUploadingZip] = useState(false)
     const [showAddTcForm, setShowAddTcForm] = useState(false)
     const [newTcForm, setNewTcForm] = useState({ inputContent: '', outputContent: '' })
+    const [isLargeFile, setIsLargeFile] = useState({ input: false, output: false })
 
     const initialForm = {
         title: '',
@@ -31,6 +78,7 @@ export default function ProblemManage() {
     }
     const [form, setForm] = useState(initialForm)
     const [tagInput, setTagInput] = useState('')
+    const [searchKeyword, setSearchKeyword] = useState('')
 
     useEffect(() => {
         loadProblems()
@@ -45,15 +93,25 @@ export default function ProblemManage() {
         }
     }
 
-    const loadProblems = async () => {
+    const loadProblems = async (keyword: string = '') => {
         try {
-            const res = await api.get('/api/problem/list')
+            let res;
+            if (keyword.trim()) {
+                res = await api.get(`/api/problem/search?keyword=${encodeURIComponent(keyword)}&page=1&size=100`)
+            } else {
+                res = await api.get('/api/problem/list?page=1&size=100')
+            }
             setProblems(res.data.data || [])
         } catch (e: any) {
             setError(e.response?.data?.error || 'Failed to load')
         } finally {
             setLoading(false)
         }
+    }
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault()
+        loadProblems(searchKeyword)
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -92,7 +150,7 @@ export default function ProblemManage() {
             setTestCaseFile(null)
             setEditingId(null)
             setShowForm(false)
-            loadProblems()
+            loadProblems(searchKeyword)
             alert(editingId ? '更新成功' : '创建成功')
         } catch (e: any) {
             setError(e.response?.data?.error || '操作失败')
@@ -123,7 +181,7 @@ export default function ProblemManage() {
         if (!confirm('确定删除该题目吗？')) return
         try {
             await api.delete(`/api/problem/${id}`)
-            loadProblems()
+            loadProblems(searchKeyword)
         } catch (e: any) {
             setError(e.response?.data?.error || '删除失败')
         }
@@ -133,14 +191,24 @@ export default function ProblemManage() {
         setEditingTestCase(tc.id);
         // 先用预览内容填充，防止界面闪烁
         setTcEditForm({ inputContent: tc.inputContent, outputContent: tc.outputContent });
+        setIsLargeFile({ input: false, output: false });
 
         try {
             // 获取完整内容
             const res = await api.get(`/api/problem/${editingId}/testcases/${tc.id}`);
             if (res.data.success) {
+                const input = res.data.data.inputContent || '';
+                const output = res.data.data.outputContent || '';
+
+                // 如果文件超过 200KB，标记为大文件
+                const LARGE_SIZE = 200 * 1024;
+                const inputLarge = input.length > LARGE_SIZE;
+                const outputLarge = output.length > LARGE_SIZE;
+
+                setIsLargeFile({ input: inputLarge, output: outputLarge });
                 setTcEditForm({
-                    inputContent: res.data.data.inputContent,
-                    outputContent: res.data.data.outputContent
+                    inputContent: input,
+                    outputContent: output
                 });
             }
         } catch (e) {
@@ -220,7 +288,26 @@ export default function ProblemManage() {
         <div className="container" style={{ paddingTop: '60px', paddingBottom: '60px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                 <h2 style={{ margin: 0, fontSize: '2rem', fontWeight: '700' }}>题目管理</h2>
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <form onSubmit={handleSearch} style={{ display: 'flex', gap: '5px' }}>
+                        <input
+                            type="text"
+                            placeholder="搜索题目 ID 或标题..."
+                            value={searchKeyword}
+                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            style={{
+                                padding: '8px 15px',
+                                borderRadius: '8px',
+                                border: '1.5px solid #e2e8f0',
+                                fontSize: '14px',
+                                width: '240px',
+                                outline: 'none'
+                            }}
+                        />
+                        <button type="submit" className="submit-btn" style={{ width: 'auto', padding: '8px 15px', margin: 0 }}>
+                            搜索
+                        </button>
+                    </form>
                     <Link to="/" className="back-btn">返回仪表盘</Link>
                     <button className="submit-btn" style={{ width: 'auto', padding: '8px 20px', margin: 0 }} onClick={() => {
                         setEditingId(null)
@@ -397,22 +484,18 @@ export default function ProblemManage() {
                                                         <td style={{ padding: '12px' }}>
                                                             {editingTestCase === tc.id ? (
                                                                 <div style={{ display: 'flex', gap: '15px' }}>
-                                                                    <div style={{ flex: 1 }}>
-                                                                        <div style={{ fontSize: '11px', color: '#999', marginBottom: '4px' }}>输入 (Input)</div>
-                                                                        <textarea
-                                                                            style={{ width: '100%', height: '200px', fontSize: '13px', fontFamily: 'monospace', padding: '8px', border: '1px solid #cbd5e0', borderRadius: '4px' }}
-                                                                            value={tcEditForm.inputContent}
-                                                                            onChange={e => setTcEditForm({ ...tcEditForm, inputContent: e.target.value })}
-                                                                        />
-                                                                    </div>
-                                                                    <div style={{ flex: 1 }}>
-                                                                        <div style={{ fontSize: '11px', color: '#999', marginBottom: '4px' }}>输出 (Output)</div>
-                                                                        <textarea
-                                                                            style={{ width: '100%', height: '200px', fontSize: '13px', fontFamily: 'monospace', padding: '8px', border: '1px solid #cbd5e0', borderRadius: '4px' }}
-                                                                            value={tcEditForm.outputContent}
-                                                                            onChange={e => setTcEditForm({ ...tcEditForm, outputContent: e.target.value })}
-                                                                        />
-                                                                    </div>
+                                                                    <LargeTextEditor
+                                                                        label="输入 (Input)"
+                                                                        initialValue={tcEditForm.inputContent}
+                                                                        onChange={(val) => setTcEditForm(prev => ({ ...prev, inputContent: val }))}
+                                                                        isLarge={isLargeFile.input}
+                                                                    />
+                                                                    <LargeTextEditor
+                                                                        label="输出 (Output)"
+                                                                        initialValue={tcEditForm.outputContent}
+                                                                        onChange={(val) => setTcEditForm(prev => ({ ...prev, outputContent: val }))}
+                                                                        isLarge={isLargeFile.output}
+                                                                    />
                                                                 </div>
                                                             ) : (
                                                                 <div style={{ display: 'flex', gap: '15px' }}>

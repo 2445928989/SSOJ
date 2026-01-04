@@ -28,12 +28,12 @@
     <select id="findById" resultMap="ProblemResultMap"> SELECT * FROM problem WHERE id = #{id} </select>
 
     <!-- 查询所有题目（分页） -->
-    <select id="findAll" resultMap="ProblemResultMap"> SELECT * FROM problem ORDER BY created_at
-        DESC LIMIT #{offset}, #{limit} </select>
+    <select id="findAll" resultMap="ProblemResultMap"> SELECT * FROM problem ORDER BY id ASC LIMIT
+        #{offset}, #{limit} </select>
 
     <!-- 根据难度查询题目 -->
     <select id="findByDifficulty" resultMap="ProblemResultMap"> SELECT * FROM problem WHERE
-        difficulty = #{difficulty} ORDER BY created_at DESC </select>
+        difficulty = #{difficulty} ORDER BY id ASC </select>
 
     <!-- 插入新题目 -->
     <insert id="insert" parameterType="com.ssoj.backend.entity.Problem"
@@ -59,12 +59,13 @@
 
     <!-- 搜索题目（按标题或描述） -->
     <select id="searchByKeyword" resultMap="ProblemResultMap"> SELECT * FROM problem WHERE title
-        LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%') ORDER BY
-        created_at DESC LIMIT #{offset}, #{limit} </select>
+        LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%') OR
+        CAST(id AS CHAR) = #{keyword} ORDER BY id ASC LIMIT #{offset}, #{limit} </select>
 
     <!-- 统计搜索结果数 -->
     <select id="countByKeyword" resultType="int"> SELECT COUNT(*) FROM problem WHERE title LIKE
-        CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%') </select>
+        CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%') OR CAST(id AS
+        CHAR) = #{keyword} </select>
 
     <!-- 增加题目的提交数 -->
     <update id="incrementSubmissionCount"> UPDATE problem SET number_of_submissions =
@@ -83,7 +84,7 @@
     <!-- 根据标签查询题目 -->
     <select id="findByTag" resultMap="ProblemResultMap"> SELECT p.* FROM problem p JOIN problem_tag
         pt ON p.id = pt.problem_id JOIN tag t ON pt.tag_id = t.id WHERE t.name = #{tagName} ORDER BY
-        p.created_at DESC LIMIT #{offset}, #{limit} </select>
+        p.id ASC LIMIT #{offset}, #{limit} </select>
 
     <!-- 统计标签下的题目总数 -->
     <select id="countByTag" resultType="int"> SELECT COUNT(*) FROM problem p JOIN problem_tag pt ON

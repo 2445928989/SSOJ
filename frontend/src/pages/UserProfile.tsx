@@ -19,6 +19,10 @@ export default function UserProfile() {
     const [heatmap, setHeatmap] = useState<Record<string, number>>({})
     const [isUploading, setIsUploading] = useState(false)
     const [isUploadingBg, setIsUploadingBg] = useState(false)
+    const [followCounts, setFollowCounts] = useState({ followers: 0, following: 0 })
+    const [showFollowers, setShowFollowers] = useState(false)
+    const [showFollowing, setShowFollowing] = useState(false)
+    const [followList, setFollowList] = useState<any[]>([])
 
     useEffect(() => {
         Promise.all([
@@ -30,10 +34,32 @@ export default function UserProfile() {
                 setFormData(profileRes.data)
                 setHeatmap(heatmapRes.data.data || {})
                 document.title = `${profileRes.data.nickname || profileRes.data.username} - SSOJ`
+
+                // 获取关注计数
+                return api.get(`/api/follow/${profileRes.data.id}/counts`)
+            })
+            .then(countsRes => {
+                if (countsRes) setFollowCounts(countsRes.data.data)
             })
             .catch(e => setError(e.response?.data?.error || '加载失败'))
             .finally(() => setLoading(false))
     }, [])
+
+    const fetchFollowList = async (type: 'followers' | 'following') => {
+        try {
+            const res = await api.get(`/api/follow/${user.id}/${type}`);
+            setFollowList(res.data.data);
+            if (type === 'followers') {
+                setShowFollowers(true);
+                setShowFollowing(false);
+            } else {
+                setShowFollowing(true);
+                setShowFollowers(false);
+            }
+        } catch (e) {
+            console.error('Failed to fetch follow list', e);
+        }
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target
@@ -269,6 +295,14 @@ export default function UserProfile() {
                             <div style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
                                 <h1 style={{ margin: 0, color: 'white', fontSize: '2.5em' }}>{user.nickname || user.username}</h1>
                                 <p className="username" style={{ margin: 0, color: 'rgba(255,255,255,0.9)', fontSize: '1.2em' }}>@{user.username}</p>
+                                <div style={{ display: 'flex', gap: '20px', marginTop: '10px', color: 'white' }}>
+                                    <div style={{ cursor: 'pointer' }} onClick={() => fetchFollowList('following')}>
+                                        <span style={{ fontWeight: 'bold' }}>{followCounts.following}</span> 关注
+                                    </div>
+                                    <div style={{ cursor: 'pointer' }} onClick={() => fetchFollowList('followers')}>
+                                        <span style={{ fontWeight: 'bold' }}>{followCounts.followers}</span> 粉丝
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         {!isEditing && !isChangingPassword && (
@@ -290,6 +324,31 @@ export default function UserProfile() {
                         )}
                     </div>
                 </div>
+
+                {(showFollowers || showFollowing) && (
+                    <div style={{ padding: '20px', borderBottom: '1px solid #eee', background: '#f8fafc' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                            <h3 style={{ margin: 0 }}>{showFollowers ? '粉丝列表' : '关注列表'}</h3>
+                            <button onClick={() => { setShowFollowers(false); setShowFollowing(false); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666' }}>关闭</button>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
+                            {followList.length === 0 ? (
+                                <div style={{ color: '#999', fontSize: '14px' }}>暂无数据</div>
+                            ) : (
+                                followList.map(u => (
+                                    <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: 'white', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                                        {u.avatar ? (
+                                            <img src={u.avatar} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
+                                        ) : (
+                                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#667eea', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>{u.username.charAt(0).toUpperCase()}</div>
+                                        )}
+                                        <a href={`/user/${u.id}`} style={{ textDecoration: 'none', color: '#2d3748', fontWeight: '500' }}>{u.nickname || u.username}</a>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 <div className="profile-content">
                     {error && <div className="error-msg">{error}</div>}

@@ -16,6 +16,8 @@ import Dashboard from './pages/Dashboard'
 import Leaderboard from './pages/Leaderboard'
 import Announcements from './pages/Announcements'
 import DiscussionList from './pages/DiscussionList'
+import NotificationDropdown from './components/NotificationDropdown'
+import Notifications from './pages/Notifications'
 
 export default function App() {
     const [user, setUser] = useState<any>(null)
@@ -94,6 +96,7 @@ export default function App() {
                 <div className="nav-right">
                     {user ? (
                         <>
+                            <NotificationDropdown />
                             <Link to="/profile" className="nav-user-info" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: 'inherit' }}>
                                 {user.avatar ? (
                                     <img src={user.avatar} alt="avatar" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #eee' }} />
@@ -131,6 +134,7 @@ export default function App() {
                     <Route path="/profile" element={<UserProfile />} />
                     <Route path="/leaderboard" element={<Leaderboard />} />
                     <Route path="/discussions" element={<DiscussionList />} />
+                    <Route path="/notifications" element={<Notifications />} />
                     <Route path="/announcements" element={<Announcements />} />
                     <Route path="/admin/problems" element={<ProblemManage />} />
                 </Routes>

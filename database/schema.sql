@@ -140,3 +140,28 @@ CREATE TABLE vote (
     UNIQUE KEY uk_user_target (user_id, type, target_id),
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE TABLE user_follow (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    follower_id BIGINT NOT NULL COMMENT '关注者ID',
+    following_id BIGINT NOT NULL COMMENT '被关注者ID',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_follower_following (follower_id, following_id),
+    FOREIGN KEY (follower_id) REFERENCES user(id) ON DELETE CASCADE,
+    FOREIGN KEY (following_id) REFERENCES user(id) ON DELETE CASCADE,
+    INDEX idx_follower (follower_id),
+    INDEX idx_following (following_id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE TABLE notification (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    receiver_id BIGINT NOT NULL COMMENT '接收者ID',
+    sender_id BIGINT NOT NULL COMMENT '发送者ID',
+    type VARCHAR(50) NOT NULL COMMENT 'REPLY, FOLLOW, etc.',
+    target_id BIGINT COMMENT '关联的目标ID (如讨论ID)',
+    content TEXT COMMENT '消息预览内容',
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (receiver_id) REFERENCES user(id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES user(id) ON DELETE CASCADE,
+    INDEX idx_receiver_read (receiver_id, is_read),
+    INDEX idx_created_at (created_at)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

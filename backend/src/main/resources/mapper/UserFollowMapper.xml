@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssoj.backend.dao.UserFollowMapper">
+
+    <insert id="insert" parameterType="com.ssoj.backend.entity.UserFollow" useGeneratedKeys="true"
+        keyProperty="id"> INSERT INTO user_follow (follower_id, following_id, created_at) VALUES
+        (#{followerId}, #{followingId}, NOW()) </insert>
+
+    <delete id="delete"> DELETE FROM user_follow WHERE follower_id = #{followerId} AND following_id
+        = #{followingId} </delete>
+
+    <select id="find" resultType="com.ssoj.backend.entity.UserFollow"> SELECT * FROM user_follow
+        WHERE follower_id = #{followerId} AND following_id = #{followingId} </select>
+
+    <select id="findFollowers" resultType="com.ssoj.backend.entity.User"> SELECT u.* FROM user u
+        JOIN user_follow f ON u.id = f.follower_id WHERE f.following_id = #{userId} ORDER BY
+        f.created_at DESC </select>
+
+    <select id="findFollowing" resultType="com.ssoj.backend.entity.User"> SELECT u.* FROM user u
+        JOIN user_follow f ON u.id = f.following_id WHERE f.follower_id = #{userId} ORDER BY
+        f.created_at DESC </select>
+
+    <select id="countFollowers" resultType="int"> SELECT COUNT(*) FROM user_follow WHERE
+        following_id = #{userId} </select>
+
+    <select id="countFollowing" resultType="int"> SELECT COUNT(*) FROM user_follow WHERE follower_id
+        = #{userId} </select>
+
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssoj.backend.dao.NotificationMapper">
+
+    <insert id="insert" parameterType="com.ssoj.backend.entity.Notification" useGeneratedKeys="true"
+        keyProperty="id"> INSERT INTO notification (receiver_id, sender_id, type, target_id,
+        content, is_read, created_at) VALUES (#{receiverId}, #{senderId}, #{type}, #{targetId},
+        #{content}, FALSE, NOW()) </insert>
+
+    <select id="findByReceiverId" resultType="com.ssoj.backend.entity.Notification"> SELECT n.*,
+        u.nickname as senderNickname, u.avatar as senderAvatar FROM notification n JOIN user u ON
+        n.sender_id = u.id WHERE n.receiver_id = #{receiverId} ORDER BY n.created_at DESC </select>
+
+    <select id="countUnread" resultType="int"> SELECT COUNT(*) FROM notification WHERE receiver_id =
+        #{receiverId} AND is_read = FALSE </select>
+
+    <update id="markAsRead"> UPDATE notification SET is_read = TRUE WHERE id = #{id} </update>
+
+    <update id="markAllAsRead"> UPDATE notification SET is_read = TRUE WHERE receiver_id =
+        #{receiverId} </update>
+
+    <delete id="deleteById"> DELETE FROM notification WHERE id = #{id} </delete>
+
+</mapper>

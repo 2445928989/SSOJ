@@ -14,6 +14,9 @@ public class DiscussionService {
     @Autowired
     private DiscussionMapper discussionMapper;
 
+    @Autowired
+    private NotificationService notificationService;
+
     public List<Discussion> getDiscussionsByProblemId(Long problemId) {
         List<Discussion> allDiscussions = discussionMapper.findByProblemId(problemId);
         return buildTwoLevelTree(allDiscussions);
@@ -89,6 +92,22 @@ public class DiscussionService {
 
     public void addDiscussion(Discussion discussion) {
         discussionMapper.insert(discussion);
+
+        // 如果是回复，发送通知给父讨论的作者
+        if (discussion.getParentId() != null) {
+            Discussion parent = discussionMapper.findById(discussion.getParentId());
+            if (parent != null) {
+                String preview = discussion.getContent();
+                if (preview.length() > 50)
+                    preview = preview.substring(0, 50) + "...";
+                notificationService.createNotification(
+                        parent.getUserId(),
+                        discussion.getUserId(),
+                        "REPLY",
+                        discussion.getId(),
+                        "回复了你的讨论: " + preview);
+            }
+        }
     }
 
     public void deleteDiscussion(Long id) {
