@@ -3,8 +3,14 @@ import { Link, useSearchParams } from 'react-router-dom'
 import api from '../api'
 import { ThumbsUp, ThumbsDown, MessageSquare, User as UserIcon } from 'lucide-react'
 
-function DiscussionListItem({ d, onVote }: { d: any, onVote: () => void }) {
+function DiscussionListItem({ d, onVote, onReplySuccess }: { d: any, onVote: () => void, onReplySuccess: () => void }) {
     const [voteStatus, setVoteStatus] = useState(0);
+    const [showReplyInput, setShowReplyInput] = useState(false);
+    const [replyContent, setReplyContent] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    const [showReplies, setShowReplies] = useState(false);
+    const [replies, setReplies] = useState<any[]>([]);
+    const [loadingReplies, setLoadingReplies] = useState(false);
 
     useEffect(() => {
         api.get(`/api/votes/status?type=DISCUSSION&targetId=${d.id}`)
@@ -29,95 +35,260 @@ function DiscussionListItem({ d, onVote }: { d: any, onVote: () => void }) {
         }
     };
 
+    const fetchReplies = async () => {
+        if (showReplies) {
+            setShowReplies(false);
+            return;
+        }
+        setLoadingReplies(true);
+        try {
+            const res = await api.get(`/api/discussion/${d.id}`);
+            if (res.data.success) {
+                setReplies(res.data.data.replies || []);
+                setShowReplies(true);
+            }
+        } catch (e) {
+            console.error('Failed to fetch replies', e);
+        } finally {
+            setLoadingReplies(false);
+        }
+    };
+
+    const handleReply = async () => {
+        if (!replyContent.trim()) return;
+        setSubmitting(true);
+        try {
+            const res = await api.post('/api/discussion/add', {
+                problemId: d.problemId,
+                parentId: d.id,
+                content: replyContent
+            });
+            if (res.data.success) {
+                setReplyContent('');
+                setShowReplyInput(false);
+                onReplySuccess();
+                // 如果回复列表已展开，刷新回复列表
+                if (showReplies) {
+                    const res2 = await api.get(`/api/discussion/${d.id}`);
+                    if (res2.data.success) setReplies(res2.data.data.replies || []);
+                } else {
+                    fetchReplies(); // 自动展开并显示新回复
+                }
+            } else {
+                alert(res.data.message || '回复失败');
+            }
+        } catch (e: any) {
+            alert(e.response?.data?.message || '回复失败，请先登录');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     return (
-        <div className="discussion-list-item" style={{
-            padding: '20px',
-            borderBottom: '1px solid #f1f5f9',
-            display: 'flex',
-            gap: '15px'
-        }}>
-            <Link to={`/user/${d.userId}`} className="avatar">
-                {d.avatar ? (
-                    <img src={d.avatar} alt="" style={{ width: '45px', height: '45px', borderRadius: '50%', objectFit: 'cover' }} />
-                ) : (
-                    <div style={{
-                        width: '45px',
-                        height: '45px',
-                        borderRadius: '50%',
-                        background: '#edf2f7',
-                        color: '#718096',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 'bold'
-                    }}>
-                        {(d.nickname || d.username || '?').charAt(0).toUpperCase()}
-                    </div>
-                )}
-            </Link>
-            <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <Link to={`/user/${d.userId}`} style={{ fontWeight: '600', color: '#2d3748', textDecoration: 'none' }}>
-                            {d.nickname || d.username}
-                        </Link>
-                        <span style={{ color: '#a0aec0', fontSize: '12px' }}>{new Date(d.createdAt).toLocaleString()}</span>
-                    </div>
-                    {d.problemId && (
-                        <Link to={`/problems/${d.problemId}`} style={{
-                            fontSize: '13px',
-                            color: '#667eea',
-                            textDecoration: 'none',
-                            background: '#f0f4ff',
-                            padding: '2px 10px',
-                            borderRadius: '12px'
+        <div className="discussion-list-item-container" style={{ borderBottom: '1px solid #f1f5f9' }}>
+            <div className="discussion-list-item" style={{
+                padding: '20px',
+                display: 'flex',
+                gap: '15px'
+            }}>
+                <Link to={`/user/${d.userId}`} className="avatar">
+                    {d.avatar ? (
+                        <img src={d.avatar} alt="" style={{ width: '45px', height: '45px', borderRadius: '50%', objectFit: 'cover' }} />
+                    ) : (
+                        <div style={{
+                            width: '45px',
+                            height: '45px',
+                            borderRadius: '50%',
+                            background: '#edf2f7',
+                            color: '#718096',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 'bold'
                         }}>
-                            #{d.problemId} {d.problemTitle}
-                        </Link>
+                            {(d.nickname || d.username || '?').charAt(0).toUpperCase()}
+                        </div>
                     )}
-                </div>
-                <div style={{ color: '#4a5568', fontSize: '15px', lineHeight: '1.6', whiteSpace: 'pre-wrap', marginBottom: '12px' }}>
-                    {d.content}
-                </div>
-                <div style={{ display: 'flex', gap: '20px', color: '#94a3b8', fontSize: '13px' }}>
-                    <button
-                        onClick={() => handleVote(1)}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            color: voteStatus === 1 ? '#667eea' : '#94a3b8',
-                            padding: 0,
-                            transition: 'color 0.2s'
-                        }}
-                    >
-                        <ThumbsUp size={14} fill={voteStatus === 1 ? 'currentColor' : 'none'} />
-                        <span>{d.likes || 0}</span>
-                    </button>
-                    <button
-                        onClick={() => handleVote(-1)}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            color: voteStatus === -1 ? '#e53e3e' : '#94a3b8',
-                            padding: 0,
-                            transition: 'color 0.2s'
-                        }}
-                    >
-                        <ThumbsDown size={14} fill={voteStatus === -1 ? 'currentColor' : 'none'} />
-                        <span>{d.dislikes || 0}</span>
-                    </button>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <MessageSquare size={14} />
-                        <span>{d.repliesCount || 0} 回复</span>
+                </Link>
+                <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <Link to={`/user/${d.userId}`} style={{ fontWeight: '600', color: '#2d3748', textDecoration: 'none' }}>
+                                {d.nickname || d.username}
+                            </Link>
+                            <span style={{ color: '#a0aec0', fontSize: '12px' }}>{new Date(d.createdAt).toLocaleString()}</span>
+                        </div>
+                        {d.problemId && (
+                            <Link to={`/problems/${d.problemId}`} style={{
+                                fontSize: '13px',
+                                color: '#667eea',
+                                textDecoration: 'none',
+                                background: '#f0f4ff',
+                                padding: '2px 10px',
+                                borderRadius: '12px'
+                            }}>
+                                #{d.problemId} {d.problemTitle}
+                            </Link>
+                        )}
                     </div>
+                    <div style={{ color: '#4a5568', fontSize: '15px', lineHeight: '1.6', whiteSpace: 'pre-wrap', marginBottom: '12px' }}>
+                        {d.content}
+                    </div>
+                    <div style={{ display: 'flex', gap: '20px', color: '#94a3b8', fontSize: '13px' }}>
+                        <button
+                            onClick={() => handleVote(1)}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: voteStatus === 1 ? '#667eea' : '#94a3b8',
+                                padding: 0,
+                                transition: 'color 0.2s'
+                            }}
+                        >
+                            <ThumbsUp size={14} fill={voteStatus === 1 ? 'currentColor' : 'none'} />
+                            <span>{d.likes || 0}</span>
+                        </button>
+                        <button
+                            onClick={() => handleVote(-1)}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: voteStatus === -1 ? '#e53e3e' : '#94a3b8',
+                                padding: 0,
+                                transition: 'color 0.2s'
+                            }}
+                        >
+                            <ThumbsDown size={14} fill={voteStatus === -1 ? 'currentColor' : 'none'} />
+                            <span>{d.dislikes || 0}</span>
+                        </button>
+                        <button
+                            onClick={fetchReplies}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: showReplies ? '#667eea' : '#94a3b8',
+                                padding: 0
+                            }}
+                        >
+                            <MessageSquare size={14} />
+                            <span>{d.repliesCount || 0} 回复</span>
+                        </button>
+                        <button
+                            onClick={() => setShowReplyInput(!showReplyInput)}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: '#667eea',
+                                padding: 0,
+                                fontSize: '13px',
+                                fontWeight: '500'
+                            }}
+                        >
+                            {showReplyInput ? '取消回复' : '回复'}
+                        </button>
+                    </div>
+
+                    {showReplyInput && (
+                        <div style={{ marginTop: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <textarea
+                                value={replyContent}
+                                onChange={(e) => setReplyContent(e.target.value)}
+                                placeholder="写下你的回复..."
+                                style={{
+                                    width: '100%',
+                                    minHeight: '80px',
+                                    padding: '10px',
+                                    borderRadius: '6px',
+                                    border: '1px solid #e2e8f0',
+                                    fontSize: '14px',
+                                    outline: 'none',
+                                    resize: 'vertical'
+                                }}
+                            />
+                            <button
+                                onClick={handleReply}
+                                disabled={submitting || !replyContent.trim()}
+                                style={{
+                                    alignSelf: 'flex-end',
+                                    padding: '6px 20px',
+                                    background: '#667eea',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    fontSize: '13px',
+                                    opacity: (submitting || !replyContent.trim()) ? 0.7 : 1
+                                }}
+                            >
+                                {submitting ? '提交中...' : '提交回复'}
+                            </button>
+                        </div>
+                    )}
+
+                    {showReplies && (
+                        <div style={{
+                            marginTop: '15px',
+                            padding: '15px',
+                            background: '#f8fafc',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '15px'
+                        }}>
+                            {replies.length === 0 ? (
+                                <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>暂无回复</div>
+                            ) : (
+                                replies.map(reply => (
+                                    <div key={reply.id} style={{ display: 'flex', gap: '12px' }}>
+                                        <Link to={`/user/${reply.userId}`}>
+                                            {reply.avatar ? (
+                                                <img src={reply.avatar} alt="" style={{ width: '30px', height: '30px', borderRadius: '50%', objectFit: 'cover' }} />
+                                            ) : (
+                                                <div style={{
+                                                    width: '30px',
+                                                    height: '30px',
+                                                    borderRadius: '50%',
+                                                    background: '#edf2f7',
+                                                    color: '#718096',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    fontSize: '12px',
+                                                    fontWeight: 'bold'
+                                                }}>
+                                                    {(reply.nickname || reply.username || '?').charAt(0).toUpperCase()}
+                                                </div>
+                                            )}
+                                        </Link>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                                <Link to={`/user/${reply.userId}`} style={{ fontWeight: '600', color: '#2d3748', textDecoration: 'none', fontSize: '13px' }}>
+                                                    {reply.nickname || reply.username}
+                                                </Link>
+                                                <span style={{ color: '#a0aec0', fontSize: '11px' }}>{new Date(reply.createdAt).toLocaleString()}</span>
+                                            </div>
+                                            <div style={{ color: '#4a5568', fontSize: '14px', lineHeight: '1.5' }}>
+                                                {reply.content}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -130,6 +301,9 @@ export default function DiscussionList() {
     const [total, setTotal] = useState(0)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
+    const [showNewPost, setShowNewPost] = useState(false)
+    const [newPostContent, setNewPostContent] = useState('')
+    const [submitting, setSubmitting] = useState(false)
 
     const page = parseInt(searchParams.get('page') || '1')
     const size = 20
@@ -153,6 +327,27 @@ export default function DiscussionList() {
         setSearchParams({ keyword: newKeyword, page: '1' })
     }
 
+    const handleNewPost = async () => {
+        if (!newPostContent.trim()) return;
+        setSubmitting(true);
+        try {
+            const res = await api.post('/api/discussion/add', {
+                content: newPostContent
+            });
+            if (res.data.success) {
+                setNewPostContent('');
+                setShowNewPost(false);
+                refreshDiscussions();
+            } else {
+                alert(res.data.message || '发布失败');
+            }
+        } catch (e: any) {
+            alert(e.response?.data?.message || '发布失败，请先登录');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     const totalPages = Math.ceil(total / size)
 
     const refreshDiscussions = () => {
@@ -170,23 +365,78 @@ export default function DiscussionList() {
         <div className="container" style={{ paddingTop: '40px', paddingBottom: '60px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                 <h1 style={{ fontSize: '2rem', fontWeight: '700', margin: 0 }}>讨论区</h1>
-                <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px' }}>
-                    <input
-                        type="text"
-                        name="keyword"
-                        defaultValue={keyword}
-                        placeholder="搜索内容、用户、题目..."
+                <div style={{ display: 'flex', gap: '15px' }}>
+                    <button
+                        onClick={() => setShowNewPost(!showNewPost)}
                         style={{
-                            padding: '8px 15px',
+                            padding: '8px 20px',
+                            background: '#667eea',
+                            color: 'white',
+                            border: 'none',
                             borderRadius: '6px',
+                            fontWeight: '600',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        {showNewPost ? '取消发布' : '+ 发起讨论'}
+                    </button>
+                    <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px' }}>
+                        <input
+                            type="text"
+                            name="keyword"
+                            defaultValue={keyword}
+                            placeholder="搜索内容、用户、题目..."
+                            style={{
+                                padding: '8px 15px',
+                                borderRadius: '6px',
+                                border: '1px solid #e2e8f0',
+                                width: '300px',
+                                outline: 'none'
+                            }}
+                        />
+                        <button type="submit" className="submit-btn" style={{ padding: '8px 20px' }}>搜索</button>
+                    </form>
+                </div>
+            </div>
+
+            {showNewPost && (
+                <div className="card" style={{ marginBottom: '30px', padding: '20px' }}>
+                    <textarea
+                        value={newPostContent}
+                        onChange={(e) => setNewPostContent(e.target.value)}
+                        placeholder="分享你的想法..."
+                        style={{
+                            width: '100%',
+                            minHeight: '120px',
+                            padding: '15px',
+                            borderRadius: '8px',
                             border: '1px solid #e2e8f0',
-                            width: '300px',
-                            outline: 'none'
+                            fontSize: '15px',
+                            outline: 'none',
+                            resize: 'vertical',
+                            marginBottom: '15px'
                         }}
                     />
-                    <button type="submit" className="submit-btn" style={{ padding: '8px 20px' }}>搜索</button>
-                </form>
-            </div>
+                    <div style={{ textAlign: 'right' }}>
+                        <button
+                            onClick={handleNewPost}
+                            disabled={submitting || !newPostContent.trim()}
+                            style={{
+                                padding: '10px 30px',
+                                background: '#667eea',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '6px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                opacity: (submitting || !newPostContent.trim()) ? 0.7 : 1
+                            }}
+                        >
+                            {submitting ? '发布中...' : '发布讨论'}
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {error && <div className="error-msg">{error}</div>}
 
@@ -198,7 +448,7 @@ export default function DiscussionList() {
                 ) : (
                     <div style={{ background: 'white', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
                         {discussions.map((d) => (
-                            <DiscussionListItem key={d.id} d={d} onVote={refreshDiscussions} />
+                            <DiscussionListItem key={d.id} d={d} onVote={refreshDiscussions} onReplySuccess={refreshDiscussions} />
                         ))}
                     </div>
                 )}

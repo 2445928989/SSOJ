@@ -48,14 +48,29 @@ public class ResultController {
     private void populateResultContent(Result r) {
         try {
             if (r.getInput() != null) {
-                r.setInputContent(FileUtil.readFileContent(r.getInput()));
+                String content = FileUtil.readFileContent(r.getInput());
+                r.setInputContent(truncate(content));
             }
             if (r.getExpectedOutput() != null) {
-                r.setExpectedOutputContent(FileUtil.readFileContent(r.getExpectedOutput()));
+                String content = FileUtil.readFileContent(r.getExpectedOutput());
+                r.setExpectedOutputContent(truncate(content));
             }
-            // actualOutputContent 已经由 MyBatis 从数据库加载，无需额外处理
+            // actualOutputContent 已经由 MyBatis 从数据库加载，可能也需要截断
+            if (r.getActualOutputContent() != null) {
+                r.setActualOutputContent(truncate(r.getActualOutputContent()));
+            }
         } catch (Exception e) {
             // Ignore or log
         }
+    }
+
+    private String truncate(String s) {
+        if (s == null)
+            return null;
+        int limit = 1000;
+        if (s.length() > limit) {
+            return s.substring(0, limit) + "... (truncated)";
+        }
+        return s;
     }
 }

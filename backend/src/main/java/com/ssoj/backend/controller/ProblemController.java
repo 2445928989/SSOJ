@@ -175,6 +175,18 @@ public class ProblemController {
     }
 
     /**
+     * GET /api/problem/{id}/testcases/{tcId}
+     * 获取单个测试用例的完整内容
+     */
+    @GetMapping("/api/problem/{id}/testcases/{tcId}")
+    public Object getTestCaseDetail(@PathVariable("id") Long id,
+            @PathVariable("tcId") Long tcId,
+            jakarta.servlet.http.HttpSession session) {
+        checkAdmin(session);
+        return Map.of("success", true, "data", problemService.getTestCaseDetail(id, tcId));
+    }
+
+    /**
      * PUT /api/problem/{id}/testcases/{tcId}
      * 更新单个测试用例
      */

@@ -251,7 +251,7 @@ public class ProblemService {
     }
 
     /**
-     * 获取题目的测试用例列表
+     * 获取题目的测试用例列表（内容会被截断以提高性能）
      */
     public List<TestCase> getTestCases(Long problemId) {
         if (problemId == null || problemId <= 0) {
@@ -262,7 +262,16 @@ public class ProblemService {
             try {
                 String input = FileUtil.readFile(tc.getInputPath());
                 String output = FileUtil.readFile(tc.getOutputPath());
-                // 不再限制长度，让管理员看到完整内容
+
+                // 截断内容，仅用于预览
+                int limit = 1000;
+                if (input.length() > limit) {
+                    input = input.substring(0, limit) + "... (truncated)";
+                }
+                if (output.length() > limit) {
+                    output = output.substring(0, limit) + "... (truncated)";
+                }
+
                 tc.setInputContent(input);
                 tc.setOutputContent(output);
             } catch (Exception e) {
@@ -271,6 +280,24 @@ public class ProblemService {
             }
         }
         return testCases;
+    }
+
+    /**
+     * 获取单个测试用例的完整内容
+     */
+    public TestCase getTestCaseDetail(Long problemId, Long testCaseId) {
+        TestCase tc = testCaseMapper.findById(testCaseId);
+        if (tc == null || !tc.getProblemId().equals(problemId)) {
+            throw new RuntimeException("测试用例不存在或不属于该题目");
+        }
+        try {
+            tc.setInputContent(FileUtil.readFile(tc.getInputPath()));
+            tc.setOutputContent(FileUtil.readFile(tc.getOutputPath()));
+        } catch (Exception e) {
+            tc.setInputContent("Error reading file: " + e.getMessage());
+            tc.setOutputContent("Error reading file: " + e.getMessage());
+        }
+        return tc;
     }
 
     /**

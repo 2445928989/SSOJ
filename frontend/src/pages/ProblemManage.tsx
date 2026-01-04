@@ -129,6 +129,25 @@ export default function ProblemManage() {
         }
     }
 
+    const startEditingTestCase = async (tc: any) => {
+        setEditingTestCase(tc.id);
+        // 先用预览内容填充，防止界面闪烁
+        setTcEditForm({ inputContent: tc.inputContent, outputContent: tc.outputContent });
+
+        try {
+            // 获取完整内容
+            const res = await api.get(`/api/problem/${editingId}/testcases/${tc.id}`);
+            if (res.data.success) {
+                setTcEditForm({
+                    inputContent: res.data.data.inputContent,
+                    outputContent: res.data.data.outputContent
+                });
+            }
+        } catch (e) {
+            console.error('Failed to load test case detail', e);
+        }
+    };
+
     const handleUpdateTestCase = async (tcId: number) => {
         try {
             await api.put(`/api/problem/${editingId}/testcases/${tcId}`, tcEditForm)
@@ -436,10 +455,7 @@ export default function ProblemManage() {
                                                                 </div>
                                                             ) : (
                                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                                                    <button type="button" onClick={() => {
-                                                                        setEditingTestCase(tc.id);
-                                                                        setTcEditForm({ inputContent: tc.inputContent, outputContent: tc.outputContent });
-                                                                    }} style={{ padding: '6px', background: '#2196f3', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>编辑</button>
+                                                                    <button type="button" onClick={() => startEditingTestCase(tc)} style={{ padding: '6px', background: '#2196f3', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>编辑</button>
                                                                     <button type="button" onClick={() => handleDeleteTestCase(tc.id)} style={{ padding: '6px', background: '#f44336', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>删除</button>
                                                                 </div>
                                                             )}
