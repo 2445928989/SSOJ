@@ -60,7 +60,10 @@ public class UserController {
 
             // 生成文件名: userId_timestamp.ext
             String originalFilename = file.getOriginalFilename();
-            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            String extension = ".jpg"; // 默认
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
             String filename = userId + "_" + System.currentTimeMillis() + extension;
             File dest = new File(uploadPath + filename);
             file.transferTo(dest);
@@ -102,7 +105,10 @@ public class UserController {
 
             // 生成文件名: bg_userId_timestamp.ext
             String originalFilename = file.getOriginalFilename();
-            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            String extension = ".jpg"; // 默认
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
             String filename = "bg_" + userId + "_" + System.currentTimeMillis() + extension;
             File dest = new File(uploadPath + filename);
             file.transferTo(dest);

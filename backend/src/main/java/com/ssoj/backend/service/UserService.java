@@ -253,4 +253,16 @@ public class UserService {
 
         return heatmap;
     }
+
+    /**
+     * 从 Session 中获取当前登录用户
+     */
+    public User getUserFromSession(jakarta.servlet.http.HttpSession session) {
+        if (session == null)
+            return null;
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null)
+            return null;
+        return userMapper.findById(userId);
+    }
 }
