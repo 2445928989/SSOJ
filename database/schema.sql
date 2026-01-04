@@ -37,10 +37,11 @@ CREATE TABLE problem(
     dislikes INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (author_id) REFERENCES user(id) ON DELETE SET NULL,
-    INDEX idx_difficulty(difficulty),
-    INDEX idx_author_id(author_id),
-    INDEX idx_created_at(created_at)
+    FOREIGN KEY (author_id) REFERENCES user(id) ON DELETE
+    SET NULL,
+        INDEX idx_difficulty(difficulty),
+        INDEX idx_author_id(author_id),
+        INDEX idx_created_at(created_at)
 );
 CREATE TABLE tag(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,

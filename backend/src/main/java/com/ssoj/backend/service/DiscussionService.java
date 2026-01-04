@@ -36,7 +36,7 @@ public class DiscussionService {
         Map<Long, Discussion> map = discussions.stream()
                 .collect(Collectors.toMap(Discussion::getId, d -> d));
         List<Discussion> roots = new ArrayList<>();
-        
+
         // 首先找出所有根节点
         for (Discussion d : discussions) {
             if (d.getParentId() == null) {
@@ -44,7 +44,7 @@ public class DiscussionService {
                 roots.add(d);
             }
         }
-        
+
         // 将所有非根节点归类到其所属的根节点下
         for (Discussion d : discussions) {
             if (d.getParentId() != null) {
@@ -65,7 +65,8 @@ public class DiscussionService {
         int depth = 0;
         while (current.getParentId() != null && depth < 100) {
             current = map.get(current.getParentId());
-            if (current == null) return null;
+            if (current == null)
+                return null;
             depth++;
         }
         return current;

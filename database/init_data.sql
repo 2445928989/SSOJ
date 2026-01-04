@@ -147,9 +147,16 @@ VALUES (
         '欢迎使用 **SSOJ**(Simple School Online Judge) 在线判题系统！本系统支持多种编程语言，提供丰富的题目练习。',
         1
     );
-
 -- 7. 插入初始讨论
-INSERT INTO discussion (id, problem_id, user_id, parent_id, title, content, likes)
+INSERT INTO discussion (
+        id,
+        problem_id,
+        user_id,
+        parent_id,
+        title,
+        content,
+        likes
+    )
 VALUES (
         1,
         NULL,
@@ -186,7 +193,6 @@ VALUES (
         '@admin 没错，不过这题 $10^9$ 还在 `int` 范围内。',
         0
     );
-
 -- 8. 插入初始投票
 INSERT INTO vote (user_id, type, target_id, vote_type)
 VALUES (1, 'DISCUSSION', 1, 1),
