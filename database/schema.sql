@@ -17,7 +17,7 @@ CREATE TABLE user (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_role (role),
     INDEX idx_created_at (created_at)
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE TABLE problem(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(100) NOT NULL UNIQUE,
@@ -42,13 +42,13 @@ CREATE TABLE problem(
         INDEX idx_difficulty(difficulty),
         INDEX idx_author_id(author_id),
         INDEX idx_created_at(created_at)
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE TABLE tag(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) UNIQUE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE TABLE problem_tag(
     problem_id BIGINT NOT NULL,
     tag_id BIGINT NOT NULL,
@@ -85,7 +85,7 @@ CREATE TABLE submission(
     INDEX idx_status(status),
     FOREIGN KEY(user_id) REFERENCES user(id) ON DELETE CASCADE,
     FOREIGN KEY(problem_id) REFERENCES problem(id) ON DELETE CASCADE
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE TABLE result(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     submission_id BIGINT NOT NULL,
@@ -111,7 +111,7 @@ CREATE TABLE announcement (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (author_id) REFERENCES user(id) ON DELETE
     SET NULL
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE TABLE discussion (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     problem_id BIGINT DEFAULT NULL COMMENT '关联题目ID，为NULL表示全局讨论',
@@ -129,7 +129,7 @@ CREATE TABLE discussion (
     INDEX idx_problem_id (problem_id),
     INDEX idx_user_id (user_id),
     INDEX idx_parent_id (parent_id)
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE TABLE vote (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -139,4 +139,4 @@ CREATE TABLE vote (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uk_user_target (user_id, type, target_id),
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

@@ -27,7 +27,9 @@ public class DiscussionService {
     public Discussion getDiscussionById(Long id) {
         Discussion discussion = discussionMapper.findById(id);
         if (discussion != null) {
-            discussion.setReplies(discussionMapper.findDescendants(id));
+            List<Discussion> descendants = discussionMapper.findDescendants(id);
+            discussion.setReplies(descendants);
+            discussion.setRepliesCount(descendants.size());
         }
         return discussion;
     }
@@ -41,6 +43,7 @@ public class DiscussionService {
         for (Discussion d : discussions) {
             if (d.getParentId() == null) {
                 d.setReplies(new ArrayList<>());
+                d.setRepliesCount(0);
                 roots.add(d);
             }
         }
@@ -54,7 +57,15 @@ public class DiscussionService {
                         root.setReplies(new ArrayList<>());
                     }
                     root.getReplies().add(d);
+                    root.setRepliesCount(root.getRepliesCount() + 1);
                 }
+            }
+        }
+
+        // 对每个根讨论的回复列表按时间正序排序
+        for (Discussion root : roots) {
+            if (root.getReplies() != null && !root.getReplies().isEmpty()) {
+                root.getReplies().sort((a, b) -> a.getCreatedAt().compareTo(b.getCreatedAt()));
             }
         }
         return roots;
