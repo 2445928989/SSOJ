@@ -89,6 +89,7 @@ export default function ProblemManage() {
     const [showAddTcForm, setShowAddTcForm] = useState(false)
     const [newTcForm, setNewTcForm] = useState({ inputContent: '', outputContent: '' })
     const [isLargeFile, setIsLargeFile] = useState({ input: false, output: false })
+    const [isTransitioning, setIsTransitioning] = useState(false)
 
     const initialForm = {
         title: '',
@@ -185,23 +186,34 @@ export default function ProblemManage() {
     }
 
     const handleEdit = (p: any) => {
-        setForm({
-            title: p.title,
-            description: p.description,
-            inputFormat: p.inputFormat,
-            outputFormat: p.outputFormat,
-            sampleInput: p.sampleInput,
-            sampleOutput: p.sampleOutput,
-            sampleExplanation: p.sampleExplanation || '',
-            difficulty: p.difficulty,
-            timeLimit: p.timeLimit,
-            memoryLimit: p.memoryLimit,
-            categories: p.categories || []
-        })
-        setTagInput((p.categories || []).join(', '))
-        setEditingId(p.id)
-        setShowForm(true)
-        loadTestCases(p.id)
+        setIsTransitioning(true)
+        // 使用双重 RAF 确保 Loading 状态先渲染
+        setTimeout(() => {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    setForm({
+                        title: p.title,
+                        description: p.description,
+                        inputFormat: p.inputFormat,
+                        outputFormat: p.outputFormat,
+                        sampleInput: p.sampleInput,
+                        sampleOutput: p.sampleOutput,
+                        sampleExplanation: p.sampleExplanation || '',
+                        difficulty: p.difficulty,
+                        timeLimit: p.timeLimit,
+                        memoryLimit: p.memoryLimit,
+                        categories: p.categories || []
+                    })
+                    setTagInput((p.categories || []).join(', '))
+                    setEditingId(p.id)
+                    setShowForm(true)
+                    loadTestCases(p.id).then(() => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' })
+                        setIsTransitioning(false)
+                    })
+                })
+            })
+        }, 50)
     }
 
     const handleDelete = async (id: number) => {
@@ -349,6 +361,32 @@ export default function ProblemManage() {
             </div>
 
             {error && <div className="error" style={{ marginBottom: '20px' }}>{error}</div>}
+
+            {isTransitioning && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(255, 255, 255, 0.7)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 9999
+                }}>
+                    <div className="spin" style={{
+                        width: '40px',
+                        height: '40px',
+                        border: '4px solid var(--primary-color)',
+                        borderTopColor: 'transparent',
+                        borderRadius: '50%',
+                        marginBottom: '15px'
+                    }}></div>
+                    <div style={{ color: 'var(--primary-color)', fontWeight: '600' }}>正在加载题目数据...</div>
+                </div>
+            )}
 
             {showForm && (
                 <div className="card" style={{ marginBottom: '40px', padding: '30px' }}>
@@ -613,48 +651,50 @@ export default function ProblemManage() {
                 </div>
             )}
 
-            <div className="card">
-                <table className="problem-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>标题</th>
-                            <th>难度</th>
-                            <th>时限/内存</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {problems.map(p => (
-                            <tr key={p.id}>
-                                <td>{p.id}</td>
-                                <td>
-                                    <span
-                                        onClick={() => handleEdit(p)}
-                                        style={{ fontWeight: 'bold', color: 'var(--primary-color)', cursor: 'pointer' }}
-                                    >
-                                        {p.title}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span className={`difficulty-badge ${p.difficulty.toLowerCase()}`}>
-                                        {p.difficulty === 'EASY' ? '简单' : p.difficulty === 'MEDIUM' ? '中等' : '困难'}
-                                    </span>
-                                </td>
-                                <td style={{ fontSize: '13px', color: '#666' }}>
-                                    {p.timeLimit}s / {Math.round(p.memoryLimit / 1024)}MB
-                                </td>
-                                <td>
-                                    <div style={{ display: 'flex', gap: '10px' }}>
-                                        <button className="edit-btn" onClick={() => handleEdit(p)}>编辑</button>
-                                        <button className="delete-btn" onClick={() => handleDelete(p.id)}>删除</button>
-                                    </div>
-                                </td>
+            {!showForm && (
+                <div className="card">
+                    <table className="problem-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>标题</th>
+                                <th>难度</th>
+                                <th>时限/内存</th>
+                                <th>操作</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {problems.map(p => (
+                                <tr key={p.id}>
+                                    <td>{p.id}</td>
+                                    <td>
+                                        <span
+                                            onClick={() => handleEdit(p)}
+                                            style={{ fontWeight: 'bold', color: 'var(--primary-color)', cursor: 'pointer' }}
+                                        >
+                                            {p.title}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span className={`difficulty-badge ${p.difficulty.toLowerCase()}`}>
+                                            {p.difficulty === 'EASY' ? '简单' : p.difficulty === 'MEDIUM' ? '中等' : '困难'}
+                                        </span>
+                                    </td>
+                                    <td style={{ fontSize: '13px', color: '#666' }}>
+                                        {p.timeLimit}s / {Math.round(p.memoryLimit / 1024)}MB
+                                    </td>
+                                    <td>
+                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                            <button className="edit-btn" onClick={() => handleEdit(p)}>编辑</button>
+                                            <button className="delete-btn" onClick={() => handleDelete(p.id)}>删除</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
 
             <style>{`
                 .problem-form .form-group {
