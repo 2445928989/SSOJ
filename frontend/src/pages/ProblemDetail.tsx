@@ -14,31 +14,38 @@ function SampleBox({ content, onCopy, copyStatusKey, copyStatus }: { content: st
     useEffect(() => {
         if (!content) {
             setDisplayContent('');
+            setIsRendering(false);
             return;
         }
 
         // 如果内容较小，直接显示
-        if (content.length < 20000) {
+        if (content.length < 15000) {
             setDisplayContent(content);
+            setIsRendering(false);
             return;
         }
 
         // 如果内容较大，先显示加载状态，延迟渲染
+        setDisplayContent(null);
         setIsRendering(true);
         const timer = setTimeout(() => {
-            setDisplayContent(content);
-            setIsRendering(false);
-        }, 150);
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    setDisplayContent(content);
+                    setIsRendering(false);
+                });
+            });
+        }, 50);
 
         return () => clearTimeout(timer);
     }, [content]);
 
     return (
-        <div className="sample-group" style={{ position: 'relative' }}>
+        <div className="sample-group" style={{ position: 'relative', minHeight: '80px' }}>
             <div className="sample-header">
                 <h3>{copyStatusKey.startsWith('in') ? '输入' : '输出'}</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    {content.length > 1024 * 5 && (
+                    {content.length > 1024 && (
                         <span style={{ fontSize: '11px', color: '#999' }}>{(content.length / 1024).toFixed(1)} KB</span>
                     )}
                     <button
@@ -57,16 +64,20 @@ function SampleBox({ content, onCopy, copyStatusKey, copyStatus }: { content: st
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        backgroundColor: 'rgba(255,255,255,0.7)',
+                        backgroundColor: 'rgba(255,255,255,0.8)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        zIndex: 5
+                        zIndex: 5,
+                        borderRadius: '4px'
                     }}>
                         <Loader2 className="spin" size={20} color="#667eea" />
                     </div>
                 )}
-                <pre className="sample-box" style={{ minHeight: isRendering ? '60px' : 'auto' }}>
+                <pre className="sample-box" style={{
+                    minHeight: isRendering ? '60px' : 'auto',
+                    display: isRendering ? 'none' : 'block'
+                }}>
                     {displayContent || (isRendering ? '' : '')}
                 </pre>
             </div>

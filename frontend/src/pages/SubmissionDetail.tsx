@@ -6,7 +6,7 @@ import api from '../api'
 import { AlertCircle, CheckCircle2, XCircle, Clock, AlertTriangle, FileCode, Loader2, Copy, Check } from 'lucide-react'
 
 // 专门用于展示大文本的组件，避免渲染时阻塞主线程导致页面卡死
-function LargeTextViewer({ content, label, backgroundColor, color, borderColor }: { content: string, label: string, backgroundColor: string, color?: string, borderColor?: string }) {
+const LargeTextViewer = React.memo(({ content, label, backgroundColor, color, borderColor }: { content: string, label: string, backgroundColor: string, color?: string, borderColor?: string }) => {
     const [displayContent, setDisplayContent] = useState<string | null>(null);
     const [isRendering, setIsRendering] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -14,39 +14,73 @@ function LargeTextViewer({ content, label, backgroundColor, color, borderColor }
     useEffect(() => {
         if (!content) {
             setDisplayContent('-');
+            setIsRendering(false);
             return;
         }
 
         // 如果内容较小，直接显示
-        if (content.length < 30000) {
+        if (content.length < 20000) {
             setDisplayContent(content);
+            setIsRendering(false);
             return;
         }
 
         // 如果内容较大，先显示加载状态，延迟渲染
+        setDisplayContent(null); // 先清空旧内容
         setIsRendering(true);
+
+        // 使用 double requestAnimationFrame 确保 Loading 状态被浏览器绘制
         const timer = setTimeout(() => {
-            setDisplayContent(content);
-            setIsRendering(false);
-        }, 200); // 给浏览器一点时间渲染加载动画
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    setDisplayContent(content);
+                    setIsRendering(false);
+                });
+            });
+        }, 50);
 
         return () => clearTimeout(timer);
     }, [content]);
 
     const handleCopy = () => {
         if (!content) return;
-        navigator.clipboard.writeText(content).then(() => {
+
+        const doCopy = () => {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
-        });
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(content).then(doCopy).catch(() => fallbackCopy(content, doCopy));
+        } else {
+            fallbackCopy(content, doCopy);
+        }
+    };
+
+    const fallbackCopy = (text: string, callback: () => void) => {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            callback();
+        } catch (err) {
+            console.error('Fallback copy failed', err);
+        }
+        document.body.removeChild(textArea);
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minWidth: 0 }}>
             <h4 style={{ margin: '0 0 10px 0', color: color || '#333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>{label}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    {content && content.length > 1024 * 10 && (
+                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                    {content && content.length > 1024 && (
                         <span style={{ fontSize: '11px', color: '#999', fontWeight: 'normal' }}>
                             {(content.length / 1024).toFixed(1)} KB
                         </span>
@@ -75,7 +109,7 @@ function LargeTextViewer({ content, label, backgroundColor, color, borderColor }
                     )}
                 </div>
             </h4>
-            <div style={{ position: 'relative', flex: 1 }}>
+            <div style={{ position: 'relative', flex: 1, minHeight: '100px' }}>
                 {isRendering && (
                     <div style={{
                         position: 'absolute',
@@ -83,7 +117,7 @@ function LargeTextViewer({ content, label, backgroundColor, color, borderColor }
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        backgroundColor: 'rgba(255,255,255,0.8)',
+                        backgroundColor: 'rgba(255,255,255,0.9)',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
@@ -93,7 +127,7 @@ function LargeTextViewer({ content, label, backgroundColor, color, borderColor }
                         border: '1px solid #e2e8f0'
                     }}>
                         <Loader2 className="spin" size={24} color="#667eea" />
-                        <span style={{ fontSize: '12px', color: '#667eea', marginTop: '8px', fontWeight: '500' }}>正在解析大数据...</span>
+                        <span style={{ fontSize: '12px', color: '#667eea', marginTop: '8px', fontWeight: '500' }}>正在渲染大数据...</span>
                     </div>
                 )}
                 <pre style={{
@@ -108,16 +142,17 @@ function LargeTextViewer({ content, label, backgroundColor, color, borderColor }
                     fontSize: '12px',
                     fontFamily: 'monospace',
                     margin: 0,
-                    minHeight: isRendering ? '120px' : 'auto',
+                    height: '100%',
                     border: borderColor ? `1px solid ${borderColor}` : '1px solid #edf2f7',
-                    lineHeight: '1.5'
+                    lineHeight: '1.5',
+                    display: isRendering ? 'none' : 'block'
                 }}>
                     {displayContent || (isRendering ? '' : '-')}
                 </pre>
             </div>
         </div>
     );
-}
+});
 
 export default function SubmissionDetail() {
     const { id } = useParams()

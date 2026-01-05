@@ -19,7 +19,7 @@ function LargeTextEditor({ label, initialValue, onChange, isLarge }: { label: st
         if (timerRef.current) clearTimeout(timerRef.current);
         timerRef.current = setTimeout(() => {
             onChange(val);
-        }, 300);
+        }, 500); // 增加防抖时间
     };
 
     return (
@@ -47,6 +47,33 @@ function LargeTextEditor({ label, initialValue, onChange, isLarge }: { label: st
         </div>
     );
 }
+
+// 智能预览组件，避免在列表中渲染超大文本导致卡顿
+const SmartPreview = React.memo(({ content, label }: { content: string, label: string }) => {
+    const isLarge = content.length > 1000;
+    const previewText = isLarge ? content.substring(0, 1000) + '...' : content;
+
+    return (
+        <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '11px', color: '#999', marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                <span>{label}</span>
+                {isLarge && <span style={{ color: '#3182ce' }}>仅显示前 1000 字符</span>}
+            </div>
+            <pre style={{
+                margin: 0,
+                background: '#f8f9fa',
+                padding: '10px',
+                borderRadius: '4px',
+                maxHeight: '120px',
+                overflow: 'auto',
+                whiteSpace: 'pre-wrap',
+                fontSize: '12px',
+                border: '1px solid #edf2f7',
+                color: '#4a5568'
+            }}>{previewText || '-'}</pre>
+        </div>
+    );
+});
 
 export default function ProblemManage() {
     const [problems, setProblems] = useState<any[]>([])
@@ -499,34 +526,8 @@ export default function ProblemManage() {
                                                                 </div>
                                                             ) : (
                                                                 <div style={{ display: 'flex', gap: '15px' }}>
-                                                                    <div style={{ flex: 1 }}>
-                                                                        <div style={{ fontSize: '11px', color: '#999', marginBottom: '4px' }}>输入预览</div>
-                                                                        <pre style={{
-                                                                            margin: 0,
-                                                                            background: '#f8f9fa',
-                                                                            padding: '10px',
-                                                                            borderRadius: '4px',
-                                                                            maxHeight: '120px',
-                                                                            overflow: 'auto',
-                                                                            whiteSpace: 'pre-wrap',
-                                                                            fontSize: '12px',
-                                                                            border: '1px solid #edf2f7'
-                                                                        }}>{tc.inputContent}</pre>
-                                                                    </div>
-                                                                    <div style={{ flex: 1 }}>
-                                                                        <div style={{ fontSize: '11px', color: '#999', marginBottom: '4px' }}>输出预览</div>
-                                                                        <pre style={{
-                                                                            margin: 0,
-                                                                            background: '#f8f9fa',
-                                                                            padding: '10px',
-                                                                            borderRadius: '4px',
-                                                                            maxHeight: '120px',
-                                                                            overflow: 'auto',
-                                                                            whiteSpace: 'pre-wrap',
-                                                                            fontSize: '12px',
-                                                                            border: '1px solid #edf2f7'
-                                                                        }}>{tc.outputContent}</pre>
-                                                                    </div>
+                                                                    <SmartPreview label="输入预览" content={tc.inputContent} />
+                                                                    <SmartPreview label="输出预览" content={tc.outputContent} />
                                                                 </div>
                                                             )}
                                                         </td>
