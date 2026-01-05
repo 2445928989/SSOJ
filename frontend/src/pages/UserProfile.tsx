@@ -682,18 +682,6 @@ export default function UserProfile() {
                     word-break: break-all;
                 }
 
-                .markdown-body {
-                    white-space: pre-wrap;
-                }
-
-                .markdown-body p {
-                    margin-bottom: 1em;
-                }
-
-                .markdown-body p:last-child {
-                    margin-bottom: 0;
-                }
-
                 .role-badge {
                     display: inline-block;
                     padding: 4px 12px;

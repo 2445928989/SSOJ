@@ -3,7 +3,121 @@ import { useParams } from 'react-router-dom'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/atom-one-dark.css'
 import api from '../api'
-import { AlertCircle, CheckCircle2, XCircle, Clock, AlertTriangle, FileCode, Loader2 } from 'lucide-react'
+import { AlertCircle, CheckCircle2, XCircle, Clock, AlertTriangle, FileCode, Loader2, Copy, Check } from 'lucide-react'
+
+// 专门用于展示大文本的组件，避免渲染时阻塞主线程导致页面卡死
+function LargeTextViewer({ content, label, backgroundColor, color, borderColor }: { content: string, label: string, backgroundColor: string, color?: string, borderColor?: string }) {
+    const [displayContent, setDisplayContent] = useState<string | null>(null);
+    const [isRendering, setIsRendering] = useState(false);
+    const [copied, setCopied] = useState(false);
+
+    useEffect(() => {
+        if (!content) {
+            setDisplayContent('-');
+            return;
+        }
+
+        // 如果内容较小，直接显示
+        if (content.length < 30000) {
+            setDisplayContent(content);
+            return;
+        }
+
+        // 如果内容较大，先显示加载状态，延迟渲染
+        setIsRendering(true);
+        const timer = setTimeout(() => {
+            setDisplayContent(content);
+            setIsRendering(false);
+        }, 200); // 给浏览器一点时间渲染加载动画
+
+        return () => clearTimeout(timer);
+    }, [content]);
+
+    const handleCopy = () => {
+        if (!content) return;
+        navigator.clipboard.writeText(content).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        });
+    };
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <h4 style={{ margin: '0 0 10px 0', color: color || '#333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>{label}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    {content && content.length > 1024 * 10 && (
+                        <span style={{ fontSize: '11px', color: '#999', fontWeight: 'normal' }}>
+                            {(content.length / 1024).toFixed(1)} KB
+                        </span>
+                    )}
+                    {content && (
+                        <button
+                            onClick={handleCopy}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: copied ? '#48bb78' : '#667eea',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                fontSize: '12px',
+                                padding: '2px 4px',
+                                borderRadius: '4px',
+                                transition: 'all 0.2s'
+                            }}
+                            title="复制内容"
+                        >
+                            {copied ? <Check size={14} /> : <Copy size={14} />}
+                            {copied ? '已复制' : '复制'}
+                        </button>
+                    )}
+                </div>
+            </h4>
+            <div style={{ position: 'relative', flex: 1 }}>
+                {isRendering && (
+                    <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(255,255,255,0.8)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 10,
+                        borderRadius: '4px',
+                        border: '1px solid #e2e8f0'
+                    }}>
+                        <Loader2 className="spin" size={24} color="#667eea" />
+                        <span style={{ fontSize: '12px', color: '#667eea', marginTop: '8px', fontWeight: '500' }}>正在解析大数据...</span>
+                    </div>
+                )}
+                <pre style={{
+                    backgroundColor: backgroundColor,
+                    color: color || 'inherit',
+                    padding: '12px',
+                    borderRadius: '4px',
+                    whiteSpace: 'pre-wrap',
+                    wordWrap: 'break-word',
+                    maxHeight: '300px',
+                    overflow: 'auto',
+                    fontSize: '12px',
+                    fontFamily: 'monospace',
+                    margin: 0,
+                    minHeight: isRendering ? '120px' : 'auto',
+                    border: borderColor ? `1px solid ${borderColor}` : '1px solid #edf2f7',
+                    lineHeight: '1.5'
+                }}>
+                    {displayContent || (isRendering ? '' : '-')}
+                </pre>
+            </div>
+        </div>
+    );
+}
 
 export default function SubmissionDetail() {
     const { id } = useParams()
@@ -240,73 +354,31 @@ export default function SubmissionDetail() {
                                             <td colSpan={5} style={{ padding: '15px' }}>
                                                 {r.errorMessage && (
                                                     <div style={{ marginBottom: '15px' }}>
-                                                        <h4 style={{ margin: '0 0 10px 0', color: '#e91e63' }}>错误信息</h4>
-                                                        <pre style={{
-                                                            backgroundColor: '#fff0f0',
-                                                            padding: '10px',
-                                                            borderRadius: '4px',
-                                                            whiteSpace: 'pre-wrap',
-                                                            wordWrap: 'break-word',
-                                                            maxHeight: '300px',
-                                                            overflow: 'auto',
-                                                            fontSize: '12px',
-                                                            fontFamily: 'monospace',
-                                                            border: '1px solid #ffcdd2',
-                                                            color: '#c62828'
-                                                        }}>
-                                                            {r.errorMessage}
-                                                        </pre>
+                                                        <LargeTextViewer
+                                                            label="错误信息"
+                                                            content={r.errorMessage}
+                                                            backgroundColor="#fff0f0"
+                                                            color="#c62828"
+                                                            borderColor="#ffcdd2"
+                                                        />
                                                     </div>
                                                 )}
                                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
-                                                    <div>
-                                                        <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>输入</h4>
-                                                        <pre style={{
-                                                            backgroundColor: '#f0f0f0',
-                                                            padding: '10px',
-                                                            borderRadius: '4px',
-                                                            whiteSpace: 'pre-wrap',
-                                                            wordWrap: 'break-word',
-                                                            maxHeight: '200px',
-                                                            overflow: 'auto',
-                                                            fontSize: '12px',
-                                                            fontFamily: 'monospace'
-                                                        }}>
-                                                            {r.inputContent || '-'}
-                                                        </pre>
-                                                    </div>
-                                                    <div>
-                                                        <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>期望输出</h4>
-                                                        <pre style={{
-                                                            backgroundColor: '#e8f5e9',
-                                                            padding: '10px',
-                                                            borderRadius: '4px',
-                                                            whiteSpace: 'pre-wrap',
-                                                            wordWrap: 'break-word',
-                                                            maxHeight: '200px',
-                                                            overflow: 'auto',
-                                                            fontSize: '12px',
-                                                            fontFamily: 'monospace'
-                                                        }}>
-                                                            {r.expectedOutputContent || '-'}
-                                                        </pre>
-                                                    </div>
-                                                    <div>
-                                                        <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>实际输出</h4>
-                                                        <pre style={{
-                                                            backgroundColor: r.status === 'AC' ? '#e8f5e9' : '#ffebee',
-                                                            padding: '10px',
-                                                            borderRadius: '4px',
-                                                            whiteSpace: 'pre-wrap',
-                                                            wordWrap: 'break-word',
-                                                            maxHeight: '200px',
-                                                            overflow: 'auto',
-                                                            fontSize: '12px',
-                                                            fontFamily: 'monospace'
-                                                        }}>
-                                                            {r.actualOutputContent || '-'}
-                                                        </pre>
-                                                    </div>
+                                                    <LargeTextViewer
+                                                        label="输入"
+                                                        content={r.inputContent}
+                                                        backgroundColor="#f0f0f0"
+                                                    />
+                                                    <LargeTextViewer
+                                                        label="期望输出"
+                                                        content={r.expectedOutputContent}
+                                                        backgroundColor="#e8f5e9"
+                                                    />
+                                                    <LargeTextViewer
+                                                        label="实际输出"
+                                                        content={r.actualOutputContent}
+                                                        backgroundColor={r.status === 'AC' ? '#e8f5e9' : '#ffebee'}
+                                                    />
                                                 </div>
                                             </td>
                                         </tr>

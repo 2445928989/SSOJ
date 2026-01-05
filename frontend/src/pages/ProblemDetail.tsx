@@ -5,7 +5,74 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import 'katex/dist/katex.min.css'
 import api from '../api'
-import { ThumbsUp, ThumbsDown, MessageSquare, Send, User as UserIcon, AlertCircle, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
+import { ThumbsUp, ThumbsDown, MessageSquare, Send, User as UserIcon, AlertCircle, Trash2, ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
+
+function SampleBox({ content, onCopy, copyStatusKey, copyStatus }: { content: string, onCopy: (text: string, key: string) => void, copyStatusKey: string, copyStatus: any }) {
+    const [displayContent, setDisplayContent] = useState<string | null>(null);
+    const [isRendering, setIsRendering] = useState(false);
+
+    useEffect(() => {
+        if (!content) {
+            setDisplayContent('');
+            return;
+        }
+
+        // 如果内容较小，直接显示
+        if (content.length < 20000) {
+            setDisplayContent(content);
+            return;
+        }
+
+        // 如果内容较大，先显示加载状态，延迟渲染
+        setIsRendering(true);
+        const timer = setTimeout(() => {
+            setDisplayContent(content);
+            setIsRendering(false);
+        }, 150);
+
+        return () => clearTimeout(timer);
+    }, [content]);
+
+    return (
+        <div className="sample-group" style={{ position: 'relative' }}>
+            <div className="sample-header">
+                <h3>{copyStatusKey.startsWith('in') ? '输入' : '输出'}</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {content.length > 1024 * 5 && (
+                        <span style={{ fontSize: '11px', color: '#999' }}>{(content.length / 1024).toFixed(1)} KB</span>
+                    )}
+                    <button
+                        className="copy-btn"
+                        onClick={() => onCopy(content, copyStatusKey)}
+                    >
+                        {copyStatus[copyStatusKey] ? '已复制!' : '复制'}
+                    </button>
+                </div>
+            </div>
+            <div style={{ position: 'relative' }}>
+                {isRendering && (
+                    <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'rgba(255,255,255,0.7)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 5
+                    }}>
+                        <Loader2 className="spin" size={20} color="#667eea" />
+                    </div>
+                )}
+                <pre className="sample-box" style={{ minHeight: isRendering ? '60px' : 'auto' }}>
+                    {displayContent || (isRendering ? '' : '')}
+                </pre>
+            </div>
+        </div>
+    );
+}
 
 function MarkdownContent({ content }: { content: string }) {
     // 处理 @username 格式，将其转换为链接
@@ -306,30 +373,18 @@ export default function ProblemDetail() {
                             <div key={i} className="samples-wrapper">
                                 <div className="sample-title">样例 {i + 1}</div>
                                 <div className="sample-grid">
-                                    <div className="sample-group">
-                                        <div className="sample-header">
-                                            <h3>输入</h3>
-                                            <button
-                                                className="copy-btn"
-                                                onClick={() => handleCopy(inputs[i] || '', `in-${i}`)}
-                                            >
-                                                {copyStatus[`in-${i}`] ? '已复制!' : '复制'}
-                                            </button>
-                                        </div>
-                                        <pre className="sample-box">{inputs[i] || ''}</pre>
-                                    </div>
-                                    <div className="sample-group">
-                                        <div className="sample-header">
-                                            <h3>输出</h3>
-                                            <button
-                                                className="copy-btn"
-                                                onClick={() => handleCopy(outputs[i] || '', `out-${i}`)}
-                                            >
-                                                {copyStatus[`out-${i}`] ? '已复制!' : '复制'}
-                                            </button>
-                                        </div>
-                                        <pre className="sample-box">{outputs[i] || ''}</pre>
-                                    </div>
+                                    <SampleBox
+                                        content={inputs[i] || ''}
+                                        onCopy={handleCopy}
+                                        copyStatusKey={`in-${i}`}
+                                        copyStatus={copyStatus}
+                                    />
+                                    <SampleBox
+                                        content={outputs[i] || ''}
+                                        onCopy={handleCopy}
+                                        copyStatusKey={`out-${i}`}
+                                        copyStatus={copyStatus}
+                                    />
                                 </div>
                             </div>
                         ));

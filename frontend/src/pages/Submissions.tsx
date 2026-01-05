@@ -7,12 +7,26 @@ export default function Submissions() {
     const [subs, setSubs] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
+    const [page, setPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(1)
+    const [total, setTotal] = useState(0)
+    const size = 20
 
-    useEffect(() => {
-        api.get('/api/submission/recent')
-            .then(res => setSubs(res.data.data || []))
+    const fetchSubmissions = (pageNum: number) => {
+        setLoading(true)
+        api.get(`/api/submission/recent?page=${pageNum}&size=${size}`)
+            .then(res => {
+                setSubs(res.data.data || [])
+                setTotal(res.data.total || 0)
+                setTotalPages(Math.ceil((res.data.total || 0) / size))
+                setPage(pageNum)
+            })
             .catch(e => setError(e.response?.data?.error || 'Failed to load'))
             .finally(() => setLoading(false))
+    }
+
+    useEffect(() => {
+        fetchSubmissions(1)
     }, [])
 
     if (loading) return (
@@ -31,7 +45,7 @@ export default function Submissions() {
 
     return (
         <div className="container" style={{ paddingTop: '60px', paddingBottom: '60px' }}>
-            <h2 style={{ marginBottom: '30px', fontSize: '2rem', fontWeight: '700' }}>最近提交</h2>
+            <h2 style={{ marginBottom: '30px', fontSize: '2rem', fontWeight: '700' }}>提交记录</h2>
             <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
@@ -96,6 +110,57 @@ export default function Submissions() {
                     </tbody>
                 </table>
             </div>
+
+            {totalPages > 1 && (
+                <div className="pagination" style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginTop: '30px',
+                    gap: '15px'
+                }}>
+                    <button
+                        onClick={() => fetchSubmissions(page - 1)}
+                        disabled={page <= 1}
+                        className="page-btn"
+                        style={{
+                            padding: '8px 16px',
+                            borderRadius: '6px',
+                            border: '1px solid #e2e8f0',
+                            background: page <= 1 ? '#f7fafc' : 'white',
+                            color: page <= 1 ? '#a0aec0' : '#4a5568',
+                            cursor: page <= 1 ? 'not-allowed' : 'pointer',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        ← 上一页
+                    </button>
+                    <span className="page-info" style={{ fontSize: '14px', color: '#718096', fontWeight: '500' }}>
+                        第 {page} / {totalPages} 页 (共 {total} 条)
+                    </span>
+                    <button
+                        onClick={() => fetchSubmissions(page + 1)}
+                        disabled={page >= totalPages}
+                        className="page-btn"
+                        style={{
+                            padding: '8px 16px',
+                            borderRadius: '6px',
+                            border: '1px solid #e2e8f0',
+                            background: page >= totalPages ? '#f7fafc' : 'white',
+                            color: page >= totalPages ? '#a0aec0' : '#4a5568',
+                            cursor: page >= totalPages ? 'not-allowed' : 'pointer',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        下一页 →
+                    </button>
+                </div>
+            )}
+
             <style>{`
                 .loading-container {
                     display: flex;
