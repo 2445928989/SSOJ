@@ -259,27 +259,17 @@ public class ProblemService {
         }
         List<TestCase> testCases = testCaseMapper.findByProblemId(problemId);
         for (TestCase tc : testCases) {
-            try {
-                String input = FileUtil.readFile(tc.getInputPath());
-                String output = FileUtil.readFile(tc.getOutputPath());
-
-                // 截断内容，仅用于预览
-                int limit = 1000;
-                if (input.length() > limit) {
-                    input = input.substring(0, limit) + "... (truncated)";
-                }
-                if (output.length() > limit) {
-                    output = output.substring(0, limit) + "... (truncated)";
-                }
-
-                tc.setInputContent(input);
-                tc.setOutputContent(output);
-            } catch (Exception e) {
-                tc.setInputContent("Error reading file: " + e.getMessage());
-                tc.setOutputContent("Error reading file: " + e.getMessage());
-            }
+            tc.setInputContent(FileUtil.readFileContent(tc.getInputPath()));
+            tc.setOutputContent(FileUtil.readFileContent(tc.getOutputPath()));
         }
         return testCases;
+    }
+
+    /**
+     * 获取单个测试用例详情 (不读取内容)
+     */
+    public TestCase getTestCaseById(Long testCaseId) {
+        return testCaseMapper.findById(testCaseId);
     }
 
     /**

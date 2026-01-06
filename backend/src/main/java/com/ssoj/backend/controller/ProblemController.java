@@ -1,16 +1,23 @@
 package com.ssoj.backend.controller;
 
 import com.ssoj.backend.entity.Problem;
+import com.ssoj.backend.entity.TestCase;
 import com.ssoj.backend.entity.User;
 import com.ssoj.backend.service.ProblemService;
 import com.ssoj.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.servlet.http.HttpSession;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -219,6 +226,36 @@ public class ProblemController {
         } catch (Exception e) {
             return Map.of("success", false, "error", e.getMessage());
         }
+    }
+
+    /**
+     * GET /api/problem/{id}/testcases/{tcId}/download/{type}
+     * 下载测试用例文件
+     */
+    @GetMapping("/api/problem/{id}/testcases/{tcId}/download/{type}")
+    public ResponseEntity<Resource> downloadTestCaseFile(@PathVariable("id") Long id,
+            @PathVariable("tcId") Long tcId,
+            @PathVariable("type") String type,
+            jakarta.servlet.http.HttpSession session) {
+        checkAdmin(session);
+        TestCase tc = problemService.getTestCaseById(tcId);
+        if (tc == null || !tc.getProblemId().equals(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "测试用例不存在");
+        }
+
+        String filePath = "input".equals(type) ? tc.getInputPath() : tc.getOutputPath();
+        File file = new File(filePath);
+        if (!file.exists()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "文件不存在");
+        }
+
+        Resource resource = new FileSystemResource(file);
+        String filename = file.getName();
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .body(resource);
     }
 
     /**

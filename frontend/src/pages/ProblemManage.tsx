@@ -2,52 +2,6 @@ import React, { useEffect, useState, useRef } from 'react'
 import api from '../api'
 import { Link } from 'react-router-dom'
 
-// 专门处理大文本的编辑器组件，避免主组件频繁重绘
-function LargeTextEditor({ label, initialValue, onChange, isLarge }: { label: string, initialValue: string, onChange: (val: string) => void, isLarge: boolean }) {
-    const [localValue, setLocalValue] = useState(initialValue);
-    const timerRef = useRef<any>(null);
-
-    useEffect(() => {
-        setLocalValue(initialValue);
-    }, [initialValue]);
-
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const val = e.target.value;
-        setLocalValue(val);
-
-        // 防抖更新父组件状态
-        if (timerRef.current) clearTimeout(timerRef.current);
-        timerRef.current = setTimeout(() => {
-            onChange(val);
-        }, 500); // 增加防抖时间
-    };
-
-    return (
-        <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '11px', color: '#999', marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
-                <span>{label}</span>
-                {isLarge && <span style={{ color: '#e53e3e' }}>大文件模式 (已启用防抖)</span>}
-            </div>
-            <textarea
-                style={{
-                    width: '100%',
-                    height: '200px',
-                    fontSize: '13px',
-                    fontFamily: 'monospace',
-                    padding: '8px',
-                    border: isLarge ? '1px solid #feb2b2' : '1px solid #cbd5e0',
-                    borderRadius: '4px',
-                    background: isLarge ? '#fff5f5' : 'white',
-                    outline: 'none'
-                }}
-                value={localValue}
-                onChange={handleChange}
-                placeholder="请输入内容..."
-            />
-        </div>
-    );
-}
-
 // 智能预览组件，避免在列表中渲染超大文本导致卡顿
 const SmartPreview = React.memo(({ content, label }: { content: string, label: string }) => {
     const isLarge = content.length > 1000;
@@ -83,12 +37,9 @@ export default function ProblemManage() {
     const [editingId, setEditingId] = useState<number | null>(null)
     const [testCaseFile, setTestCaseFile] = useState<File | null>(null)
     const [testCases, setTestCases] = useState<any[]>([])
-    const [editingTestCase, setEditingTestCase] = useState<number | null>(null)
-    const [tcEditForm, setTcEditForm] = useState({ inputContent: '', outputContent: '' })
     const [isUploadingZip, setIsUploadingZip] = useState(false)
     const [showAddTcForm, setShowAddTcForm] = useState(false)
     const [newTcForm, setNewTcForm] = useState({ inputContent: '', outputContent: '' })
-    const [isLargeFile, setIsLargeFile] = useState({ input: false, output: false })
     const [isTransitioning, setIsTransitioning] = useState(false)
 
     const initialForm = {
@@ -223,46 +174,6 @@ export default function ProblemManage() {
             loadProblems(searchKeyword)
         } catch (e: any) {
             setError(e.response?.data?.error || '删除失败')
-        }
-    }
-
-    const startEditingTestCase = async (tc: any) => {
-        setEditingTestCase(tc.id);
-        // 先用预览内容填充，防止界面闪烁
-        setTcEditForm({ inputContent: tc.inputContent, outputContent: tc.outputContent });
-        setIsLargeFile({ input: false, output: false });
-
-        try {
-            // 获取完整内容
-            const res = await api.get(`/api/problem/${editingId}/testcases/${tc.id}`);
-            if (res.data.success) {
-                const input = res.data.data.inputContent || '';
-                const output = res.data.data.outputContent || '';
-
-                // 如果文件超过 200KB，标记为大文件
-                const LARGE_SIZE = 200 * 1024;
-                const inputLarge = input.length > LARGE_SIZE;
-                const outputLarge = output.length > LARGE_SIZE;
-
-                setIsLargeFile({ input: inputLarge, output: outputLarge });
-                setTcEditForm({
-                    inputContent: input,
-                    outputContent: output
-                });
-            }
-        } catch (e) {
-            console.error('Failed to load test case detail', e);
-        }
-    };
-
-    const handleUpdateTestCase = async (tcId: number) => {
-        try {
-            await api.put(`/api/problem/${editingId}/testcases/${tcId}`, tcEditForm)
-            setEditingTestCase(null)
-            if (editingId) loadTestCases(editingId)
-            alert('测试点更新成功')
-        } catch (e: any) {
-            alert(e.response?.data?.error || '更新失败')
         }
     }
 
@@ -547,40 +458,35 @@ export default function ProblemManage() {
                                                             </div>
                                                         </td>
                                                         <td style={{ padding: '12px' }}>
-                                                            {editingTestCase === tc.id ? (
-                                                                <div style={{ display: 'flex', gap: '15px' }}>
-                                                                    <LargeTextEditor
-                                                                        label="输入 (Input)"
-                                                                        initialValue={tcEditForm.inputContent}
-                                                                        onChange={(val) => setTcEditForm(prev => ({ ...prev, inputContent: val }))}
-                                                                        isLarge={isLargeFile.input}
-                                                                    />
-                                                                    <LargeTextEditor
-                                                                        label="输出 (Output)"
-                                                                        initialValue={tcEditForm.outputContent}
-                                                                        onChange={(val) => setTcEditForm(prev => ({ ...prev, outputContent: val }))}
-                                                                        isLarge={isLargeFile.output}
-                                                                    />
-                                                                </div>
-                                                            ) : (
-                                                                <div style={{ display: 'flex', gap: '15px' }}>
+                                                            <div style={{ display: 'flex', gap: '15px' }}>
+                                                                <div style={{ flex: 1 }}>
                                                                     <SmartPreview label="输入预览" content={tc.inputContent} />
-                                                                    <SmartPreview label="输出预览" content={tc.outputContent} />
+                                                                    <a
+                                                                        href={`${api.defaults.baseURL}/api/problem/${editingId}/testcases/${tc.id}/download/input`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        style={{ fontSize: '12px', color: '#3182ce', textDecoration: 'none', display: 'inline-block', marginTop: '4px' }}
+                                                                    >
+                                                                        下载完整输入
+                                                                    </a>
                                                                 </div>
-                                                            )}
+                                                                <div style={{ flex: 1 }}>
+                                                                    <SmartPreview label="输出预览" content={tc.outputContent} />
+                                                                    <a
+                                                                        href={`${api.defaults.baseURL}/api/problem/${editingId}/testcases/${tc.id}/download/output`}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        style={{ fontSize: '12px', color: '#3182ce', textDecoration: 'none', display: 'inline-block', marginTop: '4px' }}
+                                                                    >
+                                                                        下载完整输出
+                                                                    </a>
+                                                                </div>
+                                                            </div>
                                                         </td>
                                                         <td style={{ padding: '12px', verticalAlign: 'top' }}>
-                                                            {editingTestCase === tc.id ? (
-                                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                                                    <button type="button" onClick={() => handleUpdateTestCase(tc.id)} style={{ padding: '6px', background: '#4caf50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>保存</button>
-                                                                    <button type="button" onClick={() => setEditingTestCase(null)} style={{ padding: '6px', background: '#9e9e9e', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>取消</button>
-                                                                </div>
-                                                            ) : (
-                                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                                                    <button type="button" onClick={() => startEditingTestCase(tc)} style={{ padding: '6px', background: '#2196f3', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>编辑</button>
-                                                                    <button type="button" onClick={() => handleDeleteTestCase(tc.id)} style={{ padding: '6px', background: '#f44336', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>删除</button>
-                                                                </div>
-                                                            )}
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                                <button type="button" onClick={() => handleDeleteTestCase(tc.id)} style={{ padding: '6px', background: '#ffebee', color: '#d32f2f', border: '1px solid #ffcdd2', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>删除</button>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 ))}
