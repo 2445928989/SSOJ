@@ -153,7 +153,7 @@ export default function Dashboard() {
                                     <h3>{announcement.title}</h3>
                                     {user?.role === 'ADMIN' && (
                                         <div style={{ display: 'flex', gap: '5px' }}>
-                                            <button onClick={() => handleEditAnn(announcement)} style={{ background: 'none', border: 'none', color: '#667eea', cursor: 'pointer', fontSize: '12px' }}>编辑</button>
+                                            <button onClick={() => handleEditAnn(announcement)} style={{ background: 'none', border: 'none', color: 'var(--primary-color)', cursor: 'pointer', fontSize: '12px' }}>编辑</button>
                                             <button onClick={() => handleDeleteAnn(announcement.id)} style={{ background: 'none', border: 'none', color: '#f44336', cursor: 'pointer', fontSize: '12px' }}>删除</button>
                                         </div>
                                     )}
@@ -206,7 +206,7 @@ export default function Dashboard() {
                         <h2>个人信息</h2>
                         <div className="user-dashboard-card">
                             <div className="user-card-header" style={{
-                                backgroundImage: user.backgroundImage ? `url(${user.backgroundImage})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                backgroundImage: user.backgroundImage ? `url(${user.backgroundImage})` : 'var(--primary-gradient)',
                                 backgroundSize: 'cover',
                                 backgroundPosition: 'center',
                                 height: '100px',
@@ -304,7 +304,7 @@ export default function Dashboard() {
 
                 .announcement-item {
                     padding: 15px;
-                    border-left: 4px solid #667eea;
+                    border-left: 4px solid var(--primary-color);
                     background: #f9f9f9;
                     border-radius: 4px;
                     transition: all 0.3s;
@@ -387,7 +387,7 @@ export default function Dashboard() {
 
                 .problem-item:hover {
                     background: #f9f9f9;
-                    border-color: #667eea;
+                    border-color: var(--primary-color);
                 }
 
                 .problem-header {
@@ -398,7 +398,7 @@ export default function Dashboard() {
                 }
 
                 .problem-title {
-                    color: #667eea;
+                    color: var(--primary-color);
                     text-decoration: none;
                     font-weight: 500;
                     flex: 1;
@@ -425,14 +425,14 @@ export default function Dashboard() {
                 }
 
                 .view-all {
-                    color: #667eea;
+                    color: var(--primary-color);
                     text-decoration: none;
                     font-weight: 500;
                     transition: all 0.3s;
                 }
 
                 .view-all:hover {
-                    color: #764ba2;
+                    color: var(--primary-dark);
                 }
 
                 .empty-state {
@@ -470,7 +470,7 @@ export default function Dashboard() {
                     width: 60px;
                     height: 60px;
                     border-radius: 50%;
-                    background: #667eea;
+                    background: var(--primary-color);
                     color: white;
                     display: flex;
                     align-items: center;
@@ -534,7 +534,7 @@ export default function Dashboard() {
                     display: inline-block;
                     margin-top: 15px;
                     padding: 8px 16px;
-                    background: #667eea;
+                    background: var(--primary-color);
                     color: white;
                     text-decoration: none;
                     border-radius: 4px;
@@ -543,7 +543,7 @@ export default function Dashboard() {
                 }
 
                 .edit-profile-btn:hover {
-                    background: #764ba2;
+                    background: var(--primary-dark);
                 }
 
                 .admin-section {

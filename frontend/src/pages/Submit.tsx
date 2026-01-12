@@ -285,7 +285,7 @@ export default function SubmitPage() {
                 }
 
                 .submit-header {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: var(--primary-gradient);
                     color: white;
                     padding: 40px 30px;
                 }
@@ -339,8 +339,8 @@ export default function SubmitPage() {
 
                 .language-select:focus {
                     outline: none;
-                    border-color: #667eea;
-                    box-shadow: 0 0 8px rgba(102, 126, 234, 0.2);
+                    border-color: var(--primary-color);
+                    box-shadow: 0 0 8px rgba(72, 187, 120, 0.2);
                 }
 
                 .code-editor-wrapper {
@@ -391,14 +391,14 @@ export default function SubmitPage() {
                 }
 
                 .submit-btn {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: var(--primary-gradient);
                     color: white;
-                    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                    box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
                 }
 
                 .submit-btn:hover:not(:disabled) {
                     transform: translateY(-3px);
-                    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+                    box-shadow: 0 8px 25px rgba(72, 187, 120, 0.6);
                 }
 
                 .submit-btn:active:not(:disabled) {

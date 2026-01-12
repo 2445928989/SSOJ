@@ -71,7 +71,7 @@ function SampleBox({ content, onCopy, copyStatusKey, copyStatus }: { content: st
                         zIndex: 5,
                         borderRadius: '4px'
                     }}>
-                        <Loader2 className="spin" size={20} color="#667eea" />
+                        <Loader2 className="spin" size={20} color="var(--primary-color)" />
                     </div>
                 )}
                 <pre className="sample-box" style={{
@@ -98,9 +98,9 @@ function MarkdownContent({ content }: { content: string }) {
                     a: ({ node, ...props }) => {
                         const href = props.href || '#';
                         if (href.startsWith('/')) {
-                            return <Link to={href} style={{ color: '#667eea', fontWeight: '500', textDecoration: 'none' }}>{props.children}</Link>;
+                            return <Link to={href} style={{ color: 'var(--primary-color)', fontWeight: '500', textDecoration: 'none' }}>{props.children}</Link>;
                         }
-                        return <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: '#667eea', fontWeight: '500' }}>{props.children}</a>;
+                        return <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-color)', fontWeight: '500' }}>{props.children}</a>;
                     }
                 }}
             >
@@ -495,7 +495,7 @@ export default function ProblemDetail() {
                     border-radius: 6px;
                     font-size: 13px;
                     color: #64748b;
-                    border-left: 4px solid #667eea;
+                    border-left: 4px solid var(--primary-color);
                 }
 
                 .reply-indicator button {
@@ -531,7 +531,7 @@ export default function ProblemDetail() {
                 }
 
                 .action-btn:hover {
-                    color: #667eea;
+                    color: var(--primary-color);
                 }
 
                 .action-btn.delete:hover {
@@ -544,7 +544,7 @@ export default function ProblemDetail() {
                     gap: 4px;
                     background: none;
                     border: none;
-                    color: #667eea;
+                    color: var(--primary-color);
                     font-size: 13px;
                     font-weight: 500;
                     cursor: pointer;
@@ -630,7 +630,7 @@ export default function ProblemDetail() {
                 }
 
                 .submit-btn {
-                    background: #667eea;
+                    background: var(--primary-color);
                     color: white;
                     text-decoration: none;
                     font-weight: 600;
@@ -642,8 +642,8 @@ export default function ProblemDetail() {
                 }
 
                 .submit-btn:hover {
-                    background: #764ba2;
-                    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+                    background: var(--primary-dark);
+                    box-shadow: 0 2px 8px rgba(72, 187, 120, 0.3);
                 }
 
                 .stats-bar {
@@ -868,7 +868,7 @@ export default function ProblemDetail() {
                 }
 
                 .content-section blockquote {
-                    border-left: 3px solid #667eea;
+                    border-left: 3px solid var(--primary-color);
                     padding-left: 15px;
                     margin: 15px 0;
                     color: #666;
@@ -876,7 +876,7 @@ export default function ProblemDetail() {
                 }
 
                 .content-section a {
-                    color: #667eea;
+                    color: var(--primary-color);
                     text-decoration: none;
                 }
 
@@ -910,12 +910,12 @@ export default function ProblemDetail() {
 
                 .discussion-input textarea:focus {
                     outline: none;
-                    border-color: #667eea;
+                    border-color: var(--primary-color);
                 }
 
                 .discussion-input button {
                     align-self: flex-end;
-                    background: #667eea;
+                    background: var(--primary-color);
                     color: white;
                     border: none;
                     padding: 8px 20px;
@@ -926,7 +926,7 @@ export default function ProblemDetail() {
                 }
 
                 .discussion-input button:hover {
-                    background: #764ba2;
+                    background: var(--primary-dark);
                 }
 
                 .discussion-input button:disabled {
@@ -1134,8 +1134,8 @@ function DiscussionItem({ d, onVote, isReply = false, rootId, currentUser, probl
                         ) : (
                             <>
                                 {d.replyToUsername && d.parentId !== rootId && (
-                                    <span style={{ color: '#667eea', marginRight: '8px', fontWeight: '500' }}>
-                                        回复 <Link to={`/user/${d.replyToUserId}`} style={{ color: '#667eea', textDecoration: 'none' }}>@{d.replyToUsername}</Link> :
+                                    <span style={{ color: 'var(--primary-color)', marginRight: '8px', fontWeight: '500' }}>
+                                        回复 <Link to={`/user/${d.replyToUserId}`} style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>@{d.replyToUsername}</Link> :
                                     </span>
                                 )}
                                 <div className={`content-wrapper ${isLongContent && !isExpanded ? 'collapsed' : ''}`}>

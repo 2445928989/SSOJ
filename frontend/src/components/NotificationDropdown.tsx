@@ -60,7 +60,7 @@ export default function NotificationDropdown() {
 
     const getIcon = (type: string) => {
         switch (type) {
-            case 'REPLY': return <MessageSquare size={16} style={{ color: '#667eea' }} />;
+            case 'REPLY': return <MessageSquare size={16} style={{ color: 'var(--primary-color)' }} />;
             case 'FOLLOW': return <UserPlus size={16} style={{ color: '#48bb78' }} />;
             default: return <Bell size={16} />;
         }
@@ -86,15 +86,27 @@ export default function NotificationDropdown() {
                 {unreadCount > 0 && (
                     <span style={{
                         position: 'absolute',
-                        top: '4px',
-                        right: '4px',
+                        top: '-2px',
+                        right: '-2px',
                         background: '#e53e3e',
                         color: 'white',
-                        borderRadius: '50%',
-                        width: '8px',
-                        height: '8px',
-                        border: '2px solid white'
-                    }}></span>
+                        borderRadius: '10px',
+                        minWidth: '18px',
+                        height: '18px',
+                        padding: '0 4px',
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '2px solid white',
+                        lineHeight: 1,
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0,
+                        zIndex: 10
+                    }}>
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
                 )}
             </button>
 
@@ -126,7 +138,7 @@ export default function NotificationDropdown() {
                                 onClick={markAllAsRead}
                                 style={{
                                     fontSize: '12px',
-                                    color: '#667eea',
+                                    color: 'var(--primary-color)',
                                     background: 'none',
                                     border: 'none',
                                     cursor: 'pointer',

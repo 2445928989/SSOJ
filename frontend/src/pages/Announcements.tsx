@@ -30,7 +30,7 @@ export function FoldableContent({ content, limit = 300 }: { content: string, lim
                         gap: '4px',
                         background: 'none',
                         border: 'none',
-                        color: '#667eea',
+                        color: 'var(--primary-color)',
                         fontSize: '13px',
                         fontWeight: '500',
                         cursor: 'pointer',
@@ -81,7 +81,6 @@ export default function Announcements() {
         <div className="container" style={{ paddingTop: '40px', paddingBottom: '60px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                 <h2 style={{ margin: 0, fontSize: '2rem', fontWeight: '700' }}>所有公告</h2>
-                <Link to="/" className="back-btn">返回仪表盘</Link>
             </div>
 
             <div className="announcements-full-list">
@@ -116,7 +115,7 @@ export default function Announcements() {
             <style>{`
                 .announcement-card {
                     transition: transform 0.2s, box-shadow 0.2s;
-                    border-left: 5px solid #667eea;
+                    border-left: 5px solid var(--primary-color);
                 }
                 .announcement-card:hover {
                     transform: translateY(-2px);

@@ -92,7 +92,7 @@ const LargeTextViewer = React.memo(({ content, label, backgroundColor, color, bo
                                 background: 'none',
                                 border: 'none',
                                 cursor: 'pointer',
-                                color: copied ? '#48bb78' : '#667eea',
+                                color: copied ? '#48bb78' : 'var(--primary-color)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '4px',
@@ -126,8 +126,8 @@ const LargeTextViewer = React.memo(({ content, label, backgroundColor, color, bo
                         borderRadius: '4px',
                         border: '1px solid #e2e8f0'
                     }}>
-                        <Loader2 className="spin" size={24} color="#667eea" />
-                        <span style={{ fontSize: '12px', color: '#667eea', marginTop: '8px', fontWeight: '500' }}>正在渲染大数据...</span>
+                        <Loader2 className="spin" size={24} color="var(--primary-color)" />
+                        <span style={{ fontSize: '12px', color: 'var(--primary-color)', marginTop: '8px', fontWeight: '500' }}>正在渲染大数据...</span>
                     </div>
                 )}
                 <pre style={{

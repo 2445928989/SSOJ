@@ -85,7 +85,7 @@ export default function App() {
     return (
         <div>
             <nav className="nav">
-                <div className="nav-loading-bar" style={{ width: loading ? '100%' : '100%', opacity: loading ? 1 : 0.3 }}></div>
+                <div className="nav-loading-bar" style={{ width: loading ? '100%' : '0%', opacity: loading ? 1 : 0 }}></div>
                 <div className="nav-left">
                     <Link to="/" className="logo">SSOJ</Link>
                     <Link to="/problems">题目</Link>
@@ -102,7 +102,7 @@ export default function App() {
                                 {user.avatar ? (
                                     <img src={user.avatar} alt="avatar" style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #eee' }} />
                                 ) : (
-                                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#667eea', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 'bold' }}>
+                                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 'bold' }}>
                                         {user.username.charAt(0).toUpperCase()}
                                     </div>
                                 )}
@@ -171,7 +171,7 @@ export default function App() {
                     left: 0;
                     width: 100%;
                     height: 2px;
-                    background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+                    background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-dark) 50%, var(--primary-color) 100%);
                     transition: opacity 0.3s ease;
                 }
 

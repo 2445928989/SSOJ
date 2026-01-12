@@ -168,7 +168,7 @@ export default function OtherUserProfile() {
                         {user.avatar ? (
                             <img src={user.avatar} alt="avatar" style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '4px solid white', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }} />
                         ) : (
-                            <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: '#667eea', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '40px', fontWeight: 'bold', border: '4px solid white', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }}>
+                            <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'var(--primary-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '40px', fontWeight: 'bold', border: '4px solid white', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }}>
                                 {user.username.charAt(0).toUpperCase()}
                             </div>
                         )}
@@ -192,13 +192,13 @@ export default function OtherUserProfile() {
                                         padding: '8px 24px',
                                         borderRadius: '20px',
                                         border: isFollowing ? '1.5px solid rgba(255,255,255,0.8)' : 'none',
-                                        background: isFollowing ? 'rgba(255,255,255,0.25)' : '#667eea',
+                                        background: isFollowing ? 'rgba(255,255,255,0.25)' : 'var(--primary-color)',
                                         color: 'white',
                                         fontWeight: 'bold',
                                         cursor: 'pointer',
                                         backdropFilter: 'blur(8px)',
                                         transition: 'all 0.3s',
-                                        boxShadow: isFollowing ? 'none' : '0 4px 12px rgba(102, 126, 234, 0.4)'
+                                        boxShadow: isFollowing ? 'none' : '0 4px 12px rgba(72, 187, 120, 0.4)'
                                     }}
                                 >
                                     {isFollowing ? '已关注' : '+ 关注'}
@@ -223,7 +223,7 @@ export default function OtherUserProfile() {
                                         {u.avatar ? (
                                             <img src={u.avatar} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
                                         ) : (
-                                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#667eea', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>{u.username.charAt(0).toUpperCase()}</div>
+                                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>{u.username.charAt(0).toUpperCase()}</div>
                                         )}
                                         <a href={`/user/${u.id}`} style={{ textDecoration: 'none', color: '#2d3748', fontWeight: '500' }}>{u.nickname || u.username}</a>
                                     </div>
@@ -345,7 +345,7 @@ export default function OtherUserProfile() {
                     margin-top: 0;
                     margin-bottom: 20px;
                     color: #333;
-                    border-bottom: 2px solid #667eea;
+                    border-bottom: 2px solid var(--primary-color);
                     padding-bottom: 10px;
                 }
 
@@ -396,7 +396,7 @@ export default function OtherUserProfile() {
                 .stat-number {
                     font-size: 1.4rem;
                     font-weight: bold;
-                    color: #667eea;
+                    color: var(--primary-color);
                 }
 
                 .heatmap-section {

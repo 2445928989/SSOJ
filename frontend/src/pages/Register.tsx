@@ -161,7 +161,7 @@ export default function Register() {
                         disabled={sending || countdown > 0}
                         style={{
                             padding: '0 15px',
-                            backgroundColor: countdown > 0 ? '#ccc' : '#667eea',
+                            backgroundColor: countdown > 0 ? '#ccc' : 'var(--primary-color)',
                             color: 'white',
                             border: 'none',
                             borderRadius: '4px',

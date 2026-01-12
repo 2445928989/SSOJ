@@ -276,7 +276,7 @@ export default function UserProfile() {
                                 {user.avatar ? (
                                     <img src={user.avatar} alt="avatar" style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover', border: '4px solid white', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }} />
                                 ) : (
-                                    <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: '#667eea', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '40px', fontWeight: 'bold', border: '4px solid white', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }}>
+                                    <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: 'var(--primary-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '40px', fontWeight: 'bold', border: '4px solid white', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }}>
                                         {user.username.charAt(0).toUpperCase()}
                                     </div>
                                 )}
@@ -340,7 +340,7 @@ export default function UserProfile() {
                                         {u.avatar ? (
                                             <img src={u.avatar} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
                                         ) : (
-                                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#667eea', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>{u.username.charAt(0).toUpperCase()}</div>
+                                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary-color)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>{u.username.charAt(0).toUpperCase()}</div>
                                         )}
                                         <a href={`/user/${u.id}`} style={{ textDecoration: 'none', color: '#2d3748', fontWeight: '500' }}>{u.nickname || u.username}</a>
                                     </div>
@@ -587,7 +587,7 @@ export default function UserProfile() {
                 }
 
                 .profile-header {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: var(--primary-gradient);
                     color: white;
                     padding: 40px 30px;
                     display: flex;
@@ -660,7 +660,7 @@ export default function UserProfile() {
                     margin-top: 0;
                     margin-bottom: 20px;
                     color: #333;
-                    border-bottom: 2px solid #667eea;
+                    border-bottom: 2px solid var(--primary-color);
                     padding-bottom: 10px;
                     font-size: 1.2em;
                 }
@@ -685,7 +685,7 @@ export default function UserProfile() {
                 .role-badge {
                     display: inline-block;
                     padding: 4px 12px;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: var(--primary-gradient);
                     color: white;
                     border-radius: 20px;
                     font-size: 0.9em;
@@ -723,7 +723,7 @@ export default function UserProfile() {
                 .stat-number {
                     font-size: 1.4rem;
                     font-weight: bold;
-                    color: #667eea;
+                    color: var(--primary-color);
                 }
 
                 .heatmap-section {
@@ -805,8 +805,8 @@ export default function UserProfile() {
                 .form-group input:focus,
                 .form-group textarea:focus {
                     outline: none;
-                    border-color: #667eea;
-                    box-shadow: 0 0 8px rgba(102, 126, 234, 0.2);
+                    border-color: var(--primary-color);
+                    box-shadow: 0 0 8px rgba(72, 187, 120, 0.2);
                 }
 
                 .input-disabled {
@@ -839,13 +839,13 @@ export default function UserProfile() {
                 }
 
                 .save-btn {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: var(--primary-gradient);
                     color: white;
                 }
 
                 .save-btn:hover:not(:disabled) {
                     transform: translateY(-2px);
-                    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+                    box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
                 }
 
                 .save-btn:disabled {

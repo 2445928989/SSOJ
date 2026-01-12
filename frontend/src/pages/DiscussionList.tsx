@@ -21,9 +21,9 @@ function MarkdownContent({ content }: { content: string }) {
                     a: ({ node, ...props }) => {
                         const href = props.href || '#';
                         if (href.startsWith('/')) {
-                            return <Link to={href} style={{ color: '#667eea', fontWeight: '500', textDecoration: 'none' }}>{props.children}</Link>;
+                            return <Link to={href} style={{ color: 'var(--primary-color)', fontWeight: '500', textDecoration: 'none' }}>{props.children}</Link>;
                         }
-                        return <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: '#667eea', fontWeight: '500' }}>{props.children}</a>;
+                        return <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-color)', fontWeight: '500' }}>{props.children}</a>;
                     }
                 }}
             >
@@ -50,7 +50,7 @@ function FoldableContent({ content, limit = 300 }: { content: string, limit?: nu
                         gap: '4px',
                         background: 'none',
                         border: 'none',
-                        color: '#667eea',
+                        color: 'var(--primary-color)',
                         fontSize: '13px',
                         fontWeight: '500',
                         cursor: 'pointer',
@@ -218,7 +218,7 @@ function DiscussionListItem({ d, onVote, onReplySuccess, currentUser }: { d: any
                         {d.problemId && (
                             <Link to={`/problems/${d.problemId}`} style={{
                                 fontSize: '13px',
-                                color: '#667eea',
+                                color: 'var(--primary-color)',
                                 textDecoration: 'none',
                                 background: '#f0f4ff',
                                 padding: '2px 10px',
@@ -248,7 +248,7 @@ function DiscussionListItem({ d, onVote, onReplySuccess, currentUser }: { d: any
                                     background: 'none',
                                     border: 'none',
                                     cursor: 'pointer',
-                                    color: voteStatus === 1 ? '#667eea' : '#94a3b8',
+                                    color: voteStatus === 1 ? 'var(--primary-color)' : '#94a3b8',
                                     padding: 0,
                                     transition: 'color 0.2s'
                                 }}
@@ -282,7 +282,7 @@ function DiscussionListItem({ d, onVote, onReplySuccess, currentUser }: { d: any
                                     background: 'none',
                                     border: 'none',
                                     cursor: 'pointer',
-                                    color: showReplies ? '#667eea' : '#94a3b8',
+                                    color: showReplies ? 'var(--primary-color)' : '#94a3b8',
                                     padding: 0
                                 }}
                             >
@@ -306,7 +306,7 @@ function DiscussionListItem({ d, onVote, onReplySuccess, currentUser }: { d: any
                                     background: 'none',
                                     border: 'none',
                                     cursor: 'pointer',
-                                    color: '#667eea',
+                                    color: 'var(--primary-color)',
                                     padding: 0,
                                     fontSize: '13px',
                                     fontWeight: '500'
@@ -379,7 +379,7 @@ function DiscussionListItem({ d, onVote, onReplySuccess, currentUser }: { d: any
                                         disabled={submitting || !replyContent.trim()}
                                         style={{
                                             padding: '6px 20px',
-                                            background: '#667eea',
+                                            background: 'var(--primary-color)',
                                             color: 'white',
                                             border: 'none',
                                             borderRadius: '4px',
@@ -445,7 +445,7 @@ function DiscussionListItem({ d, onVote, onReplySuccess, currentUser }: { d: any
                                                             style={{
                                                                 background: 'none',
                                                                 border: 'none',
-                                                                color: '#667eea',
+                                                                color: 'var(--primary-color)',
                                                                 fontSize: '12px',
                                                                 cursor: 'pointer',
                                                                 padding: '2px 5px'
@@ -483,8 +483,8 @@ function DiscussionListItem({ d, onVote, onReplySuccess, currentUser }: { d: any
                                                 ) : (
                                                     <>
                                                         {reply.replyToUsername && reply.parentId !== d.id && (
-                                                            <span style={{ color: '#667eea', marginRight: '8px', fontWeight: '500' }}>
-                                                                回复 <Link to={`/user/${reply.replyToUserId}`} style={{ color: '#667eea', textDecoration: 'none' }}>@{reply.replyToUsername}</Link> :
+                                                            <span style={{ color: 'var(--primary-color)', marginRight: '8px', fontWeight: '500' }}>
+                                                                回复 <Link to={`/user/${reply.replyToUserId}`} style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>@{reply.replyToUsername}</Link> :
                                                             </span>
                                                         )}
                                                         <FoldableContent content={reply.content} limit={150} />
@@ -621,7 +621,7 @@ export default function DiscussionList() {
                         onClick={() => setShowNewPost(!showNewPost)}
                         style={{
                             padding: '8px 20px',
-                            background: '#667eea',
+                            background: 'var(--primary-color)',
                             color: 'white',
                             border: 'none',
                             borderRadius: '6px',
@@ -674,7 +674,7 @@ export default function DiscussionList() {
                             disabled={submitting || !newPostContent.trim()}
                             style={{
                                 padding: '10px 30px',
-                                background: '#667eea',
+                                background: 'var(--primary-color)',
                                 color: 'white',
                                 border: 'none',
                                 borderRadius: '6px',
@@ -715,7 +715,7 @@ export default function DiscussionList() {
                                 padding: '8px 15px',
                                 borderRadius: '4px',
                                 border: '1px solid #e2e8f0',
-                                background: page === i + 1 ? '#667eea' : 'white',
+                                background: page === i + 1 ? 'var(--primary-color)' : 'white',
                                 color: page === i + 1 ? 'white' : '#4a5568',
                                 cursor: 'pointer'
                             }}
@@ -728,7 +728,7 @@ export default function DiscussionList() {
 
             <style>{`
                 .submit-btn {
-                    background: #667eea;
+                    background: var(--primary-color);
                     color: white;
                     border: none;
                     border-radius: 6px;
@@ -740,7 +740,7 @@ export default function DiscussionList() {
                 .submit-btn:hover {
                     background: #5a67d8;
                     transform: translateY(-1px);
-                    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+                    box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
                 }
 
                 .submit-btn:active {

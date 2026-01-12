@@ -377,7 +377,7 @@ export default function ProblemManage() {
                                         onClick={() => setShowAddTcForm(!showAddTcForm)}
                                         style={{
                                             padding: '5px 15px',
-                                            background: '#667eea',
+                                            background: 'var(--primary-color)',
                                             color: 'white',
                                             border: 'none',
                                             borderRadius: '4px',
@@ -523,7 +523,7 @@ export default function ProblemManage() {
                                     style={{
                                         display: 'inline-block',
                                         padding: '12px 30px',
-                                        background: isUploadingZip ? '#cbd5e0' : '#667eea',
+                                        background: isUploadingZip ? '#cbd5e0' : 'var(--primary-color)',
                                         color: 'white',
                                         borderRadius: '8px',
                                         cursor: isUploadingZip ? 'not-allowed' : 'pointer',

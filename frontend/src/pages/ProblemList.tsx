@@ -365,13 +365,13 @@ export default function ProblemList() {
 
                 .search-input:focus {
                     outline: none;
-                    border-color: #667eea;
-                    box-shadow: 0 0 4px rgba(102, 126, 234, 0.2);
+                    border-color: var(--primary-color);
+                    box-shadow: 0 0 4px rgba(72, 187, 120, 0.2);
                 }
 
                 .search-btn {
                     padding: 8px 16px;
-                    background: #667eea;
+                    background: var(--primary-color);
                     color: white;
                     border: none;
                     border-radius: 4px;
@@ -382,7 +382,7 @@ export default function ProblemList() {
                 }
 
                 .search-btn:hover {
-                    background: #764ba2;
+                    background: var(--primary-dark);
                 }
 
                 .clear-btn {
@@ -467,8 +467,8 @@ export default function ProblemList() {
                 }
 
                 .tag-btn.active {
-                    color: #667eea;
-                    border-left-color: #667eea;
+                    color: var(--primary-color);
+                    border-left-color: var(--primary-color);
                     background: #f0f2ff;
                 }
 
@@ -524,7 +524,7 @@ export default function ProblemList() {
                 }
 
                 .problem-title {
-                    color: #667eea;
+                    color: var(--primary-color);
                     text-decoration: none;
                     font-weight: 500;
                     transition: color 0.2s;
@@ -532,7 +532,7 @@ export default function ProblemList() {
                 }
 
                 .problem-title:hover {
-                    color: #764ba2;
+                    color: var(--primary-dark);
                     text-decoration: underline;
                 }
 
@@ -580,7 +580,7 @@ export default function ProblemList() {
 
                 .page-btn {
                     padding: 8px 14px;
-                    background: #667eea;
+                    background: var(--primary-color);
                     color: white;
                     border: none;
                     border-radius: 4px;
@@ -591,7 +591,7 @@ export default function ProblemList() {
                 }
 
                 .page-btn:hover:not(:disabled) {
-                    background: #764ba2;
+                    background: var(--primary-dark);
                 }
 
                 .page-btn:disabled {
@@ -677,7 +677,7 @@ export default function ProblemList() {
 
                     .tag-btn.active {
                         border-left: none;
-                        border-bottom-color: #667eea;
+                        border-bottom-color: var(--primary-color);
                     }
                 }
 

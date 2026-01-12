@@ -45,7 +45,7 @@ export default function Notifications() {
 
     const getIcon = (type: string) => {
         switch (type) {
-            case 'REPLY': return <MessageSquare size={20} style={{ color: '#667eea' }} />;
+            case 'REPLY': return <MessageSquare size={20} style={{ color: 'var(--primary-color)' }} />;
             case 'FOLLOW': return <UserPlus size={20} style={{ color: '#48bb78' }} />;
             default: return <Bell size={20} />;
         }
@@ -62,7 +62,7 @@ export default function Notifications() {
                         onClick={markAllAsRead}
                         style={{
                             padding: '8px 16px',
-                            background: '#667eea',
+                            background: 'var(--primary-color)',
                             color: 'white',
                             border: 'none',
                             borderRadius: '8px',
@@ -119,7 +119,7 @@ export default function Notifications() {
                                 {!n.isRead && (
                                     <button
                                         onClick={() => markAsRead(n.id)}
-                                        style={{ fontSize: '12px', color: '#667eea', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                                        style={{ fontSize: '12px', color: 'var(--primary-color)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                                     >
                                         标记已读
                                     </button>

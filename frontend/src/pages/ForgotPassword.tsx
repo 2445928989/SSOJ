@@ -142,7 +142,7 @@ export default function ForgotPassword() {
                         disabled={sending || countdown > 0}
                         style={{
                             padding: '0 15px',
-                            backgroundColor: countdown > 0 ? '#ccc' : '#667eea',
+                            backgroundColor: countdown > 0 ? '#ccc' : 'var(--primary-color)',
                             color: 'white',
                             border: 'none',
                             borderRadius: '4px',
@@ -177,7 +177,7 @@ export default function ForgotPassword() {
                     style={{
                         width: '100%',
                         padding: '12px',
-                        backgroundColor: '#667eea',
+                        backgroundColor: 'var(--primary-color)',
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',
@@ -191,7 +191,7 @@ export default function ForgotPassword() {
                 </button>
 
                 <div style={{ textAlign: 'center', fontSize: '14px' }}>
-                    <Link to="/login" style={{ color: '#667eea', textDecoration: 'none' }}>返回登录</Link>
+                    <Link to="/login" style={{ color: 'var(--primary-color)', textDecoration: 'none' }}>返回登录</Link>
                 </div>
             </form>
         </div>

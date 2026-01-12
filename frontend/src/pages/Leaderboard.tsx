@@ -73,11 +73,11 @@ export default function Leaderboard() {
                         <tbody>
                             {users.map((user, idx) => (
                                 <tr key={user.id} style={{ borderBottom: '1px solid #eee' }}>
-                                    <td style={{ padding: '15px', fontWeight: 'bold', color: idx < 3 ? '#667eea' : '#718096' }}>
+                                    <td style={{ padding: '15px', fontWeight: 'bold', color: idx < 3 ? 'var(--primary-color)' : '#718096' }}>
                                         {idx === 0 ? '🥇 ' : idx === 1 ? '🥈 ' : idx === 2 ? '🥉 ' : ''}{idx + 1}
                                     </td>
                                     <td style={{ padding: '15px' }}>
-                                        <Link to={`/user/${user.id}`} style={{ color: '#667eea', textDecoration: 'none', fontWeight: '500' }}>
+                                        <Link to={`/user/${user.id}`} style={{ color: 'var(--primary-color)', textDecoration: 'none', fontWeight: '500' }}>
                                             #{user.id}
                                         </Link>
                                     </td>
@@ -113,13 +113,13 @@ export default function Leaderboard() {
                     align-items: center;
                     justify-content: center;
                     min-height: 300px;
-                    color: #667eea;
+                    color: var(--primary-color);
                 }
                 .loading-spinner {
                     width: 40px;
                     height: 40px;
                     border: 4px solid #f3f3f3;
-                    border-top: 4px solid #667eea;
+                    border-top: 4px solid var(--primary-color);
                     border-radius: 50%;
                     animation: spin 1s linear infinite;
                     margin-bottom: 15px;

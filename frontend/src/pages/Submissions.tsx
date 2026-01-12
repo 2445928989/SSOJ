@@ -62,7 +62,7 @@ export default function Submissions() {
                     <tbody>
                         {subs.map(s => (
                             <tr key={s.id} style={{ borderBottom: '1px solid #eee' }}>
-                                <td style={{ padding: '15px' }}><Link to={`/submissions/${s.id}`} style={{ color: '#667eea', fontWeight: '600' }}>#{s.id}</Link></td>
+                                <td style={{ padding: '15px' }}><Link to={`/submissions/${s.id}`} style={{ color: 'var(--primary-color)', fontWeight: '600' }}>#{s.id}</Link></td>
                                 <td style={{ padding: '15px' }}>
                                     <Link to={`/user/${s.userId}`} style={{ color: '#4a5568', textDecoration: 'none', fontWeight: '500' }}>
                                         {s.username || '未知用户'}
@@ -168,13 +168,13 @@ export default function Submissions() {
                     align-items: center;
                     justify-content: center;
                     min-height: 300px;
-                    color: #667eea;
+                    color: var(--primary-color);
                 }
                 .loading-spinner {
                     width: 40px;
                     height: 40px;
                     border: 4px solid #f3f3f3;
-                    border-top: 4px solid #667eea;
+                    border-top: 4px solid var(--primary-color);
                     border-radius: 50%;
                     animation: spin 1s linear infinite;
                     margin-bottom: 15px;
