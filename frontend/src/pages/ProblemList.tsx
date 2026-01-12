@@ -221,90 +221,90 @@ export default function ProblemList() {
                             <div className="problems-count">共 {filteredProblems.length} 道题目</div>
                             <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
                                 <table className="problems-table">
-                                <thead>
-                                    <tr>
-                                        <th>状态</th>
-                                        <th
-                                            onClick={() => handleSort('id')}
-                                            style={{ cursor: 'pointer', userSelect: 'none' }}
-                                            title="点击排序"
-                                        >
-                                            ID <span style={{ opacity: sortBy === 'id' ? 1 : 0.4 }}>{sortBy === 'id' ? (sortOrder === 'asc' ? '↑' : '↓') : '↑'}</span>
-                                        </th>
-                                        <th>题目</th>
-                                        {showTags && <th>标签</th>}
-                                        <th
-                                            onClick={() => handleSort('difficulty')}
-                                            style={{ cursor: 'pointer', userSelect: 'none' }}
-                                            title="点击排序"
-                                        >
-                                            难度 <span style={{ opacity: sortBy === 'difficulty' ? 1 : 0.4 }}>{sortBy === 'difficulty' ? (sortOrder === 'asc' ? '↑' : '↓') : '↑'}</span>
-                                        </th>
-                                        <th>提交</th>
-                                        <th>通过</th>
-                                        <th
-                                            onClick={() => handleSort('passRate')}
-                                            style={{ cursor: 'pointer', userSelect: 'none' }}
-                                            title="点击排序"
-                                        >
-                                            通过率 <span style={{ opacity: sortBy === 'passRate' ? 1 : 0.4 }}>{sortBy === 'passRate' ? (sortOrder === 'asc' ? '↑' : '↓') : '↑'}</span>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredProblems.map(p => {
-                                        const passRate = p.numberOfSubmissions > 0
-                                            ? ((p.numberOfAccepted / p.numberOfSubmissions) * 100).toFixed(1)
-                                            : 0
-                                        const isSolved = solvedProblems.has(p.id)
-                                        return (
-                                            <tr
-                                                key={p.id}
-                                                style={{
-                                                    cursor: 'pointer',
-                                                    backgroundColor: isSolved ? '#f0f8f0' : 'transparent'
-                                                }}
-                                                onClick={() => window.location.href = `/problems/${p.id}`}
+                                    <thead>
+                                        <tr>
+                                            <th>状态</th>
+                                            <th
+                                                onClick={() => handleSort('id')}
+                                                style={{ cursor: 'pointer', userSelect: 'none' }}
+                                                title="点击排序"
                                             >
-                                                <td style={{ textAlign: 'center' }}>
-                                                    {isSolved ? <CheckCircle2 size={18} color="#48bb78" /> : ''}
-                                                </td>
-                                                <td>#{p.id}</td>
-                                                <td>
-                                                    <Link to={`/problems/${p.id}`} className="problem-title">
-                                                        {p.title}
-                                                    </Link>
-                                                </td>
-                                                {showTags && (
-                                                    <td>
-                                                        <div className="tags-cell">
-                                                            {p.categories && p.categories.length > 0
-                                                                ? p.categories.map(cat => (
-                                                                    <span key={cat} className="tag-badge">{cat}</span>
-                                                                ))
-                                                                : <span style={{ color: '#999' }}>-</span>
-                                                            }
-                                                        </div>
+                                                ID <span style={{ opacity: sortBy === 'id' ? 1 : 0.4 }}>{sortBy === 'id' ? (sortOrder === 'asc' ? '↑' : '↓') : '↑'}</span>
+                                            </th>
+                                            <th>题目</th>
+                                            {showTags && <th>标签</th>}
+                                            <th
+                                                onClick={() => handleSort('difficulty')}
+                                                style={{ cursor: 'pointer', userSelect: 'none' }}
+                                                title="点击排序"
+                                            >
+                                                难度 <span style={{ opacity: sortBy === 'difficulty' ? 1 : 0.4 }}>{sortBy === 'difficulty' ? (sortOrder === 'asc' ? '↑' : '↓') : '↑'}</span>
+                                            </th>
+                                            <th>提交</th>
+                                            <th>通过</th>
+                                            <th
+                                                onClick={() => handleSort('passRate')}
+                                                style={{ cursor: 'pointer', userSelect: 'none' }}
+                                                title="点击排序"
+                                            >
+                                                通过率 <span style={{ opacity: sortBy === 'passRate' ? 1 : 0.4 }}>{sortBy === 'passRate' ? (sortOrder === 'asc' ? '↑' : '↓') : '↑'}</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredProblems.map(p => {
+                                            const passRate = p.numberOfSubmissions > 0
+                                                ? ((p.numberOfAccepted / p.numberOfSubmissions) * 100).toFixed(1)
+                                                : 0
+                                            const isSolved = solvedProblems.has(p.id)
+                                            return (
+                                                <tr
+                                                    key={p.id}
+                                                    style={{
+                                                        cursor: 'pointer',
+                                                        backgroundColor: isSolved ? '#f0f8f0' : 'transparent'
+                                                    }}
+                                                    onClick={() => window.location.href = `/problems/${p.id}`}
+                                                >
+                                                    <td style={{ textAlign: 'center' }}>
+                                                        {isSolved ? <CheckCircle2 size={18} color="#48bb78" /> : ''}
                                                     </td>
-                                                )}
-                                                <td>
-                                                    <span className={`difficulty-${p.difficulty.toLowerCase()}`}>
-                                                        {p.difficulty === 'EASY' && '简单'}
-                                                        {p.difficulty === 'MEDIUM' && '中等'}
-                                                        {p.difficulty === 'HARD' && '困难'}
-                                                    </span>
-                                                </td>
-                                                <td>{p.numberOfSubmissions || 0}</td>
-                                                <td>{p.numberOfAccepted || 0}</td>
-                                                <td>{passRate}%</td>
-                                            </tr>
-                                        )
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
+                                                    <td>#{p.id}</td>
+                                                    <td>
+                                                        <Link to={`/problems/${p.id}`} className="problem-title">
+                                                            {p.title}
+                                                        </Link>
+                                                    </td>
+                                                    {showTags && (
+                                                        <td>
+                                                            <div className="tags-cell">
+                                                                {p.categories && p.categories.length > 0
+                                                                    ? p.categories.map(cat => (
+                                                                        <span key={cat} className="tag-badge">{cat}</span>
+                                                                    ))
+                                                                    : <span style={{ color: '#999' }}>-</span>
+                                                                }
+                                                            </div>
+                                                        </td>
+                                                    )}
+                                                    <td>
+                                                        <span className={`difficulty-${p.difficulty.toLowerCase()}`}>
+                                                            {p.difficulty === 'EASY' && '简单'}
+                                                            {p.difficulty === 'MEDIUM' && '中等'}
+                                                            {p.difficulty === 'HARD' && '困难'}
+                                                        </span>
+                                                    </td>
+                                                    <td>{p.numberOfSubmissions || 0}</td>
+                                                    <td>{p.numberOfAccepted || 0}</td>
+                                                    <td>{passRate}%</td>
+                                                </tr>
+                                            )
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
 
-                        {totalPages > 1 && (
+                            {totalPages > 1 && (
                                 <div className="pagination">
                                     <button
                                         onClick={() => loadProblems(page - 1, searchKeyword, sortBy, sortOrder, selectedTag)}

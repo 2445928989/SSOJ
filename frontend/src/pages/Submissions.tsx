@@ -49,120 +49,120 @@ export default function Submissions() {
                 <>
                     <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                        <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #eee' }}>
-                            <th style={{ padding: '15px', textAlign: 'left' }}>ID</th>
-                            <th style={{ padding: '15px', textAlign: 'left' }}>用户</th>
-                            <th style={{ padding: '15px', textAlign: 'left' }}>问题</th>
-                            <th style={{ padding: '15px', textAlign: 'left' }}>状态</th>
-                            <th style={{ padding: '15px', textAlign: 'left' }}>时间</th>
-                            <th style={{ padding: '15px', textAlign: 'left' }}>内存</th>
-                            <th style={{ padding: '15px', textAlign: 'left' }}>提交时间</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {subs.map(s => (
-                            <tr key={s.id} style={{ borderBottom: '1px solid #eee' }}>
-                                <td style={{ padding: '15px' }}><Link to={`/submissions/${s.id}`} style={{ color: 'var(--primary-color)', fontWeight: '600' }}>#{s.id}</Link></td>
-                                <td style={{ padding: '15px' }}>
-                                    <Link to={`/user/${s.userId}`} style={{ color: '#4a5568', textDecoration: 'none', fontWeight: '500' }}>
-                                        {s.username || '未知用户'}
-                                        {s.nickname && (
-                                            <span style={{ color: '#a0aec0', fontWeight: 'normal', fontSize: '0.9em', marginLeft: '8px' }}>
-                                                ({s.nickname})
-                                            </span>
-                                        )}
-                                    </Link>
-                                </td>
-                                <td style={{ padding: '15px' }}><Link to={`/problems/${s.problemId}`} style={{ color: '#4a5568', textDecoration: 'none' }}>{s.problemTitle || `问题 ${s.problemId}`}</Link></td>
-                                <td style={{ padding: '15px' }}>
-                                    <Link to={`/submissions/${s.id}`} style={{ textDecoration: 'none' }}>
-                                        <span className={`status-${s.status.toLowerCase()}`}
-                                            style={{
-                                                padding: '4px 10px',
-                                                borderRadius: '4px',
-                                                fontSize: '13px',
-                                                fontWeight: 'bold',
-                                                backgroundColor: s.status === 'AC' ? '#48bb78' : s.status === 'WA' ? '#f56565' : s.status === 'TLE' ? '#ed8936' : s.status === 'RE' ? '#e53e3e' : '#9f7aea',
-                                                color: 'white',
-                                                cursor: 'pointer',
-                                                display: 'inline-flex',
-                                                alignItems: 'center',
-                                                gap: '4px',
-                                                minWidth: '40px',
-                                                textAlign: 'center'
-                                            }}>
-                                            {s.status === 'AC' ? <CheckCircle2 size={14} /> :
-                                                s.status === 'WA' ? <XCircle size={14} /> :
-                                                    s.status === 'TLE' ? <Clock size={14} /> :
-                                                        s.status === 'RE' ? <AlertTriangle size={14} /> :
-                                                            s.status === 'CE' ? <FileCode size={14} /> :
-                                                                s.status === 'RUNNING' ? <Loader2 size={14} className="spin" /> :
-                                                                    null}
-                                            {s.status}
-                                        </span>
-                                    </Link>
-                                </td>
-                                <td style={{ padding: '15px', color: '#718096' }}>{s.maxTimeUsed || 0}ms</td>
-                                <td style={{ padding: '15px', color: '#718096' }}>{s.maxMemoryUsed || 0}KB</td>
-                                <td style={{ padding: '15px', color: '#a0aec0', fontSize: '13px' }}>{new Date(s.submittedAt).toLocaleString('zh-CN')}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                            <thead>
+                                <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #eee' }}>
+                                    <th style={{ padding: '15px', textAlign: 'left' }}>ID</th>
+                                    <th style={{ padding: '15px', textAlign: 'left' }}>用户</th>
+                                    <th style={{ padding: '15px', textAlign: 'left' }}>问题</th>
+                                    <th style={{ padding: '15px', textAlign: 'left' }}>状态</th>
+                                    <th style={{ padding: '15px', textAlign: 'left' }}>时间</th>
+                                    <th style={{ padding: '15px', textAlign: 'left' }}>内存</th>
+                                    <th style={{ padding: '15px', textAlign: 'left' }}>提交时间</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {subs.map(s => (
+                                    <tr key={s.id} style={{ borderBottom: '1px solid #eee' }}>
+                                        <td style={{ padding: '15px' }}><Link to={`/submissions/${s.id}`} style={{ color: 'var(--primary-color)', fontWeight: '600' }}>#{s.id}</Link></td>
+                                        <td style={{ padding: '15px' }}>
+                                            <Link to={`/user/${s.userId}`} style={{ color: '#4a5568', textDecoration: 'none', fontWeight: '500' }}>
+                                                {s.username || '未知用户'}
+                                                {s.nickname && (
+                                                    <span style={{ color: '#a0aec0', fontWeight: 'normal', fontSize: '0.9em', marginLeft: '8px' }}>
+                                                        ({s.nickname})
+                                                    </span>
+                                                )}
+                                            </Link>
+                                        </td>
+                                        <td style={{ padding: '15px' }}><Link to={`/problems/${s.problemId}`} style={{ color: '#4a5568', textDecoration: 'none' }}>{s.problemTitle || `问题 ${s.problemId}`}</Link></td>
+                                        <td style={{ padding: '15px' }}>
+                                            <Link to={`/submissions/${s.id}`} style={{ textDecoration: 'none' }}>
+                                                <span className={`status-${s.status.toLowerCase()}`}
+                                                    style={{
+                                                        padding: '4px 10px',
+                                                        borderRadius: '4px',
+                                                        fontSize: '13px',
+                                                        fontWeight: 'bold',
+                                                        backgroundColor: s.status === 'AC' ? '#48bb78' : s.status === 'WA' ? '#f56565' : s.status === 'TLE' ? '#ed8936' : s.status === 'RE' ? '#e53e3e' : '#9f7aea',
+                                                        color: 'white',
+                                                        cursor: 'pointer',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '4px',
+                                                        minWidth: '40px',
+                                                        textAlign: 'center'
+                                                    }}>
+                                                    {s.status === 'AC' ? <CheckCircle2 size={14} /> :
+                                                        s.status === 'WA' ? <XCircle size={14} /> :
+                                                            s.status === 'TLE' ? <Clock size={14} /> :
+                                                                s.status === 'RE' ? <AlertTriangle size={14} /> :
+                                                                    s.status === 'CE' ? <FileCode size={14} /> :
+                                                                        s.status === 'RUNNING' ? <Loader2 size={14} className="spin" /> :
+                                                                            null}
+                                                    {s.status}
+                                                </span>
+                                            </Link>
+                                        </td>
+                                        <td style={{ padding: '15px', color: '#718096' }}>{s.maxTimeUsed || 0}ms</td>
+                                        <td style={{ padding: '15px', color: '#718096' }}>{s.maxMemoryUsed || 0}KB</td>
+                                        <td style={{ padding: '15px', color: '#a0aec0', fontSize: '13px' }}>{new Date(s.submittedAt).toLocaleString('zh-CN')}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
-            {totalPages > 1 && (
-                <div className="pagination" style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    marginTop: '30px',
-                    gap: '15px'
-                }}>
-                    <button
-                        onClick={() => fetchSubmissions(page - 1)}
-                        disabled={page <= 1}
-                        className="page-btn"
-                        style={{
-                            padding: '8px 16px',
-                            borderRadius: '6px',
-                            border: '1px solid #e2e8f0',
-                            background: page <= 1 ? '#f7fafc' : 'white',
-                            color: page <= 1 ? '#a0aec0' : '#4a5568',
-                            cursor: page <= 1 ? 'not-allowed' : 'pointer',
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            transition: 'all 0.2s'
-                        }}
-                    >
-                        ← 上一页
-                    </button>
-                    <span className="page-info" style={{ fontSize: '14px', color: '#718096', fontWeight: '500' }}>
-                        第 {page} / {totalPages} 页 (共 {total} 条)
-                    </span>
-                    <button
-                        onClick={() => fetchSubmissions(page + 1)}
-                        disabled={page >= totalPages}
-                        className="page-btn"
-                        style={{
-                            padding: '8px 16px',
-                            borderRadius: '6px',
-                            border: '1px solid #e2e8f0',
-                            background: page >= totalPages ? '#f7fafc' : 'white',
-                            color: page >= totalPages ? '#a0aec0' : '#4a5568',
-                            cursor: page >= totalPages ? 'not-allowed' : 'pointer',
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            transition: 'all 0.2s'
-                        }}
-                    >
-                        下一页 →
-                    </button>
-                </div>
-            )}
+                    {totalPages > 1 && (
+                        <div className="pagination" style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            marginTop: '30px',
+                            gap: '15px'
+                        }}>
+                            <button
+                                onClick={() => fetchSubmissions(page - 1)}
+                                disabled={page <= 1}
+                                className="page-btn"
+                                style={{
+                                    padding: '8px 16px',
+                                    borderRadius: '6px',
+                                    border: '1px solid #e2e8f0',
+                                    background: page <= 1 ? '#f7fafc' : 'white',
+                                    color: page <= 1 ? '#a0aec0' : '#4a5568',
+                                    cursor: page <= 1 ? 'not-allowed' : 'pointer',
+                                    fontSize: '14px',
+                                    fontWeight: '500',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                ← 上一页
+                            </button>
+                            <span className="page-info" style={{ fontSize: '14px', color: '#718096', fontWeight: '500' }}>
+                                第 {page} / {totalPages} 页 (共 {total} 条)
+                            </span>
+                            <button
+                                onClick={() => fetchSubmissions(page + 1)}
+                                disabled={page >= totalPages}
+                                className="page-btn"
+                                style={{
+                                    padding: '8px 16px',
+                                    borderRadius: '6px',
+                                    border: '1px solid #e2e8f0',
+                                    background: page >= totalPages ? '#f7fafc' : 'white',
+                                    color: page >= totalPages ? '#a0aec0' : '#4a5568',
+                                    cursor: page >= totalPages ? 'not-allowed' : 'pointer',
+                                    fontSize: '14px',
+                                    fontWeight: '500',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                下一页 →
+                            </button>
+                        </div>
+                    )}
 
-            <style>{`
+                    <style>{`
                 .loading-container {
                     display: flex;
                     flex-direction: column;
@@ -193,6 +193,6 @@ export default function Submissions() {
                     margin-top: 20px;
                 }
             `}</style>
-        </div>
-    )
+                </div>
+            )
 }

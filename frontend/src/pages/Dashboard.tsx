@@ -93,215 +93,215 @@ export default function Dashboard() {
             ) : (
                 <>
                     <div className="announcements-section">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', paddingBottom: '5px' }}>
-                    <h2 style={{ margin: 0 }}>公告与更新</h2>
-                    {user?.role === 'ADMIN' && (
-                        <button
-                            onClick={() => {
-                                setAnnForm({ title: '', content: '' })
-                                setEditingAnnId(null)
-                                setShowAnnForm(true)
-                            }}
-                            className="admin-btn"
-                            style={{ padding: '6px 12px', fontSize: '14px' }}
-                        >
-                            发布公告
-                        </button>
-                    )}
-                </div>
-
-                {showAnnForm && !editingAnnId && (
-                    <div className="card" style={{ marginBottom: '20px', padding: '20px', borderLeft: '4px solid var(--primary-color)' }}>
-                        <h3 style={{ marginTop: 0 }}>发布新公告</h3>
-                        <form onSubmit={handleAnnSubmit}>
-                            <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>标题</label>
-                                <input
-                                    type="text"
-                                    value={annForm.title}
-                                    onChange={e => setAnnForm({ ...annForm, title: e.target.value })}
-                                    placeholder="请输入公告标题"
-                                    required
-                                    style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}
-                                />
-                            </div>
-                            <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>内容 (支持 Markdown)</label>
-                                <textarea
-                                    value={annForm.content}
-                                    onChange={e => setAnnForm({ ...annForm, content: e.target.value })}
-                                    placeholder="请输入公告内容..."
-                                    required
-                                    rows={5}
-                                    style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd', fontFamily: 'inherit' }}
-                                />
-                            </div>
-                            <div style={{ display: 'flex', gap: '10px' }}>
-                                <button type="submit" className="admin-btn" style={{ border: 'none', cursor: 'pointer' }}>发布</button>
-                                <button type="button" onClick={() => setShowAnnForm(false)} style={{ padding: '10px 20px', borderRadius: '4px', border: '1px solid #ddd', background: 'white', cursor: 'pointer' }}>取消</button>
-                            </div>
-                        </form>
-                    </div>
-                )}
-
-                <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                    {announcements.length === 0 ? (
-                        <p style={{ textAlign: 'center', color: '#999', padding: '40px' }}>暂无公告</p>
-                    ) : announcements.slice(0, 4).map((announcement: any, idx) => (
-                        <div key={announcement.id} className="announcement-list-item" style={{ 
-                            padding: '20px', 
-                            borderBottom: idx === Math.min(announcements.length, 4) - 1 ? 'none' : '1px solid var(--border-color)',
-                            transition: 'all 0.2s',
-                            borderLeft: '4px solid var(--primary-color)'
-                        }}>
-                            {editingAnnId === announcement.id ? (
-                                <div style={{ padding: '10px' }}>
-                                    <h3 style={{ marginTop: 0 }}>编辑公告</h3>
-                                    <form onSubmit={handleAnnSubmit}>
-                                        <div style={{ marginBottom: '15px' }}>
-                                            <input
-                                                type="text"
-                                                value={annForm.title}
-                                                onChange={e => setAnnForm({ ...annForm, title: e.target.value })}
-                                                required
-                                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd', fontWeight: 'bold' }}
-                                            />
-                                        </div>
-                                        <div style={{ marginBottom: '15px' }}>
-                                            <textarea
-                                                value={annForm.content}
-                                                onChange={e => setAnnForm({ ...annForm, content: e.target.value })}
-                                                required
-                                                rows={5}
-                                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd', fontFamily: 'inherit' }}
-                                            />
-                                        </div>
-                                        <div style={{ display: 'flex', gap: '10px' }}>
-                                            <button type="submit" className="admin-btn" style={{ border: 'none', cursor: 'pointer', padding: '6px 15px' }}>保存</button>
-                                            <button type="button" onClick={() => { setEditingAnnId(null); setShowAnnForm(false); }} style={{ padding: '6px 15px', borderRadius: '4px', border: '1px solid #ddd', background: 'white', cursor: 'pointer' }}>取消</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="announcement-header">
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <h3 style={{ margin: 0 }}>{announcement.title}</h3>
-                                            {user?.role === 'ADMIN' && (
-                                                <div style={{ display: 'flex', gap: '8px', marginLeft: '10px' }}>
-                                                    <button onClick={() => handleEditAnn(announcement)} style={{ background: 'none', border: 'none', color: 'var(--primary-color)', cursor: 'pointer', fontSize: '13px', padding: 0 }}>编辑</button>
-                                                    <button onClick={() => handleDeleteAnn(announcement.id)} style={{ background: 'none', border: 'none', color: '#f44336', cursor: 'pointer', fontSize: '13px', padding: 0 }}>删除</button>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <span className="announcement-date">{new Date(announcement.createdAt).toLocaleDateString('zh-CN')}</span>
-                                    </div>
-                                    <div className="announcement-content">
-                                        <FoldableContent content={announcement.content} limit={100} />
-                                    </div>
-                                </>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', paddingBottom: '5px' }}>
+                            <h2 style={{ margin: 0 }}>公告与更新</h2>
+                            {user?.role === 'ADMIN' && (
+                                <button
+                                    onClick={() => {
+                                        setAnnForm({ title: '', content: '' })
+                                        setEditingAnnId(null)
+                                        setShowAnnForm(true)
+                                    }}
+                                    className="admin-btn"
+                                    style={{ padding: '6px 12px', fontSize: '14px' }}
+                                >
+                                    发布公告
+                                </button>
                             )}
                         </div>
-                    ))}
-                </div>
-                <div style={{ textAlign: 'right', marginTop: '15px' }}>
-                    <Link to="/announcements" className="view-all">查看全部公告 →</Link>
-                </div>
-            </div>
 
-            <div className="content-grid">
-                <div className="section">
-                    <h2>热门题目</h2>
-                    {problemStats?.problems && problemStats.problems.length === 0 ? (
-                        <p className="empty-state">暂无题目</p>
-                    ) : (
-                        <div className="problems-list">
-                            {problemStats?.problems?.slice(0, 5).map((p: any) => (
-                                <div key={p.id} className="problem-item">
-                                    <div className="problem-header">
-                                        <Link to={`/problems/${p.id}`} className="problem-title">{p.title}</Link>
-                                        <span className={`difficulty-${p.difficulty.toLowerCase()}`}>
-                                            {p.difficulty === 'EASY' ? '简单' : p.difficulty === 'MEDIUM' ? '中等' : '困难'}
-                                        </span>
+                        {showAnnForm && !editingAnnId && (
+                            <div className="card" style={{ marginBottom: '20px', padding: '20px', borderLeft: '4px solid var(--primary-color)' }}>
+                                <h3 style={{ marginTop: 0 }}>发布新公告</h3>
+                                <form onSubmit={handleAnnSubmit}>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>标题</label>
+                                        <input
+                                            type="text"
+                                            value={annForm.title}
+                                            onChange={e => setAnnForm({ ...annForm, title: e.target.value })}
+                                            placeholder="请输入公告标题"
+                                            required
+                                            style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}
+                                        />
                                     </div>
-                                    <div className="problem-stats">
-                                        <span>提交 {p.numberOfSubmissions || 0}</span>
-                                        <span>通过 {p.numberOfAccepted || 0}</span>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>内容 (支持 Markdown)</label>
+                                        <textarea
+                                            value={annForm.content}
+                                            onChange={e => setAnnForm({ ...annForm, content: e.target.value })}
+                                            placeholder="请输入公告内容..."
+                                            required
+                                            rows={5}
+                                            style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd', fontFamily: 'inherit' }}
+                                        />
                                     </div>
+                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                        <button type="submit" className="admin-btn" style={{ border: 'none', cursor: 'pointer' }}>发布</button>
+                                        <button type="button" onClick={() => setShowAnnForm(false)} style={{ padding: '10px 20px', borderRadius: '4px', border: '1px solid #ddd', background: 'white', cursor: 'pointer' }}>取消</button>
+                                    </div>
+                                </form>
+                            </div>
+                        )}
+
+                        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                            {announcements.length === 0 ? (
+                                <p style={{ textAlign: 'center', color: '#999', padding: '40px' }}>暂无公告</p>
+                            ) : announcements.slice(0, 4).map((announcement: any, idx) => (
+                                <div key={announcement.id} className="announcement-list-item" style={{
+                                    padding: '20px',
+                                    borderBottom: idx === Math.min(announcements.length, 4) - 1 ? 'none' : '1px solid var(--border-color)',
+                                    transition: 'all 0.2s',
+                                    borderLeft: '4px solid var(--primary-color)'
+                                }}>
+                                    {editingAnnId === announcement.id ? (
+                                        <div style={{ padding: '10px' }}>
+                                            <h3 style={{ marginTop: 0 }}>编辑公告</h3>
+                                            <form onSubmit={handleAnnSubmit}>
+                                                <div style={{ marginBottom: '15px' }}>
+                                                    <input
+                                                        type="text"
+                                                        value={annForm.title}
+                                                        onChange={e => setAnnForm({ ...annForm, title: e.target.value })}
+                                                        required
+                                                        style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd', fontWeight: 'bold' }}
+                                                    />
+                                                </div>
+                                                <div style={{ marginBottom: '15px' }}>
+                                                    <textarea
+                                                        value={annForm.content}
+                                                        onChange={e => setAnnForm({ ...annForm, content: e.target.value })}
+                                                        required
+                                                        rows={5}
+                                                        style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd', fontFamily: 'inherit' }}
+                                                    />
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '10px' }}>
+                                                    <button type="submit" className="admin-btn" style={{ border: 'none', cursor: 'pointer', padding: '6px 15px' }}>保存</button>
+                                                    <button type="button" onClick={() => { setEditingAnnId(null); setShowAnnForm(false); }} style={{ padding: '6px 15px', borderRadius: '4px', border: '1px solid #ddd', background: 'white', cursor: 'pointer' }}>取消</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="announcement-header">
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                    <h3 style={{ margin: 0 }}>{announcement.title}</h3>
+                                                    {user?.role === 'ADMIN' && (
+                                                        <div style={{ display: 'flex', gap: '8px', marginLeft: '10px' }}>
+                                                            <button onClick={() => handleEditAnn(announcement)} style={{ background: 'none', border: 'none', color: 'var(--primary-color)', cursor: 'pointer', fontSize: '13px', padding: 0 }}>编辑</button>
+                                                            <button onClick={() => handleDeleteAnn(announcement.id)} style={{ background: 'none', border: 'none', color: '#f44336', cursor: 'pointer', fontSize: '13px', padding: 0 }}>删除</button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <span className="announcement-date">{new Date(announcement.createdAt).toLocaleDateString('zh-CN')}</span>
+                                            </div>
+                                            <div className="announcement-content">
+                                                <FoldableContent content={announcement.content} limit={100} />
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             ))}
                         </div>
-                    )}
-                    <div className="section-footer">
-                        <Link to="/problems" className="view-all">查看所有 →</Link>
-                    </div>
-                </div>
-
-                {user && (
-                    <div className="section">
-                        <h2>个人信息</h2>
-                        <div className="user-dashboard-card">
-                            <div className="user-card-header" style={{
-                                backgroundImage: user.backgroundImage ? `url(${user.backgroundImage})` : 'var(--primary-gradient)',
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                                height: '100px',
-                                borderRadius: '8px 8px 0 0',
-                                position: 'relative'
-                            }}>
-                                <div className="user-card-avatar-wrapper">
-                                    {user.avatar ? (
-                                        <img src={user.avatar} alt="avatar" className="user-card-avatar" />
-                                    ) : (
-                                        <div className="user-card-avatar-placeholder">
-                                            {user.username.charAt(0).toUpperCase()}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="user-card-body">
-                                <div className="user-card-info">
-                                    <h3 className="user-card-name">{user.nickname || user.username}</h3>
-                                    <p className="user-card-username">@{user.username}</p>
-                                    {user.role === 'ADMIN' && (
-                                        <div className="admin-badge">管理员</div>
-                                    )}
-                                </div>
-
-                                {Object.keys(heatmap).length > 0 && (
-                                    <div className="dashboard-heatmap-container">
-                                        <div className="heatmap-grid">
-                                            {Object.entries(heatmap)
-                                                .sort()
-                                                .slice(-90) // 只显示最近90天，避免在侧边栏太长
-                                                .map(([date, count]) => {
-                                                    const intensity = Math.min(count / 5, 1)
-                                                    const colors = ['#ebedf0', '#c6e48b', '#7bc96f', '#239a3b', '#196127']
-                                                    const colorIdx = Math.floor(intensity * (colors.length - 1))
-                                                    return (
-                                                        <div
-                                                            key={date}
-                                                            className="heatmap-cell"
-                                                            style={{ backgroundColor: colors[colorIdx] }}
-                                                            title={`${date}: ${count} 次提交`}
-                                                        />
-                                                    )
-                                                })}
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="user-card-actions">
-                                    <Link to="/profile" className="edit-profile-btn">个人主页</Link>
-                                </div>
-                            </div>
+                        <div style={{ textAlign: 'right', marginTop: '15px' }}>
+                            <Link to="/announcements" className="view-all">查看全部公告 →</Link>
                         </div>
                     </div>
-                )}
-            </>
+
+                    <div className="content-grid">
+                        <div className="section">
+                            <h2>热门题目</h2>
+                            {problemStats?.problems && problemStats.problems.length === 0 ? (
+                                <p className="empty-state">暂无题目</p>
+                            ) : (
+                                <div className="problems-list">
+                                    {problemStats?.problems?.slice(0, 5).map((p: any) => (
+                                        <div key={p.id} className="problem-item">
+                                            <div className="problem-header">
+                                                <Link to={`/problems/${p.id}`} className="problem-title">{p.title}</Link>
+                                                <span className={`difficulty-${p.difficulty.toLowerCase()}`}>
+                                                    {p.difficulty === 'EASY' ? '简单' : p.difficulty === 'MEDIUM' ? '中等' : '困难'}
+                                                </span>
+                                            </div>
+                                            <div className="problem-stats">
+                                                <span>提交 {p.numberOfSubmissions || 0}</span>
+                                                <span>通过 {p.numberOfAccepted || 0}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            <div className="section-footer">
+                                <Link to="/problems" className="view-all">查看所有 →</Link>
+                            </div>
+                        </div>
+
+                        {user && (
+                            <div className="section">
+                                <h2>个人信息</h2>
+                                <div className="user-dashboard-card">
+                                    <div className="user-card-header" style={{
+                                        backgroundImage: user.backgroundImage ? `url(${user.backgroundImage})` : 'var(--primary-gradient)',
+                                        backgroundSize: 'cover',
+                                        backgroundPosition: 'center',
+                                        height: '100px',
+                                        borderRadius: '8px 8px 0 0',
+                                        position: 'relative'
+                                    }}>
+                                        <div className="user-card-avatar-wrapper">
+                                            {user.avatar ? (
+                                                <img src={user.avatar} alt="avatar" className="user-card-avatar" />
+                                            ) : (
+                                                <div className="user-card-avatar-placeholder">
+                                                    {user.username.charAt(0).toUpperCase()}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="user-card-body">
+                                        <div className="user-card-info">
+                                            <h3 className="user-card-name">{user.nickname || user.username}</h3>
+                                            <p className="user-card-username">@{user.username}</p>
+                                            {user.role === 'ADMIN' && (
+                                                <div className="admin-badge">管理员</div>
+                                            )}
+                                        </div>
+
+                                        {Object.keys(heatmap).length > 0 && (
+                                            <div className="dashboard-heatmap-container">
+                                                <div className="heatmap-grid">
+                                                    {Object.entries(heatmap)
+                                                        .sort()
+                                                        .slice(-90) // 只显示最近90天，避免在侧边栏太长
+                                                        .map(([date, count]) => {
+                                                            const intensity = Math.min(count / 5, 1)
+                                                            const colors = ['#ebedf0', '#c6e48b', '#7bc96f', '#239a3b', '#196127']
+                                                            const colorIdx = Math.floor(intensity * (colors.length - 1))
+                                                            return (
+                                                                <div
+                                                                    key={date}
+                                                                    className="heatmap-cell"
+                                                                    style={{ backgroundColor: colors[colorIdx] }}
+                                                                    title={`${date}: ${count} 次提交`}
+                                                                />
+                                                            )
+                                                        })}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="user-card-actions">
+                                            <Link to="/profile" className="edit-profile-btn">个人主页</Link>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </>
             )}
 
-            <style>{`
+                    <style>{`
                 .dashboard {
                     animation: fadeIn 0.3s ease-in;
                 }
@@ -615,6 +615,6 @@ export default function Dashboard() {
                     }
                 }
             `}</style>
-        </div>
-    )
+                </div>
+            )
 }
