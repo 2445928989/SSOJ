@@ -53,15 +53,53 @@ export default function Announcements() {
     const [announcements, setAnnouncements] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
+    const [user, setUser] = useState<any>(null)
+    const [editingAnnId, setEditingAnnId] = useState<number | null>(null)
+    const [annForm, setAnnForm] = useState({ title: '', content: '' })
 
-    useEffect(() => {
-        api.get('/api/announcement/list')
-            .then(res => {
-                setAnnouncements(res.data.data || [])
+    const loadData = () => {
+        setLoading(true)
+        Promise.all([
+            api.get('/api/announcement/list'),
+            api.get('/api/user/profile').catch(() => ({ data: null }))
+        ])
+            .then(([annRes, userRes]) => {
+                setAnnouncements(annRes.data.data || [])
+                setUser(userRes.data)
             })
             .catch(e => setError(e.response?.data?.error || '加载失败'))
             .finally(() => setLoading(false))
+    }
+
+    useEffect(() => {
+        loadData()
     }, [])
+
+    const handleEditAnn = (ann: any) => {
+        setAnnForm({ title: ann.title, content: ann.content })
+        setEditingAnnId(ann.id)
+    }
+
+    const handleDeleteAnn = async (id: number) => {
+        if (!window.confirm('确定要删除这条公告吗？')) return
+        try {
+            await api.delete(`/api/announcement/${id}`)
+            loadData()
+        } catch (e: any) {
+            alert(e.response?.data?.error || '删除失败')
+        }
+    }
+
+    const handleAnnSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        try {
+            await api.put(`/api/announcement/${editingAnnId}`, annForm)
+            setEditingAnnId(null)
+            loadData()
+        } catch (e: any) {
+            alert(e.response?.data?.error || '保存失败')
+        }
+    }
 
     if (loading) return (
         <div className="loading-container">
@@ -79,7 +117,7 @@ export default function Announcements() {
 
     return (
         <div className="container" style={{ paddingTop: '40px', paddingBottom: '60px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', borderBottom: '2px solid #e2e8f0', paddingBottom: '15px' }}>
                 <h2 style={{ margin: 0, fontSize: '2rem', fontWeight: '700' }}>所有公告</h2>
             </div>
 
@@ -89,25 +127,83 @@ export default function Announcements() {
                         暂无公告
                     </div>
                 ) : announcements.map((ann: any) => (
-                    <div key={ann.id} className="card announcement-card" style={{ marginBottom: '20px', padding: '25px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.4rem', color: '#333' }}>{ann.title}</h3>
-                            <span style={{ color: '#999', fontSize: '0.9rem' }}>
-                                {new Date(ann.createdAt).toLocaleString('zh-CN')}
-                            </span>
-                        </div>
-                        <div style={{
-                            lineHeight: '1.6',
-                            color: '#4a5568',
-                            fontSize: '1.05rem',
-                            wordBreak: 'break-all',
-                            overflowWrap: 'break-word'
-                        }}>
-                            <FoldableContent content={ann.content} />
-                        </div>
-                        <div style={{ marginTop: '15px', fontSize: '0.85rem', color: '#a0aec0', textAlign: 'right' }}>
-                            发布者: {ann.authorName || '管理员'}
-                        </div>
+                    <div key={ann.id} className="card announcement-card" style={{ marginBottom: '20px', padding: '25px', position: 'relative' }}>
+                        {editingAnnId === ann.id ? (
+                            <div style={{ padding: '10px' }}>
+                                <h3 style={{ marginTop: 0 }}>编辑公告</h3>
+                                <form onSubmit={handleAnnSubmit}>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <input
+                                            type="text"
+                                            value={annForm.title}
+                                            onChange={e => setAnnForm({ ...annForm, title: e.target.value })}
+                                            required
+                                            style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd', fontSize: '1.2rem', fontWeight: 'bold' }}
+                                        />
+                                    </div>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <textarea
+                                            value={annForm.content}
+                                            onChange={e => setAnnForm({ ...annForm, content: e.target.value })}
+                                            required
+                                            rows={8}
+                                            style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd', fontFamily: 'inherit', fontSize: '1rem' }}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                        <button type="submit" className="admin-btn" style={{ border: 'none', cursor: 'pointer' }}>保存修改</button>
+                                        <button type="button" onClick={() => setEditingAnnId(null)} style={{ padding: '10px 20px', borderRadius: '4px', border: '1px solid #ddd', background: 'white', cursor: 'pointer' }}>取消</button>
+                                    </div>
+                                </form>
+                            </div>
+                        ) : (
+                            <>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                        <h3 style={{ margin: 0, fontSize: '1.4rem', color: '#333' }}>{ann.title}</h3>
+                                        {user?.role === 'ADMIN' && (
+                                            <div style={{ display: 'flex', gap: '10px' }}>
+                                                <button onClick={() => handleEditAnn(ann)} style={{ background: 'none', border: 'none', color: 'var(--primary-color)', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold' }}>编辑</button>
+                                                <button onClick={() => handleDeleteAnn(ann.id)} style={{ background: 'none', border: 'none', color: '#f44336', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold' }}>删除</button>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <span style={{ color: '#999', fontSize: '0.9rem' }}>
+                                        {new Date(ann.createdAt).toLocaleString('zh-CN')}
+                                    </span>
+                                </div>
+                                <div style={{
+                                    lineHeight: '1.6',
+                                    color: '#4a5568',
+                                    fontSize: '1.05rem',
+                                    wordBreak: 'break-all',
+                                    overflowWrap: 'break-word',
+                                    marginBottom: '20px'
+                                }}>
+                                    <FoldableContent content={ann.content} limit={500} />
+                                </div>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    paddingTop: '15px',
+                                    borderTop: '1px solid #edf2f7',
+                                    marginTop: '15px'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <div style={{ width: '24px', height: '24px', background: 'var(--primary-gradient)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '12px', fontWeight: 'bold' }}>
+                                            {(ann.authorName || '编').charAt(0)}
+                                        </div>
+                                        <span style={{ fontSize: '0.9rem', color: '#718096', fontWeight: '500' }}>
+                                            {ann.authorName || '管理员'}
+                                        </span>
+                                    </div>
+                                    <span style={{ color: '#a0aec0', fontSize: '0.85rem' }}>
+                                        SSOJ 官方发布
+                                    </span>
+                                </div>
+                            </>
+                        )}
                     </div>
                 ))}
             </div>

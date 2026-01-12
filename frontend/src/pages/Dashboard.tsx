@@ -92,9 +92,9 @@ export default function Dashboard() {
     )
 
     return (
-        <div className="dashboard">
+        <div className="dashboard container" style={{ paddingTop: '20px' }}>
             <div className="announcements-section">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', borderBottom: '2px solid #e2e8f0', paddingBottom: '15px' }}>
                     <h2 style={{ margin: 0 }}>公告与更新</h2>
                     {user?.role === 'ADMIN' && (
                         <button
@@ -111,32 +111,34 @@ export default function Dashboard() {
                     )}
                 </div>
 
-                {showAnnForm && (
-                    <div className="card" style={{ marginBottom: '20px', padding: '20px' }}>
-                        <h3>{editingAnnId ? '编辑公告' : '发布新公告'}</h3>
+                {showAnnForm && !editingAnnId && (
+                    <div className="card" style={{ marginBottom: '20px', padding: '20px', borderLeft: '4px solid var(--primary-color)' }}>
+                        <h3 style={{ marginTop: 0 }}>发布新公告</h3>
                         <form onSubmit={handleAnnSubmit}>
                             <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px' }}>标题</label>
+                                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>标题</label>
                                 <input
                                     type="text"
                                     value={annForm.title}
                                     onChange={e => setAnnForm({ ...annForm, title: e.target.value })}
+                                    placeholder="请输入公告标题"
                                     required
-                                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}
                                 />
                             </div>
                             <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px' }}>内容</label>
+                                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>内容 (支持 Markdown)</label>
                                 <textarea
                                     value={annForm.content}
                                     onChange={e => setAnnForm({ ...annForm, content: e.target.value })}
+                                    placeholder="请输入公告内容..."
                                     required
                                     rows={5}
-                                    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                                    style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ddd', fontFamily: 'inherit' }}
                                 />
                             </div>
                             <div style={{ display: 'flex', gap: '10px' }}>
-                                <button type="submit" className="admin-btn" style={{ border: 'none', cursor: 'pointer' }}>保存</button>
+                                <button type="submit" className="admin-btn" style={{ border: 'none', cursor: 'pointer' }}>发布</button>
                                 <button type="button" onClick={() => setShowAnnForm(false)} style={{ padding: '10px 20px', borderRadius: '4px', border: '1px solid #ddd', background: 'white', cursor: 'pointer' }}>取消</button>
                             </div>
                         </form>
@@ -148,21 +150,53 @@ export default function Dashboard() {
                         <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>暂无公告</p>
                     ) : announcements.slice(0, 4).map((announcement: any) => (
                         <div key={announcement.id} className="announcement-item">
-                            <div className="announcement-header">
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <h3>{announcement.title}</h3>
-                                    {user?.role === 'ADMIN' && (
-                                        <div style={{ display: 'flex', gap: '5px' }}>
-                                            <button onClick={() => handleEditAnn(announcement)} style={{ background: 'none', border: 'none', color: 'var(--primary-color)', cursor: 'pointer', fontSize: '12px' }}>编辑</button>
-                                            <button onClick={() => handleDeleteAnn(announcement.id)} style={{ background: 'none', border: 'none', color: '#f44336', cursor: 'pointer', fontSize: '12px' }}>删除</button>
+                            {editingAnnId === announcement.id ? (
+                                <div style={{ padding: '10px' }}>
+                                    <h3 style={{ marginTop: 0 }}>编辑公告</h3>
+                                    <form onSubmit={handleAnnSubmit}>
+                                        <div style={{ marginBottom: '15px' }}>
+                                            <input
+                                                type="text"
+                                                value={annForm.title}
+                                                onChange={e => setAnnForm({ ...annForm, title: e.target.value })}
+                                                required
+                                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd', fontWeight: 'bold' }}
+                                            />
                                         </div>
-                                    )}
+                                        <div style={{ marginBottom: '15px' }}>
+                                            <textarea
+                                                value={annForm.content}
+                                                onChange={e => setAnnForm({ ...annForm, content: e.target.value })}
+                                                required
+                                                rows={5}
+                                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd', fontFamily: 'inherit' }}
+                                            />
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                            <button type="submit" className="admin-btn" style={{ border: 'none', cursor: 'pointer', padding: '6px 15px' }}>保存</button>
+                                            <button type="button" onClick={() => { setEditingAnnId(null); setShowAnnForm(false); }} style={{ padding: '6px 15px', borderRadius: '4px', border: '1px solid #ddd', background: 'white', cursor: 'pointer' }}>取消</button>
+                                        </div>
+                                    </form>
                                 </div>
-                                <span className="announcement-date">{new Date(announcement.createdAt).toLocaleDateString('zh-CN')}</span>
-                            </div>
-                            <div className="announcement-content">
-                                <FoldableContent content={announcement.content} limit={100} />
-                            </div>
+                            ) : (
+                                <>
+                                    <div className="announcement-header">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <h3 style={{ margin: 0 }}>{announcement.title}</h3>
+                                            {user?.role === 'ADMIN' && (
+                                                <div style={{ display: 'flex', gap: '8px', marginLeft: '10px' }}>
+                                                    <button onClick={() => handleEditAnn(announcement)} style={{ background: 'none', border: 'none', color: 'var(--primary-color)', cursor: 'pointer', fontSize: '13px', padding: 0 }}>编辑</button>
+                                                    <button onClick={() => handleDeleteAnn(announcement.id)} style={{ background: 'none', border: 'none', color: '#f44336', cursor: 'pointer', fontSize: '13px', padding: 0 }}>删除</button>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <span className="announcement-date">{new Date(announcement.createdAt).toLocaleDateString('zh-CN')}</span>
+                                    </div>
+                                    <div className="announcement-content">
+                                        <FoldableContent content={announcement.content} limit={100} />
+                                    </div>
+                                </>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -263,15 +297,6 @@ export default function Dashboard() {
                     </div>
                 )}
             </div>
-
-            {user && user.role === 'ADMIN' && (
-                <div className="admin-section">
-                    <h2>管理员面板</h2>
-                    <div className="admin-links">
-                        <Link to="/admin/problems" className="admin-btn">管理题目</Link>
-                    </div>
-                </div>
-            )}
 
             <style>{`
                 .dashboard {

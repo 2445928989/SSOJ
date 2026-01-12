@@ -574,11 +574,16 @@ export default function DiscussionList() {
             .catch(() => { });
     };
 
-    if (loading && discussions.length === 0) return <div className="container loading">正在加载讨论...</div>
+    if (loading && discussions.length === 0) return (
+        <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <div className="loading-text">正在加载讨论列表...</div>
+        </div>
+    );
 
     return (
         <div className="container" style={{ paddingTop: '40px', paddingBottom: '60px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', borderBottom: '2px solid #e2e8f0', paddingBottom: '15px' }}>
                 <h1 style={{ fontSize: '2rem', fontWeight: '700', margin: 0 }}>讨论区</h1>
                 <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                     <div style={{ display: 'flex', background: '#f1f5f9', padding: '4px', borderRadius: '8px', gap: '4px' }}>

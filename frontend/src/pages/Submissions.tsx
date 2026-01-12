@@ -44,8 +44,10 @@ export default function Submissions() {
     )
 
     return (
-        <div className="container" style={{ paddingTop: '60px', paddingBottom: '60px' }}>
-            <h2 style={{ marginBottom: '30px', fontSize: '2rem', fontWeight: '700' }}>提交记录</h2>
+        <div className="container" style={{ paddingTop: '40px', paddingBottom: '60px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', borderBottom: '2px solid #e2e8f0', paddingBottom: '15px' }}>
+                <h2 style={{ fontSize: '2rem', fontWeight: '700', margin: 0 }}>提交记录</h2>
+            </div>
             <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>

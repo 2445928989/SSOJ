@@ -258,7 +258,6 @@ export default function ProblemManage() {
                             搜索
                         </button>
                     </form>
-                    <Link to="/" className="back-btn">返回仪表盘</Link>
                     <button className="submit-btn" style={{ width: 'auto', padding: '8px 20px', margin: 0 }} onClick={() => {
                         setEditingId(null)
                         setForm(initialForm)

@@ -5,6 +5,7 @@ import com.ssoj.backend.entity.TestCase;
 import com.ssoj.backend.entity.User;
 import com.ssoj.backend.service.ProblemService;
 import com.ssoj.backend.service.UserService;
+import com.ssoj.backend.util.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -244,9 +245,9 @@ public class ProblemController {
         }
 
         String filePath = "input".equals(type) ? tc.getInputPath() : tc.getOutputPath();
-        File file = new File(filePath);
+        File file = new File(FileUtil.getAbsolutePath(filePath));
         if (!file.exists()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "文件不存在");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "文件不存在: " + filePath);
         }
 
         Resource resource = new FileSystemResource(file);
