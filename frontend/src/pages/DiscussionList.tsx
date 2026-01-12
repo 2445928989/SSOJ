@@ -577,7 +577,6 @@ export default function DiscussionList() {
     if (loading && discussions.length === 0) return (
         <div className="loading-container">
             <div className="loading-spinner"></div>
-            <div className="loading-text">正在加载讨论列表...</div>
         </div>
     );
 

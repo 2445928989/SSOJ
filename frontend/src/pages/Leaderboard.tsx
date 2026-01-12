@@ -39,13 +39,6 @@ export default function Leaderboard() {
             .finally(() => setLoading(false))
     }, [])
 
-    if (loading) return (
-        <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <div className="loading-text">正在加载排行榜...</div>
-        </div>
-    )
-
     if (error) return (
         <div className="error-container">
             <AlertCircle size={48} className="error-icon" style={{ color: 'var(--danger-color)', marginBottom: '16px' }} />
@@ -55,10 +48,14 @@ export default function Leaderboard() {
 
     return (
         <div className="container" style={{ paddingTop: '40px', paddingBottom: '60px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', paddingBottom: '5px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                 <h2 style={{ fontSize: '2rem', fontWeight: '700', margin: 0 }}>排行榜</h2>
             </div>
-            {users.length === 0 ? (
+            {loading ? (
+                <div className="loading-container" style={{ minHeight: '200px' }}>
+                    <div className="loading-spinner"></div>
+                </div>
+            ) : users.length === 0 ? (
                 <div className="card" style={{ padding: '40px', textAlign: 'center', color: '#999' }}>暂无用户数据</div>
             ) : (
                 <div className="card" style={{ padding: '0', overflow: 'hidden' }}>

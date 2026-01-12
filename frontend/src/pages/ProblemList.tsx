@@ -209,9 +209,8 @@ export default function ProblemList() {
                     )}
 
                     {loading ? (
-                        <div className="loading-container">
+                        <div className="loading-container" style={{ minHeight: '200px' }}>
                             <div className="loading-spinner"></div>
-                            <div className="loading-text">正在加载题目列表...</div>
                         </div>
                     ) : problems.length === 0 ? (
                         <div className="empty-state">
@@ -220,7 +219,8 @@ export default function ProblemList() {
                     ) : (
                         <>
                             <div className="problems-count">共 {filteredProblems.length} 道题目</div>
-                            <table className="problems-table">
+                            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                                <table className="problems-table">
                                 <thead>
                                     <tr>
                                         <th>状态</th>
@@ -302,8 +302,9 @@ export default function ProblemList() {
                                     })}
                                 </tbody>
                             </table>
+                        </div>
 
-                            {totalPages > 1 && (
+                        {totalPages > 1 && (
                                 <div className="pagination">
                                     <button
                                         onClick={() => loadProblems(page - 1, searchKeyword, sortBy, sortOrder, selectedTag)}

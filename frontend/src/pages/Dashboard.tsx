@@ -77,13 +77,6 @@ export default function Dashboard() {
         }
     }
 
-    if (loading) return (
-        <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <div className="loading-text">正在加载仪表盘...</div>
-        </div>
-    )
-
     if (error) return (
         <div className="error-container">
             <AlertCircle size={48} className="error-icon" style={{ color: 'var(--danger-color)', marginBottom: '16px' }} />
@@ -93,7 +86,13 @@ export default function Dashboard() {
 
     return (
         <div className="dashboard container" style={{ paddingTop: '20px' }}>
-            <div className="announcements-section">
+            {loading ? (
+                <div className="loading-container" style={{ minHeight: '300px' }}>
+                    <div className="loading-spinner"></div>
+                </div>
+            ) : (
+                <>
+                    <div className="announcements-section">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', paddingBottom: '5px' }}>
                     <h2 style={{ margin: 0 }}>公告与更新</h2>
                     {user?.role === 'ADMIN' && (
@@ -145,11 +144,16 @@ export default function Dashboard() {
                     </div>
                 )}
 
-                <div className="announcements-list">
+                <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
                     {announcements.length === 0 ? (
-                        <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>暂无公告</p>
-                    ) : announcements.slice(0, 4).map((announcement: any) => (
-                        <div key={announcement.id} className="announcement-item">
+                        <p style={{ textAlign: 'center', color: '#999', padding: '40px' }}>暂无公告</p>
+                    ) : announcements.slice(0, 4).map((announcement: any, idx) => (
+                        <div key={announcement.id} className="announcement-list-item" style={{ 
+                            padding: '20px', 
+                            borderBottom: idx === Math.min(announcements.length, 4) - 1 ? 'none' : '1px solid var(--border-color)',
+                            transition: 'all 0.2s',
+                            borderLeft: '4px solid var(--primary-color)'
+                        }}>
                             {editingAnnId === announcement.id ? (
                                 <div style={{ padding: '10px' }}>
                                     <h3 style={{ marginTop: 0 }}>编辑公告</h3>
@@ -200,11 +204,9 @@ export default function Dashboard() {
                         </div>
                     ))}
                 </div>
-                {announcements.length > 4 && (
-                    <div style={{ textAlign: 'right', marginTop: '15px' }}>
-                        <Link to="/announcements" className="view-all">查看全部公告 →</Link>
-                    </div>
-                )}
+                <div style={{ textAlign: 'right', marginTop: '15px' }}>
+                    <Link to="/announcements" className="view-all">查看全部公告 →</Link>
+                </div>
             </div>
 
             <div className="content-grid">
@@ -296,7 +298,8 @@ export default function Dashboard() {
                         </div>
                     </div>
                 )}
-            </div>
+            </>
+            )}
 
             <style>{`
                 .dashboard {

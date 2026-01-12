@@ -101,13 +101,6 @@ export default function Announcements() {
         }
     }
 
-    if (loading) return (
-        <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <div className="loading-text">正在加载公告...</div>
-        </div>
-    )
-
     if (error) return (
         <div className="error-container">
             <AlertCircle size={48} className="error-icon" style={{ color: 'var(--danger-color)', marginBottom: '16px' }} />
@@ -117,24 +110,32 @@ export default function Announcements() {
 
     return (
         <div className="container" style={{ paddingTop: '40px', paddingBottom: '60px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', paddingBottom: '5px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                 <h2 style={{ margin: 0, fontSize: '2rem', fontWeight: '700' }}>所有公告</h2>
             </div>
 
-            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                {announcements.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
-                        暂无公告
-                    </div>
-                ) : announcements.map((ann: any, idx) => (
-                    <div key={ann.id} style={{
-                        padding: '25px',
-                        borderBottom: idx === announcements.length - 1 ? 'none' : '1px solid #edf2f7',
-                        borderLeft: '5px solid var(--primary-color)',
-                        position: 'relative',
-                        transition: 'background-color 0.2s'
-                    }}>
-                        {editingAnnId === ann.id ? (
+            {loading ? (
+                <div className="loading-container" style={{ minHeight: '200px' }}>
+                    <div className="loading-spinner"></div>
+                </div>
+            ) : (
+                <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                    {announcements.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
+                            暂无公告
+                        </div>
+                    ) : announcements.map((ann: any, idx) => (
+                        <div key={ann.id} className="announcement-list-item" style={{
+                            padding: '25px',
+                            borderBottom: idx === announcements.length - 1 ? 'none' : '1px solid var(--border-color)',
+                            borderLeft: '5px solid var(--primary-color)',
+                            position: 'relative',
+                            transition: 'all 0.2s',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '12px'
+                        }}>
+                            {editingAnnId === ann.id ? (
                             <div style={{ padding: '10px' }}>
                                 <h3 style={{ marginTop: 0 }}>编辑公告</h3>
                                 <form onSubmit={handleAnnSubmit}>

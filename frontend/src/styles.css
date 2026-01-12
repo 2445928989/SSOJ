@@ -114,24 +114,29 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 300px;
-    padding: 40px;
+    min-height: 200px;
+    padding: 20px;
 }
 
 .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid var(--primary-color);
+    width: 32px;
+    height: 32px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--primary-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;
-    margin-bottom: 15px;
 }
 
 .loading-text {
     color: var(--text-secondary);
     font-size: 14px;
     font-weight: 500;
+    margin-top: 10px;
+}
+
+/* 公告列表项 */
+.announcement-list-item:hover {
+    background-color: #f8fafc;
 }
 
 /* 全局错误提示 */
@@ -424,6 +429,12 @@ textarea {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     margin-bottom: 2rem;
     transition: all 0.3s ease;
+}
+
+.card table {
+    margin: 0;
+    border: none;
+    box-shadow: none;
 }
 
 .card:hover {
