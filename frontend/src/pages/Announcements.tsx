@@ -117,17 +117,23 @@ export default function Announcements() {
 
     return (
         <div className="container" style={{ paddingTop: '40px', paddingBottom: '60px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', borderBottom: '2px solid #e2e8f0', paddingBottom: '15px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', paddingBottom: '5px' }}>
                 <h2 style={{ margin: 0, fontSize: '2rem', fontWeight: '700' }}>所有公告</h2>
             </div>
 
-            <div className="announcements-full-list">
+            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
                 {announcements.length === 0 ? (
-                    <div className="card" style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
+                    <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
                         暂无公告
                     </div>
-                ) : announcements.map((ann: any) => (
-                    <div key={ann.id} className="card announcement-card" style={{ marginBottom: '20px', padding: '25px', position: 'relative' }}>
+                ) : announcements.map((ann: any, idx) => (
+                    <div key={ann.id} style={{
+                        padding: '25px',
+                        borderBottom: idx === announcements.length - 1 ? 'none' : '1px solid #edf2f7',
+                        borderLeft: '5px solid var(--primary-color)',
+                        position: 'relative',
+                        transition: 'background-color 0.2s'
+                    }}>
                         {editingAnnId === ann.id ? (
                             <div style={{ padding: '10px' }}>
                                 <h3 style={{ marginTop: 0 }}>编辑公告</h3>
@@ -209,14 +215,6 @@ export default function Announcements() {
             </div>
 
             <style>{`
-                .announcement-card {
-                    transition: transform 0.2s, box-shadow 0.2s;
-                    border-left: 5px solid var(--primary-color);
-                }
-                .announcement-card:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                }
                 .back-btn {
                     padding: 8px 20px;
                     border-radius: 8px;

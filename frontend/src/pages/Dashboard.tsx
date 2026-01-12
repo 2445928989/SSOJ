@@ -94,7 +94,7 @@ export default function Dashboard() {
     return (
         <div className="dashboard container" style={{ paddingTop: '20px' }}>
             <div className="announcements-section">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', borderBottom: '2px solid #e2e8f0', paddingBottom: '15px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', paddingBottom: '5px' }}>
                     <h2 style={{ margin: 0 }}>公告与更新</h2>
                     {user?.role === 'ADMIN' && (
                         <button

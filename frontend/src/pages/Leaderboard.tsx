@@ -55,7 +55,7 @@ export default function Leaderboard() {
 
     return (
         <div className="container" style={{ paddingTop: '40px', paddingBottom: '60px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', borderBottom: '2px solid #e2e8f0', paddingBottom: '15px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', paddingBottom: '5px' }}>
                 <h2 style={{ fontSize: '2rem', fontWeight: '700', margin: 0 }}>排行榜</h2>
             </div>
             {users.length === 0 ? (

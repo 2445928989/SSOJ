@@ -56,7 +56,7 @@ export default function Notifications() {
     return (
         <div className="container" style={{ maxWidth: '800px', paddingTop: '40px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-                <h2 style={{ margin: 0, border: 'none' }}>消息通知</h2>
+                <h2 style={{ margin: 0, fontSize: '2rem', fontWeight: '700' }}>消息通知</h2>
                 {notifications.some(n => !n.isRead) && (
                     <button
                         onClick={markAllAsRead}

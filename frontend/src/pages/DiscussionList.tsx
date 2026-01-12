@@ -583,8 +583,8 @@ export default function DiscussionList() {
 
     return (
         <div className="container" style={{ paddingTop: '40px', paddingBottom: '60px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', borderBottom: '2px solid #e2e8f0', paddingBottom: '15px' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: '700', margin: 0 }}>讨论区</h1>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: '700', margin: 0 }}>讨论区</h2>
                 <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                     <div style={{ display: 'flex', background: '#f1f5f9', padding: '4px', borderRadius: '8px', gap: '4px' }}>
                         <button
