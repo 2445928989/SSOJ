@@ -302,7 +302,7 @@ export default function Dashboard() {
                 </>
             )}
 
-                    <style>{`
+            <style>{`
                 .dashboard {
                     animation: fadeIn 0.3s ease-in;
                 }
@@ -616,6 +616,6 @@ export default function Dashboard() {
                     }
                 }
             `}</style>
-                </div>
-            )
+        </div>
+    )
 }
