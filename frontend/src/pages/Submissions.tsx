@@ -161,8 +161,10 @@ export default function Submissions() {
                             </button>
                         </div>
                     )}
+                </>
+            )}
 
-                    <style>{`
+            <style>{`
                 .loading-container {
                     display: flex;
                     flex-direction: column;
@@ -193,6 +195,6 @@ export default function Submissions() {
                     margin-top: 20px;
                 }
             `}</style>
-                </div>
-            )
+        </div>
+    )
 }
