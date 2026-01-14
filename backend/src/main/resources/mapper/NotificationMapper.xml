@@ -8,8 +8,9 @@
         #{content}, FALSE, NOW()) </insert>
 
     <select id="findByReceiverId" resultType="com.ssoj.backend.entity.Notification"> SELECT n.*,
-        u.nickname as senderNickname, u.avatar as senderAvatar FROM notification n JOIN user u ON
-        n.sender_id = u.id WHERE n.receiver_id = #{receiverId} ORDER BY n.created_at DESC </select>
+        u.username as senderUsername, u.nickname as senderNickname, u.avatar as senderAvatar FROM
+        notification n JOIN user u ON n.sender_id = u.id WHERE n.receiver_id = #{receiverId} ORDER
+        BY n.created_at DESC </select>
 
     <select id="countUnread" resultType="int"> SELECT COUNT(*) FROM notification WHERE receiver_id =
         #{receiverId} AND is_read = FALSE </select>

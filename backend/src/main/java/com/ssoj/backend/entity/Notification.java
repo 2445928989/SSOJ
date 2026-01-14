@@ -15,6 +15,7 @@ public class Notification {
     private LocalDateTime createdAt;
 
     // 辅助字段，用于前端显示
+    private String senderUsername;
     private String senderNickname;
     private String senderAvatar;
 }

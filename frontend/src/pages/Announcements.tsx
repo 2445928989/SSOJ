@@ -130,7 +130,6 @@ export default function Announcements() {
                             borderBottom: idx === announcements.length - 1 ? 'none' : '1px solid var(--border-color)',
                             borderLeft: '5px solid var(--primary-color)',
                             position: 'relative',
-                            transition: 'all 0.2s',
                             display: 'flex',
                             flexDirection: 'column',
                             gap: '12px'
@@ -205,9 +204,6 @@ export default function Announcements() {
                                                 {ann.authorName || '管理员'}
                                             </span>
                                         </div>
-                                        <span style={{ color: '#a0aec0', fontSize: '0.85rem' }}>
-                                            SSOJ 官方发布
-                                        </span>
                                     </div>
                                 </>
                             )}
@@ -227,13 +223,11 @@ export default function Announcements() {
                     border: 1.5px solid var(--border-color);
                     display: flex;
                     align-items: center;
-                    transition: all 0.3s ease;
                 }
                 .back-btn:hover {
                     background: #f8fafc;
                     border-color: var(--primary-color);
                     color: var(--primary-color);
-                    transform: translateY(-1px);
                     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
                 }
             `}</style>

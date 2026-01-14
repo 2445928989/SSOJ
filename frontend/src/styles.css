@@ -52,7 +52,6 @@ body {
     color: var(--text-primary);
     text-decoration: none;
     font-weight: 500;
-    transition: color 0.3s ease;
     position: relative;
     padding: 0.5rem 0;
     cursor: pointer;
@@ -66,7 +65,6 @@ body {
     width: 0;
     height: 2px;
     background: var(--primary-color);
-    transition: width 0.3s ease;
 }
 
 .nav a:hover::after {
@@ -428,7 +426,6 @@ textarea {
     padding: 2rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     margin-bottom: 2rem;
-    transition: all 0.3s ease;
 }
 
 .card table {
@@ -445,7 +442,6 @@ a {
     text-decoration: none;
     color: var(--primary-color);
     font-weight: 500;
-    transition: color 0.3s ease;
 }
 
 a:hover {

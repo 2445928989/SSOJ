@@ -93,26 +93,33 @@ export default function Notifications() {
                                 borderBottom: '1px solid #f1f5f9',
                                 background: n.isRead ? 'white' : '#f8faff',
                                 display: 'flex',
-                                gap: '15px',
-                                transition: 'all 0.2s'
+                                gap: '15px'
                             }}
                         >
-                            <div style={{
-                                width: '40px',
-                                height: '40px',
-                                borderRadius: '10px',
-                                background: n.isRead ? '#f1f5f9' : '#ebf4ff',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                {getIcon(n.type)}
-                            </div>
+                            <Link to={`/user/${n.senderId}`} style={{ textDecoration: 'none' }}>
+                                {n.senderAvatar ? (
+                                    <img src={n.senderAvatar} alt="" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                                ) : (
+                                    <div style={{
+                                        width: '40px',
+                                        height: '40px',
+                                        borderRadius: '50%',
+                                        background: n.isRead ? '#f1f5f9' : '#ebf4ff',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: 'var(--primary-color)',
+                                        fontWeight: 'bold'
+                                    }}>
+                                        {(n.senderNickname || n.senderUsername || '?').charAt(0).toUpperCase()}
+                                    </div>
+                                )}
+                            </Link>
                             <div style={{ flex: 1 }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                                     <div style={{ fontSize: '15px' }}>
-                                        <Link to={`/user/${n.senderId}`} style={{ fontWeight: 'bold', color: '#2d3748', textDecoration: 'none' }}>{n.senderNickname}</Link>
-                                        <span style={{ color: '#718096', marginLeft: '8px' }}>{n.content}</span>
+                                        <Link to={`/user/${n.senderId}`} style={{ fontWeight: 'bold', color: '#2d3748', textDecoration: 'none' }}>{n.senderNickname || n.senderUsername || '未知用户'}</Link>
+                                        <span style={{ color: '#718096', marginLeft: '10px' }}>{n.content}</span>
                                     </div>
                                     <span style={{ fontSize: '12px', color: '#a0aec0' }}>{new Date(n.createdAt).toLocaleString()}</span>
                                 </div>

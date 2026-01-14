@@ -181,17 +181,16 @@ export default function NotificationDropdown() {
                                                 <img src={n.senderAvatar} alt="" style={{ width: '36px', height: '36px', borderRadius: '50%' }} />
                                             ) : (
                                                 <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#edf2f7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>
-                                                    {n.senderNickname?.charAt(0) || '?'}
+                                                    {(n.senderNickname || n.senderUsername || '?').charAt(0)}
                                                 </div>
                                             )}
                                         </Link>
                                         <div style={{ flex: 1 }}>
                                             <div style={{ fontSize: '13px', marginBottom: '4px' }}>
-                                                <span style={{ fontWeight: '600' }}>{n.senderNickname}</span>
+                                                <span style={{ fontWeight: '600' }}>{n.senderNickname || n.senderUsername || '未知用户'}</span>
                                                 <span style={{ color: '#718096', marginLeft: '6px' }}>{n.content}</span>
                                             </div>
-                                            <div style={{ fontSize: '11px', color: '#a0aec0', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                                {getIcon(n.type)}
+                                            <div style={{ fontSize: '11px', color: '#a0aec0', marginTop: '2px' }}>
                                                 {new Date(n.createdAt).toLocaleString()}
                                             </div>
                                         </div>

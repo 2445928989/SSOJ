@@ -151,7 +151,6 @@ export default function Dashboard() {
                                 <div key={announcement.id} className="announcement-list-item" style={{
                                     padding: '20px',
                                     borderBottom: idx === Math.min(announcements.length, 4) - 1 ? 'none' : '1px solid var(--border-color)',
-                                    transition: 'all 0.2s',
                                     borderLeft: '4px solid var(--primary-color)'
                                 }}>
                                     {editingAnnId === announcement.id ? (
@@ -194,7 +193,12 @@ export default function Dashboard() {
                                                         </div>
                                                     )}
                                                 </div>
-                                                <span className="announcement-date">{new Date(announcement.createdAt).toLocaleDateString('zh-CN')}</span>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                    <span style={{ fontSize: '12px', color: '#718096', background: '#f0f2f5', padding: '2px 8px', borderRadius: '4px' }}>
+                                                        {announcement.authorName || '管理员'}
+                                                    </span>
+                                                    <span className="announcement-date">{new Date(announcement.createdAt).toLocaleDateString('zh-CN')}</span>
+                                                </div>
                                             </div>
                                             <div className="announcement-content">
                                                 <FoldableContent content={announcement.content} limit={100} />
@@ -303,15 +307,6 @@ export default function Dashboard() {
             )}
 
             <style>{`
-                .dashboard {
-                    animation: fadeIn 0.3s ease-in;
-                }
-
-                @keyframes fadeIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
-                }
-
                 .announcements-section {
                     margin-bottom: 40px;
                     background: white;
@@ -336,7 +331,6 @@ export default function Dashboard() {
                     border-left: 4px solid var(--primary-color);
                     background: #f9f9f9;
                     border-radius: 4px;
-                    transition: all 0.3s;
                 }
 
                 .announcement-item:hover {
@@ -411,7 +405,6 @@ export default function Dashboard() {
                     padding: 12px;
                     border: 1px solid #e0e0e0;
                     border-radius: 6px;
-                    transition: all 0.3s;
                 }
 
                 .problem-item:hover {
@@ -457,7 +450,6 @@ export default function Dashboard() {
                     color: var(--primary-color);
                     text-decoration: none;
                     font-weight: 500;
-                    transition: all 0.3s;
                 }
 
                 .view-all:hover {
@@ -567,7 +559,6 @@ export default function Dashboard() {
                     color: white;
                     text-decoration: none;
                     border-radius: 4px;
-                    transition: background 0.3s;
                     font-weight: 500;
                 }
 
@@ -601,7 +592,6 @@ export default function Dashboard() {
                     color: white;
                     text-decoration: none;
                     border-radius: 4px;
-                    transition: background 0.3s;
                     border: none;
                     cursor: pointer;
                 }
