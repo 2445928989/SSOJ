@@ -39,6 +39,9 @@ public class ProblemService {
     @Autowired
     private TestCaseMapper testCaseMapper;
 
+    @Autowired
+    private TaskService taskService;
+
     /**
      * 获取题目列表（分页）
      */
@@ -52,8 +55,11 @@ public class ProblemService {
         }
         int offset = (page - 1) * size;
         List<Problem> problems = problemMapper.findAll(offset, size);
-        // 为每个问题加载标签
-        problems.forEach(this::loadProblemCategories);
+        // 为每个问题加载标签和描述
+        problems.forEach(p -> {
+            loadProblemCategories(p);
+            p.setDescription(FileUtil.readDescription(p.getDescriptionId()));
+        });
         return problems;
     }
 
@@ -69,6 +75,7 @@ public class ProblemService {
             throw new RuntimeException("题目不存在: " + id);
         }
         loadProblemCategories(problem);
+        problem.setDescription(FileUtil.readDescription(problem.getDescriptionId()));
         return problem;
     }
 
@@ -83,8 +90,11 @@ public class ProblemService {
             throw new IllegalArgumentException("题目难度无效，必须是 easy/medium/hard");
         }
         List<Problem> problems = problemMapper.findByDifficulty(difficulty);
-        // 为每个问题加载标签
-        problems.forEach(this::loadProblemCategories);
+        // 为每个问题加载标签和描述
+        problems.forEach(p -> {
+            loadProblemCategories(p);
+            p.setDescription(FileUtil.readDescription(p.getDescriptionId()));
+        });
         return problems;
     }
 
@@ -110,9 +120,19 @@ public class ProblemService {
             problem.setMemoryLimit(262144);
         }
 
+        // 保存描述到文件
+        try {
+            if (problem.getDescription() != null) {
+                String descId = FileUtil.saveDescription(problem.getDescription());
+                problem.setDescriptionId(descId);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("保存题目描述失败: " + e.getMessage());
+        }
+
         problemMapper.insert(problem);
         saveProblemCategories(problem);
-        return problemMapper.findById(problem.getId());
+        return getProblemById(problem.getId());
     }
 
     /**
@@ -122,9 +142,30 @@ public class ProblemService {
         if (problem.getId() == null || problem.getId() <= 0) {
             throw new IllegalArgumentException("更新题目ID无效");
         }
+
+        // 获取原题目状态以判断是否需要更新描述文件
+        Problem oldProblem = problemMapper.findById(problem.getId());
+        if (oldProblem == null) {
+            throw new RuntimeException("更新题目不存在: " + problem.getId());
+        }
+
+        try {
+            if (problem.getDescription() != null) {
+                if (oldProblem.getDescriptionId() != null) {
+                    FileUtil.updateDescription(oldProblem.getDescriptionId(), problem.getDescription());
+                    problem.setDescriptionId(oldProblem.getDescriptionId());
+                } else {
+                    String descId = FileUtil.saveDescription(problem.getDescription());
+                    problem.setDescriptionId(descId);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("更新题目描述失败: " + e.getMessage());
+        }
+
         int ret = problemMapper.update(problem);
         if (ret == 0) {
-            throw new RuntimeException("更新题目不存在: " + problem.getId());
+            throw new RuntimeException("更新题目失败: " + problem.getId());
         }
         saveProblemCategories(problem);
         return true;
@@ -166,8 +207,11 @@ public class ProblemService {
         }
         int offset = (page - 1) * size;
         List<Problem> problems = problemMapper.searchByKeyword(keyword, offset, size);
-        // 为每个问题加载标签
-        problems.forEach(this::loadProblemCategories);
+        // 为每个问题加载标签和描述
+        problems.forEach(p -> {
+            loadProblemCategories(p);
+            p.setDescription(FileUtil.readDescription(p.getDescriptionId()));
+        });
         return problems;
     }
 
@@ -213,7 +257,10 @@ public class ProblemService {
         }
         int offset = (page - 1) * size;
         List<Problem> problems = problemMapper.findByTag(tag, offset, size);
-        problems.forEach(this::loadProblemCategories);
+        problems.forEach(p -> {
+            loadProblemCategories(p);
+            p.setDescription(FileUtil.readDescription(p.getDescriptionId()));
+        });
         return problems;
     }
 
@@ -341,63 +388,110 @@ public class ProblemService {
     }
 
     /**
-     * 上传并处理测试用例 ZIP 文件
+     * 异步上传并处理测试用例 ZIP 文件
      */
-    public void uploadTestCases(Long problemId, MultipartFile file) throws IOException {
+    public String uploadTestCasesAsync(Long problemId, MultipartFile file) throws IOException {
         // 1. 检查题目是否存在
         Problem problem = problemMapper.findById(problemId);
         if (problem == null) {
             throw new RuntimeException("题目不存在: " + problemId);
         }
 
-        // 2. 清理旧的测试用例
-        testCaseMapper.deleteByProblemId(problemId);
+        String taskId = taskService.createTask();
+        // 因为 MultipartFile 的 InputStream 在请求结束后会关闭，
+        // 且如果是直接在内存中，读取一次就没了，所以先转成 byte[]
+        byte[] bytes = file.getBytes();
 
-        // 3. 解析 ZIP 文件
-        Map<String, byte[]> inputs = new HashMap<>();
-        Map<String, byte[]> outputs = new HashMap<>();
+        new Thread(() -> {
+            try {
+                taskService.updateProgress(taskId, 5.0, "running", "正在分析 ZIP 文件...");
 
-        try (ZipInputStream zis = new ZipInputStream(file.getInputStream())) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                if (entry.isDirectory())
-                    continue;
-                String name = entry.getName();
-
-                // 只处理根目录下的 .in 和 .out 文件
-                if (name.contains("/")) {
-                    name = name.substring(name.lastIndexOf("/") + 1);
+                // 1. 先统计文件总数以计算进度
+                int totalEntries = 0;
+                try (ZipInputStream zis = new ZipInputStream(new java.io.ByteArrayInputStream(bytes))) {
+                    while (zis.getNextEntry() != null) {
+                        totalEntries++;
+                    }
                 }
 
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                byte[] buffer = new byte[1024];
-                int len;
-                while ((len = zis.read(buffer)) > 0) {
-                    baos.write(buffer, 0, len);
+                if (totalEntries == 0) {
+                    taskService.failTask(taskId, "ZIP 文件为空");
+                    return;
                 }
-                byte[] content = baos.toByteArray();
 
-                if (name.endsWith(".in")) {
-                    inputs.put(name.substring(0, name.length() - 3), content);
-                } else if (name.endsWith(".out") || name.endsWith(".ans")) {
-                    outputs.put(name.substring(0, name.length() - 4), content);
+                // 2. 清理旧的测试用例
+                testCaseMapper.deleteByProblemId(problemId);
+
+                // 3. 解析 ZIP 文件
+                Map<String, byte[]> inputs = new HashMap<>();
+                Map<String, byte[]> outputs = new HashMap<>();
+
+                try (ZipInputStream zis = new ZipInputStream(new java.io.ByteArrayInputStream(bytes))) {
+                    ZipEntry entry;
+                    int processed = 0;
+                    while ((entry = zis.getNextEntry()) != null) {
+                        processed++;
+                        double progress = 5.0 + (processed * 60.0 / totalEntries);
+                        taskService.updateProgress(taskId, progress, "running", "正在解压: " + entry.getName());
+
+                        if (entry.isDirectory())
+                            continue;
+                        String name = entry.getName();
+
+                        // 只处理根目录下或者扁平化后的 .in 和 .out 文件
+                        if (name.contains("/")) {
+                            name = name.substring(name.lastIndexOf("/") + 1);
+                        }
+                        if (name.isEmpty())
+                            continue;
+
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        byte[] buffer = new byte[8192];
+                        int len;
+                        while ((len = zis.read(buffer)) > 0) {
+                            baos.write(buffer, 0, len);
+                        }
+                        byte[] content = baos.toByteArray();
+
+                        if (name.endsWith(".in")) {
+                            inputs.put(name.substring(0, name.length() - 3), content);
+                        } else if (name.endsWith(".out") || name.endsWith(".ans")) {
+                            String base = name.endsWith(".out") ? name.substring(0, name.length() - 4)
+                                    : name.substring(0, name.length() - 4);
+                            outputs.put(base, content);
+                        }
+                    }
                 }
+
+                // 4. 配对并保存
+                int totalToSave = inputs.size();
+                int saved = 0;
+                for (String baseName : inputs.keySet()) {
+                    if (outputs.containsKey(baseName)) {
+                        saved++;
+                        double progress = 65.0 + (saved * 35.0 / totalToSave);
+                        taskService.updateProgress(taskId, progress, "running", "正在保存测试点: " + baseName);
+
+                        String inputPath = FileUtil.saveTestCaseFile(problemId, baseName, "in", inputs.get(baseName));
+                        String outputPath = FileUtil.saveTestCaseFile(problemId, baseName, "out",
+                                outputs.get(baseName));
+
+                        TestCase tc = new TestCase();
+                        tc.setProblemId(problemId);
+                        tc.setInputPath(inputPath);
+                        tc.setOutputPath(outputPath);
+                        testCaseMapper.insert(tc);
+                    }
+                }
+
+                taskService.completeTask(taskId, Map.of("count", saved));
+            } catch (Exception e) {
+                e.printStackTrace();
+                taskService.failTask(taskId, "解压失败: " + e.getMessage());
             }
-        }
+        }).start();
 
-        // 4. 配对并保存
-        for (String baseName : inputs.keySet()) {
-            if (outputs.containsKey(baseName)) {
-                String inputPath = FileUtil.saveTestCaseFile(problemId, baseName, "in", inputs.get(baseName));
-                String outputPath = FileUtil.saveTestCaseFile(problemId, baseName, "out", outputs.get(baseName));
-
-                TestCase tc = new TestCase();
-                tc.setProblemId(problemId);
-                tc.setInputPath(inputPath);
-                tc.setOutputPath(outputPath);
-                testCaseMapper.insert(tc);
-            }
-        }
+        return taskId;
     }
 
     /**

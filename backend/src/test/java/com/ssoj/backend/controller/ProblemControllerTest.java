@@ -41,12 +41,13 @@ class ProblemControllerTest {
         admin.setId(1L);
         admin.setRole("ADMIN");
         when(userService.getUserById(1L)).thenReturn(admin);
+        when(problemService.uploadTestCasesAsync(anyLong(), any())).thenReturn("task-123");
 
         mockMvc.perform(multipart("/api/problem/1/testcases").file(file)
                 .sessionAttr("userId", 1L)
                 .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk());
 
-        verify(problemService).uploadTestCases(anyLong(), any());
+        verify(problemService).uploadTestCasesAsync(anyLong(), any());
     }
 }

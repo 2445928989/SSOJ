@@ -11,7 +11,8 @@ import java.util.List;
 public class Problem {
     private Long id;
     private String title;
-    private String description;
+    private String descriptionId; // MD 文件的 ID 映射
+    private String description; // 仅用于 API 传输，不直接存储在 problem 表中
     private String inputFormat;
     private String outputFormat;
     private String sampleInput;

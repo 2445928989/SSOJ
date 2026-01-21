@@ -34,6 +34,9 @@ public class ProblemController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private com.ssoj.backend.service.TaskService taskService;
+
     /**
      * POST /api/problem/{id}/testcases
      * 上传测试用例
@@ -44,8 +47,8 @@ public class ProblemController {
             jakarta.servlet.http.HttpSession session) {
         checkAdmin(session);
         try {
-            problemService.uploadTestCases(id, file);
-            return Map.of("success", true);
+            String taskId = problemService.uploadTestCasesAsync(id, file);
+            return Map.of("success", true, "taskId", taskId);
         } catch (Exception e) {
             e.printStackTrace();
             String msg = e.getMessage();
@@ -53,6 +56,21 @@ public class ProblemController {
                 msg = e.toString();
             return Map.of("success", false, "error", msg);
         }
+    }
+
+    /**
+     * GET /api/problem/task/{taskId}
+     * 查询后台任务进度
+     */
+    @GetMapping("/api/problem/task/{taskId}")
+    public Object getTaskStatus(@PathVariable("taskId") String taskId,
+            jakarta.servlet.http.HttpSession session) {
+        checkAdmin(session);
+        var task = taskService.getTask(taskId);
+        if (task == null) {
+            return Map.of("success", false, "error", "任务不存在");
+        }
+        return Map.of("success", true, "data", task);
     }
 
     /**

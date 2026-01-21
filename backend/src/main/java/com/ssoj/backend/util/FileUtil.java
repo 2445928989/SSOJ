@@ -48,6 +48,45 @@ public class FileUtil {
     }
 
     /**
+     * 保存题目描述 MD 文件
+     * 
+     * @return 文件标识符 (UUID)
+     */
+    public static String saveDescription(String content) throws IOException {
+        String id = java.util.UUID.randomUUID().toString();
+        String fileName = "descriptions/" + id + ".md";
+        String fullPath = BASE_DIR + "/" + fileName;
+        Files.createDirectories(Paths.get(BASE_DIR, "descriptions"));
+        Files.write(Paths.get(fullPath), content.getBytes());
+        return id;
+    }
+
+    /**
+     * 读取题目描述 MD 文件
+     */
+    public static String readDescription(String id) {
+        if (id == null || id.isEmpty())
+            return "";
+        try {
+            return readFile("descriptions/" + id + ".md");
+        } catch (Exception e) {
+            return "Error reading description: " + e.getMessage();
+        }
+    }
+
+    /**
+     * 更新题目描述 MD 文件
+     */
+    public static void updateDescription(String id, String content) throws IOException {
+        if (id == null || id.isEmpty())
+            return;
+        String fileName = "descriptions/" + id + ".md";
+        String fullPath = BASE_DIR + "/" + fileName;
+        Files.createDirectories(Paths.get(BASE_DIR, "descriptions"));
+        Files.write(Paths.get(fullPath), content.getBytes());
+    }
+
+    /**
      * 读取文件内容
      */
     public static String readFile(String relativePath) throws IOException {

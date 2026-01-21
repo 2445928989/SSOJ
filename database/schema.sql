@@ -21,7 +21,7 @@ CREATE TABLE user (
 CREATE TABLE problem(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(100) NOT NULL UNIQUE,
-    description TEXT,
+    description_id VARCHAR(100) COMMENT 'MD 文件的 ID 映射',
     input_format TEXT,
     output_format TEXT,
     sample_input TEXT,

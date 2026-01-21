@@ -18,6 +18,7 @@ export default function SubmitPage() {
     const [problem, setProblem] = useState<any>(null)
     const [code, setCode] = useState('')
     const [language, setLanguage] = useState('cpp')
+    const [useMonaco, setUseMonaco] = useState(true)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const navigate = useNavigate()
@@ -206,45 +207,66 @@ export default function SubmitPage() {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="code">代码编辑</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                            <label htmlFor="code" style={{ margin: 0 }}>代码编辑</label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: '500', fontSize: '0.9em', color: '#666' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={useMonaco}
+                                    onChange={e => setUseMonaco(e.target.checked)}
+                                />
+                                使用高级编辑器 (Monaco)
+                            </label>
+                        </div>
                         <div className="code-editor-wrapper">
-                            <Editor
-                                height="500px"
-                                language={getMonacoLanguage()}
-                                value={code}
-                                onChange={(value) => setCode(value || '')}
-                                onMount={handleEditorMount}
-                                theme="vs-dark"
-                                options={{
-                                    minimap: { enabled: false },
-                                    fontSize: 14,
-                                    lineNumbers: 'on',
-                                    scrollBeyondLastLine: false,
-                                    automaticLayout: true,
-                                    tabSize: 4,
-                                    insertSpaces: false,
-                                    wordWrap: 'off',
-                                    bracketPairColorization: {
-                                        enabled: true
-                                    },
-                                    autoClosingBrackets: 'always',
-                                    autoClosingQuotes: 'always',
-                                    autoIndent: 'full',
-                                    formatOnPaste: false,
-                                    suggest: {
-                                        showKeywords: true,
-                                        showSnippets: true
-                                    },
-                                    quickSuggestions: {
-                                        other: 'on',
-                                        comments: 'off',
-                                        strings: 'off'
-                                    },
-                                    suggestOnTriggerCharacters: true,
-                                    acceptSuggestionOnCommitCharacter: true,
-                                    acceptSuggestionOnEnter: 'smart'
-                                }}
-                            />
+                            {useMonaco ? (
+                                <Editor
+                                    height="500px"
+                                    language={getMonacoLanguage()}
+                                    value={code}
+                                    onChange={(value) => setCode(value || '')}
+                                    onMount={handleEditorMount}
+                                    theme="vs-dark"
+                                    options={{
+                                        minimap: { enabled: false },
+                                        fontSize: 14,
+                                        lineNumbers: 'on',
+                                        scrollBeyondLastLine: false,
+                                        automaticLayout: true,
+                                        tabSize: 4,
+                                        insertSpaces: false,
+                                        wordWrap: 'off',
+                                        bracketPairColorization: {
+                                            enabled: true
+                                        },
+                                        autoClosingBrackets: 'always',
+                                        autoClosingQuotes: 'always',
+                                        autoIndent: 'full',
+                                        formatOnPaste: false,
+                                        suggest: {
+                                            showKeywords: true,
+                                            showSnippets: true
+                                        },
+                                        quickSuggestions: {
+                                            other: 'on',
+                                            comments: 'off',
+                                            strings: 'off'
+                                        },
+                                        suggestOnTriggerCharacters: true,
+                                        acceptSuggestionOnCommitCharacter: true,
+                                        acceptSuggestionOnEnter: 'smart'
+                                    }}
+                                />
+                            ) : (
+                                <textarea
+                                    id="code"
+                                    className="plain-editor"
+                                    value={code}
+                                    onChange={e => setCode(e.target.value)}
+                                    placeholder="在此输入或粘贴代码..."
+                                    spellCheck={false}
+                                />
+                            )}
                         </div>
                         <div className="code-hint">
                             已输入 {code.length} 个字符

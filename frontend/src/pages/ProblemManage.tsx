@@ -41,6 +41,9 @@ export default function ProblemManage() {
     const [showAddTcForm, setShowAddTcForm] = useState(false)
     const [newTcForm, setNewTcForm] = useState({ inputContent: '', outputContent: '' })
     const [isTransitioning, setIsTransitioning] = useState(false)
+    const [decompressionProgress, setDecompressionProgress] = useState(0)
+    const [decompressionMsg, setDecompressionMsg] = useState('')
+    const [isDecompressing, setIsDecompressing] = useState(false)
 
     const initialForm = {
         title: '',
@@ -113,15 +116,14 @@ export default function ProblemManage() {
                 const formData = new FormData()
                 formData.append('file', testCaseFile)
                 try {
-                    await api.post(`/api/problem/${problemId}/testcases`, formData, {
+                    const res = await api.post(`/api/problem/${problemId}/testcases`, formData, {
                         headers: { 'Content-Type': 'multipart/form-data' }
                     })
-                } catch (e: any) {
-                    if (e.response?.status === 413) {
-                        alert('测试用例文件太大 (最大 10MB)')
-                    } else {
-                        alert('测试用例上传失败: ' + (e.response?.data?.message || '未知错误'))
+                    if (res.data.taskId) {
+                        pollDecompressionStatus(res.data.taskId)
                     }
+                } catch (e: any) {
+                    alert('测试用例上传失败: ' + (e.response?.data?.message || '未知错误'))
                 }
             }
 
@@ -197,20 +199,51 @@ export default function ProblemManage() {
         const formData = new FormData()
         formData.append('file', file)
         try {
-            await api.post(`/api/problem/${editingId}/testcases`, formData, {
+            const res = await api.post(`/api/problem/${editingId}/testcases`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             })
-            loadTestCases(editingId)
-            alert('测试用例上传并解析成功')
-        } catch (e: any) {
-            if (e.response?.status === 413) {
-                alert('测试用例文件太大 (最大 10MB)')
+            if (res.data.taskId) {
+                pollDecompressionStatus(res.data.taskId)
             } else {
-                alert('测试用例上传失败: ' + (e.response?.data?.message || '未知错误'))
+                loadTestCases(editingId)
+                alert('测试用例上传成功')
             }
+        } catch (e: any) {
+            alert('测试用例上传失败: ' + (e.response?.data?.message || e.response?.data?.error || '未知错误'))
         } finally {
             setIsUploadingZip(false)
         }
+    }
+
+    const pollDecompressionStatus = async (taskId: string) => {
+        setIsDecompressing(true)
+        setDecompressionProgress(0)
+        setDecompressionMsg('正在解析文件...')
+
+        const poll = async () => {
+            try {
+                const res = await api.get(`/api/problem/task/${taskId}`)
+                const { status, progress, message } = res.data.data
+
+                setDecompressionProgress(progress)
+                setDecompressionMsg(message)
+
+                if (status === 'completed') {
+                    setIsDecompressing(false)
+                    if (editingId) loadTestCases(editingId)
+                } else if (status === 'error') {
+                    setIsDecompressing(false)
+                    alert('测试用例处理失败: ' + message)
+                } else {
+                    setTimeout(poll, 1000)
+                }
+            } catch (e) {
+                console.error('Polling error', e)
+                setIsDecompressing(false)
+            }
+        }
+
+        poll()
     }
 
     const handleAddTestCase = async () => {
@@ -367,6 +400,38 @@ export default function ProblemManage() {
 
                         {editingId && (
                             <div className="form-group" style={{ marginTop: '20px' }}>
+                                {(isDecompressing || isUploadingZip) && (
+                                    <div style={{
+                                        background: '#ebf8ff',
+                                        padding: '15px 20px',
+                                        borderRadius: '8px',
+                                        border: '1px solid #bee3f8',
+                                        marginBottom: '20px'
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                            <span style={{ fontWeight: '600', color: '#2b6cb0' }}>
+                                                {isUploadingZip ? '正在上传文件...' : (decompressionMsg || '正在处理测试用例...')}
+                                            </span>
+                                            {!isUploadingZip && <span style={{ color: '#2b6cb0' }}>{Math.round(decompressionProgress)}%</span>}
+                                        </div>
+                                        {!isUploadingZip && (
+                                            <div style={{
+                                                width: '100%',
+                                                height: '8px',
+                                                background: '#bee3f8',
+                                                borderRadius: '4px',
+                                                overflow: 'hidden'
+                                            }}>
+                                                <div style={{
+                                                    width: `${decompressionProgress}%`,
+                                                    height: '100%',
+                                                    background: '#3182ce',
+                                                    transition: 'width 0.3s ease'
+                                                }}></div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                                     <label style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
                                         测试用例管理 ({testCases.length})
