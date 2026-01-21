@@ -43,6 +43,29 @@ public class ProblemService {
     private TaskService taskService;
 
     /**
+     * 获取题目详情（内部统一处理描述加载与旧数据迁移）
+     */
+    private void loadProblemDescription(Problem problem) {
+        // 兼容性处理：如果 description_id 为空，但 description 有值（说明是从旧数据库字段读到的）
+        // 则自动执行文件保存迁移
+        if ((problem.getDescriptionId() == null || problem.getDescriptionId().isEmpty())
+                && problem.getDescription() != null && !problem.getDescription().isEmpty()) {
+            try {
+                String descId = FileUtil.saveDescription(problem.getDescription());
+                problem.setDescriptionId(descId);
+                // 更新数据库记录，记录 description_id
+                problemMapper.update(problem);
+            } catch (IOException e) {
+                // 如果迁移失败，仅记录错误，不影响题目访问
+                System.err.println("Auto migration failed for problem " + problem.getId() + ": " + e.getMessage());
+            }
+        } else {
+            // 正常读取文件内容
+            problem.setDescription(FileUtil.readDescription(problem.getDescriptionId()));
+        }
+    }
+
+    /**
      * 获取题目列表（分页）
      */
     public List<Problem> getProblems(int page, int size) {
@@ -58,7 +81,7 @@ public class ProblemService {
         // 为每个问题加载标签和描述
         problems.forEach(p -> {
             loadProblemCategories(p);
-            p.setDescription(FileUtil.readDescription(p.getDescriptionId()));
+            loadProblemDescription(p);
         });
         return problems;
     }
@@ -75,7 +98,7 @@ public class ProblemService {
             throw new RuntimeException("题目不存在: " + id);
         }
         loadProblemCategories(problem);
-        problem.setDescription(FileUtil.readDescription(problem.getDescriptionId()));
+        loadProblemDescription(problem);
         return problem;
     }
 
@@ -93,7 +116,7 @@ public class ProblemService {
         // 为每个问题加载标签和描述
         problems.forEach(p -> {
             loadProblemCategories(p);
-            p.setDescription(FileUtil.readDescription(p.getDescriptionId()));
+            loadProblemDescription(p);
         });
         return problems;
     }
@@ -210,7 +233,7 @@ public class ProblemService {
         // 为每个问题加载标签和描述
         problems.forEach(p -> {
             loadProblemCategories(p);
-            p.setDescription(FileUtil.readDescription(p.getDescriptionId()));
+            loadProblemDescription(p);
         });
         return problems;
     }
@@ -259,7 +282,7 @@ public class ProblemService {
         List<Problem> problems = problemMapper.findByTag(tag, offset, size);
         problems.forEach(p -> {
             loadProblemCategories(p);
-            p.setDescription(FileUtil.readDescription(p.getDescriptionId()));
+            loadProblemDescription(p);
         });
         return problems;
     }
