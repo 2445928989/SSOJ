@@ -184,11 +184,12 @@ public class UserService {
     /**
      * 更新用户个人资料（仅更新可修改的字段）
      */
-    public boolean updateProfile(Long userId, String nickname, String phone, String profile) {
+    public boolean updateProfile(Long userId, String nickname, String phone, String profile, String avatar,
+            String backgroundImage) {
         if (userId == null || userId <= 0) {
             throw new IllegalArgumentException("用户ID无效");
         }
-        int ret = userMapper.updateProfile(userId, nickname, phone, profile, null);
+        int ret = userMapper.updateProfile(userId, nickname, phone, profile, avatar, backgroundImage);
         return ret > 0;
     }
 

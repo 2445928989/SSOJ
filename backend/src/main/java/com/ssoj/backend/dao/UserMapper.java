@@ -43,11 +43,11 @@ public interface UserMapper {
     int update(User user);
 
     /**
-     * 只更新用户的个人资料（昵称、电话、个人介绍、头像）
+     * 只更新用户的个人资料（昵称、电话、个人介绍、头像、背景图）
      */
     int updateProfile(@Param("id") Long id, @Param("nickname") String nickname,
             @Param("phone") String phone, @Param("profile") String profile,
-            @Param("avatar") String avatar);
+            @Param("avatar") String avatar, @Param("backgroundImage") String backgroundImage);
 
     /**
      * 删除用户

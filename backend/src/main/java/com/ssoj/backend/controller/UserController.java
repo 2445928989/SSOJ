@@ -259,8 +259,10 @@ public class UserController {
         String nickname = request.get("nickname");
         String phone = request.get("phone");
         String profile = request.get("profile");
+        String avatar = request.get("avatar");
+        String backgroundImage = request.get("backgroundImage");
 
-        boolean ok = userService.updateProfile(userId, nickname, phone, profile);
+        boolean ok = userService.updateProfile(userId, nickname, phone, profile, avatar, backgroundImage);
         return Map.of("success", ok);
     }
 

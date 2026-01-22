@@ -58,7 +58,7 @@ body {
     transition: color 0.3s ease;
 }
 
-.nav a::after {
+.nav a:not(.logo)::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -69,13 +69,24 @@ body {
     transition: width 0.3s ease;
 }
 
-.nav a:hover::after {
+.nav a:not(.logo):hover::after {
     width: 100%;
 }
 
 .nav a:not(.logo):hover {
     color: var(--primary-color);
     text-decoration: none;
+}
+
+.logo {
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-decoration: none;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transition: opacity 0.3s ease;
 }
 
 .logo:hover {
