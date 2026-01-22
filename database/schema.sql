@@ -21,6 +21,7 @@ CREATE TABLE user (
 CREATE TABLE problem(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
     description_id VARCHAR(100) COMMENT 'MD 文件的 ID 映射',
     input_format TEXT,
     output_format TEXT,
@@ -58,6 +59,16 @@ CREATE TABLE problem_tag(
     FOREIGN KEY(tag_id) REFERENCES tag(id) ON DELETE CASCADE,
     INDEX idx_tag_id(tag_id)
 );
+CREATE TABLE sample_case (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    problem_id BIGINT NOT NULL,
+    input_text MEDIUMTEXT,
+    output_text MEDIUMTEXT,
+    order_num INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(problem_id) REFERENCES problem(id) ON DELETE CASCADE,
+    INDEX idx_problem_id(problem_id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE TABLE test_case(
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     problem_id BIGINT NOT NULL,

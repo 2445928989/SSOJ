@@ -2,9 +2,11 @@ package com.ssoj.backend.service;
 
 import com.ssoj.backend.dao.ProblemMapper;
 import com.ssoj.backend.dao.ProblemTagMapper;
+import com.ssoj.backend.dao.SampleCaseMapper;
 import com.ssoj.backend.dao.TagMapper;
 import com.ssoj.backend.dao.TestCaseMapper;
 import com.ssoj.backend.entity.Problem;
+import com.ssoj.backend.entity.SampleCase;
 import com.ssoj.backend.entity.TestCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +38,9 @@ class ProblemServiceTest {
 
     @Mock
     private TestCaseMapper testCaseMapper;
+
+    @Mock
+    private SampleCaseMapper sampleCaseMapper;
 
     @Mock
     private TaskService taskService;

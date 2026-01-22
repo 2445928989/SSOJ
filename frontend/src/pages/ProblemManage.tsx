@@ -4,8 +4,9 @@ import { Link } from 'react-router-dom'
 
 // 智能预览组件，避免在列表中渲染超大文本导致卡顿
 const SmartPreview = React.memo(({ content, label }: { content: string, label: string }) => {
-    const isLarge = content.length > 1000;
-    const previewText = isLarge ? content.substring(0, 1000) + '...' : content;
+    const safeContent = content || '';
+    const isLarge = safeContent.length > 1000;
+    const previewText = isLarge ? safeContent.substring(0, 1000) + '...' : safeContent;
 
     return (
         <div style={{ flex: 1 }}>
@@ -48,17 +49,13 @@ export default function ProblemManage() {
     const initialForm = {
         title: '',
         description: '',
-        inputFormat: '',
-        outputFormat: '',
-        sampleInput: '',
-        sampleOutput: '',
-        sampleExplanation: '',
         difficulty: 'EASY',
         timeLimit: 1.0,
         memoryLimit: 262144,
         categories: [] as string[]
     }
     const [form, setForm] = useState(initialForm)
+    const [samples, setSamples] = useState<{ input: string, output: string }[]>([{ input: '', output: '' }])
     const [tagInput, setTagInput] = useState('')
     const [searchKeyword, setSearchKeyword] = useState('')
 
@@ -101,7 +98,25 @@ export default function ProblemManage() {
         try {
             // 处理标签输入
             const categories = tagInput.split(/[,，\s]+/).map(s => s.trim()).filter(s => s !== '')
-            const finalForm = { ...form, categories }
+
+            // 转换为后端需要的样例格式
+            const mappedSamples = samples.map((s, index) => ({
+                inputText: s.input,
+                outputText: s.output,
+                orderNum: index
+            }))
+
+            const finalForm = {
+                ...form,
+                categories,
+                samples: mappedSamples,
+                // 清空已废弃的分块字段，强制让管理者放入 description
+                inputFormat: '',
+                outputFormat: '',
+                sampleExplanation: '',
+                sampleInput: '',
+                sampleOutput: ''
+            }
 
             let problemId = editingId
             if (editingId) {
@@ -128,6 +143,7 @@ export default function ProblemManage() {
             }
 
             setForm(initialForm)
+            setSamples([{ input: '', output: '' }])
             setTestCaseFile(null)
             setEditingId(null)
             setShowForm(false)
@@ -145,18 +161,31 @@ export default function ProblemManage() {
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     setForm({
-                        title: p.title,
-                        description: p.description,
-                        inputFormat: p.inputFormat,
-                        outputFormat: p.outputFormat,
-                        sampleInput: p.sampleInput,
-                        sampleOutput: p.sampleOutput,
-                        sampleExplanation: p.sampleExplanation || '',
-                        difficulty: p.difficulty,
-                        timeLimit: p.timeLimit,
-                        memoryLimit: p.memoryLimit,
+                        title: p.title || '',
+                        description: p.description || '',
+                        difficulty: p.difficulty || 'EASY',
+                        timeLimit: p.timeLimit || 1.0,
+                        memoryLimit: p.memoryLimit || 262144,
                         categories: p.categories || []
                     })
+
+                    // 优先使用结构化样例数组，如果没有则解析旧的字符串（用于懒迁移兼容）
+                    if (p.samples && p.samples.length > 0) {
+                        setSamples(p.samples.map((s: any) => ({
+                            input: s.inputText || '',
+                            output: s.outputText || ''
+                        })));
+                    } else {
+                        const inList = (p.sampleInput || '').split('---').map((s: string) => s.trim());
+                        const outList = (p.sampleOutput || '').split('---').map((s: string) => s.trim());
+                        const count = Math.max(inList.length, outList.length, 1);
+                        const parsedSamples = Array.from({ length: count }).map((_, i) => ({
+                            input: inList[i] || '',
+                            output: outList[i] || ''
+                        }));
+                        setSamples(parsedSamples);
+                    }
+
                     setTagInput((p.categories || []).join(', '))
                     setEditingId(p.id)
                     setShowForm(true)
@@ -294,6 +323,7 @@ export default function ProblemManage() {
                     <button className="submit-btn" style={{ width: 'auto', padding: '8px 20px', margin: 0 }} onClick={() => {
                         setEditingId(null)
                         setForm(initialForm)
+                        setSamples([{ input: '', output: '' }])
                         setTagInput('')
                         setTestCases([])
                         setShowForm(!showForm)
@@ -340,35 +370,68 @@ export default function ProblemManage() {
                             <input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required placeholder="输入题目名称" />
                         </div>
                         <div className="form-group">
-                            <label>题目描述 (Markdown)</label>
-                            <textarea rows={8} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} required placeholder="支持 Markdown 格式" />
+                            <label>题目详情 (Markdown)</label>
+                            <div style={{ fontSize: '12px', color: '#718096', marginBottom: '8px' }}>
+                                请在此输入完整题干。建议包含：题目描述、输入格式、输出格式、样例说明等。可以使用 Markdown 标题（如 #, ##）进行分块。
+                            </div>
+                            <textarea rows={20} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} required placeholder="在此输入完整 Markdown 题干内容..." />
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '15px' }}>
-                            <div className="form-group">
-                                <label>输入格式</label>
-                                <textarea rows={3} value={form.inputFormat} onChange={e => setForm({ ...form, inputFormat: e.target.value })} />
+                        <div style={{ marginBottom: '25px', padding: '20px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                                <label style={{ fontWeight: '600', fontSize: '1rem' }}>样例管理</label>
+                                <button
+                                    type="button"
+                                    onClick={() => setSamples([...samples, { input: '', output: '' }])}
+                                    style={{ padding: '4px 12px', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
+                                >
+                                    + 添加样例
+                                </button>
                             </div>
-                            <div className="form-group">
-                                <label>输出格式</label>
-                                <textarea rows={3} value={form.outputFormat} onChange={e => setForm({ ...form, outputFormat: e.target.value })} />
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '15px' }}>
-                            <div className="form-group">
-                                <label>样例输入 (多个样例请用 --- 分隔)</label>
-                                <textarea rows={4} value={form.sampleInput} onChange={e => setForm({ ...form, sampleInput: e.target.value })} style={{ fontFamily: 'monospace' }} />
-                            </div>
-                            <div className="form-group">
-                                <label>样例输出 (多个样例请用 --- 分隔)</label>
-                                <textarea rows={4} value={form.sampleOutput} onChange={e => setForm({ ...form, sampleOutput: e.target.value })} style={{ fontFamily: 'monospace' }} />
-                            </div>
-                        </div>
-
-                        <div className="form-group">
-                            <label>样例说明 (Markdown)</label>
-                            <textarea rows={3} value={form.sampleExplanation} onChange={e => setForm({ ...form, sampleExplanation: e.target.value })} placeholder="对样例的解释说明" />
+                            {samples.map((s, i) => (
+                                <div key={i} style={{ marginBottom: '20px', padding: '15px', background: 'white', borderRadius: '6px', border: '1px solid #edf2f7', position: 'relative' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                        <span style={{ fontWeight: '600', color: '#4a5568', fontSize: '14px' }}>样例 {i + 1}</span>
+                                        {samples.length > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setSamples(samples.filter((_, idx) => idx !== i))}
+                                                style={{ color: '#e53e3e', background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px' }}
+                                            >
+                                                删除此样例
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label style={{ fontSize: '12px' }}>输入</label>
+                                            <textarea
+                                                rows={4}
+                                                value={s.input}
+                                                onChange={e => {
+                                                    const newSamples = [...samples];
+                                                    newSamples[i].input = e.target.value;
+                                                    setSamples(newSamples);
+                                                }}
+                                                style={{ fontFamily: 'monospace', fontSize: '13px' }}
+                                            />
+                                        </div>
+                                        <div className="form-group" style={{ marginBottom: 0 }}>
+                                            <label style={{ fontSize: '12px' }}>输出</label>
+                                            <textarea
+                                                rows={4}
+                                                value={s.output}
+                                                onChange={e => {
+                                                    const newSamples = [...samples];
+                                                    newSamples[i].output = e.target.value;
+                                                    setSamples(newSamples);
+                                                }}
+                                                style={{ fontFamily: 'monospace', fontSize: '13px' }}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '15px', marginBottom: '15px' }}>

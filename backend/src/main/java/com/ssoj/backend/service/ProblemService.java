@@ -2,9 +2,11 @@ package com.ssoj.backend.service;
 
 import com.ssoj.backend.entity.Problem;
 import com.ssoj.backend.entity.ProblemTag;
+import com.ssoj.backend.entity.SampleCase;
 import com.ssoj.backend.entity.TestCase;
 import com.ssoj.backend.dao.ProblemMapper;
 import com.ssoj.backend.dao.ProblemTagMapper;
+import com.ssoj.backend.dao.SampleCaseMapper;
 import com.ssoj.backend.dao.TagMapper;
 import com.ssoj.backend.dao.TestCaseMapper;
 import com.ssoj.backend.util.FileUtil;
@@ -40,28 +42,62 @@ public class ProblemService {
     private TestCaseMapper testCaseMapper;
 
     @Autowired
+    private SampleCaseMapper sampleCaseMapper;
+
+    @Autowired
     private TaskService taskService;
 
     /**
-     * 获取题目详情（内部统一处理描述加载与旧数据迁移）
+     * 加载题目内容（处理描述加载、样例加载与旧数据迁移）
      */
-    private void loadProblemDescription(Problem problem) {
-        // 兼容性处理：如果 description_id 为空，但 description 有值（说明是从旧数据库字段读到的）
-        // 则自动执行文件保存迁移
+    private void loadProblemData(Problem problem) {
+        // 1. 描述迁移与加载
         if ((problem.getDescriptionId() == null || problem.getDescriptionId().isEmpty())
                 && problem.getDescription() != null && !problem.getDescription().isEmpty()) {
             try {
                 String descId = FileUtil.saveDescription(problem.getDescription());
                 problem.setDescriptionId(descId);
-                // 更新数据库记录，记录 description_id
                 problemMapper.update(problem);
             } catch (IOException e) {
-                // 如果迁移失败，仅记录错误，不影响题目访问
-                System.err.println("Auto migration failed for problem " + problem.getId() + ": " + e.getMessage());
+                System.err.println(
+                        "Auto description migration failed for problem " + problem.getId() + ": " + e.getMessage());
             }
         } else {
-            // 正常读取文件内容
             problem.setDescription(FileUtil.readDescription(problem.getDescriptionId()));
+        }
+
+        // 2. 样例加载
+        List<SampleCase> samples = sampleCaseMapper.findByProblemId(problem.getId());
+
+        // 如果数据库中有关联样例，则直接返回
+        if (!samples.isEmpty()) {
+            problem.setSamples(samples);
+        } else {
+            // 兼容性迁移：如果关联表为空，但旧字段有数据
+            if (problem.getSampleInput() != null && !problem.getSampleInput().isEmpty()) {
+                try {
+                    String[] inParts = problem.getSampleInput().split("---");
+                    String[] outParts = (problem.getSampleOutput() != null ? problem.getSampleOutput() : "")
+                            .split("---");
+                    int count = Math.max(inParts.length, outParts.length);
+                    List<SampleCase> migrateSamples = new ArrayList<>();
+                    for (int i = 0; i < count; i++) {
+                        SampleCase sc = new SampleCase();
+                        sc.setProblemId(problem.getId());
+                        sc.setInputText(i < inParts.length ? inParts[i].trim() : "");
+                        sc.setOutputText(i < outParts.length ? outParts[i].trim() : "");
+                        sc.setOrderNum(i);
+                        sampleCaseMapper.insert(sc);
+                        migrateSamples.add(sc);
+                    }
+                    problem.setSamples(migrateSamples);
+                } catch (Exception e) {
+                    System.err.println(
+                            "Auto samples migration failed for problem " + problem.getId() + ": " + e.getMessage());
+                }
+            } else {
+                problem.setSamples(new ArrayList<>());
+            }
         }
     }
 
@@ -81,7 +117,7 @@ public class ProblemService {
         // 为每个问题加载标签和描述
         problems.forEach(p -> {
             loadProblemCategories(p);
-            loadProblemDescription(p);
+            loadProblemData(p);
         });
         return problems;
     }
@@ -98,7 +134,7 @@ public class ProblemService {
             throw new RuntimeException("题目不存在: " + id);
         }
         loadProblemCategories(problem);
-        loadProblemDescription(problem);
+        loadProblemData(problem);
         return problem;
     }
 
@@ -116,7 +152,7 @@ public class ProblemService {
         // 为每个问题加载标签和描述
         problems.forEach(p -> {
             loadProblemCategories(p);
-            loadProblemDescription(p);
+            loadProblemData(p);
         });
         return problems;
     }
@@ -154,6 +190,13 @@ public class ProblemService {
         }
 
         problemMapper.insert(problem);
+
+        // 保存样例
+        if (problem.getSamples() != null && !problem.getSamples().isEmpty()) {
+            problem.getSamples().forEach(s -> s.setProblemId(problem.getId()));
+            sampleCaseMapper.batchInsert(problem.getSamples());
+        }
+
         saveProblemCategories(problem);
         return getProblemById(problem.getId());
     }
@@ -190,6 +233,16 @@ public class ProblemService {
         if (ret == 0) {
             throw new RuntimeException("更新题目失败: " + problem.getId());
         }
+
+        // 更新样例：先删后插
+        if (problem.getSamples() != null) {
+            sampleCaseMapper.deleteByProblemId(problem.getId());
+            if (!problem.getSamples().isEmpty()) {
+                problem.getSamples().forEach(s -> s.setProblemId(problem.getId()));
+                sampleCaseMapper.batchInsert(problem.getSamples());
+            }
+        }
+
         saveProblemCategories(problem);
         return true;
     }
@@ -233,7 +286,7 @@ public class ProblemService {
         // 为每个问题加载标签和描述
         problems.forEach(p -> {
             loadProblemCategories(p);
-            loadProblemDescription(p);
+            loadProblemData(p);
         });
         return problems;
     }
@@ -282,7 +335,7 @@ public class ProblemService {
         List<Problem> problems = problemMapper.findByTag(tag, offset, size);
         problems.forEach(p -> {
             loadProblemCategories(p);
-            loadProblemDescription(p);
+            loadProblemData(p);
         });
         return problems;
     }

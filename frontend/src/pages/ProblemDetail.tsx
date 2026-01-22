@@ -336,62 +336,56 @@ export default function ProblemDetail() {
             <div className="problem-main">
                 {/* 题目描述 */}
                 <section className="content-section">
-                    <h2>题目描述</h2>
                     {problem.description ? (
-                        <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                            {problem.description}
-                        </ReactMarkdown>
+                        <div className="markdown-body">
+                            <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                                {problem.description}
+                            </ReactMarkdown>
+                        </div>
                     ) : (
                         <p className="placeholder">暂无描述</p>
                     )}
                 </section>
 
-                {/* 输入格式 */}
-                <section className="content-section">
-                    <h2>输入格式</h2>
-                    {problem.inputFormat ? (
-                        <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                            {problem.inputFormat}
-                        </ReactMarkdown>
-                    ) : (
-                        <p className="placeholder">暂无说明</p>
-                    )}
-                </section>
-
-                {/* 输出格式 */}
-                <section className="content-section">
-                    <h2>输出格式</h2>
-                    {problem.outputFormat ? (
-                        <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                            {problem.outputFormat}
-                        </ReactMarkdown>
-                    ) : (
-                        <p className="placeholder">暂无说明</p>
-                    )}
-                </section>
-
                 {/* 样例 */}
                 <section className="content-section">
-                    <h2>样例</h2>
+                    <h2 style={{ marginBottom: '1.5rem', borderLeft: '4px solid var(--primary-color)', paddingLeft: '1rem' }}>样例</h2>
                     {(() => {
-                        const inputs = (problem.sampleInput || '').split('---').map(s => s.trim()).filter(s => s !== '');
-                        const outputs = (problem.sampleOutput || '').split('---').map(s => s.trim()).filter(s => s !== '');
-                        const count = Math.max(inputs.length, outputs.length);
+                        let sampleList: { input: string, output: string }[] = [];
 
-                        if (count === 0) return <p className="placeholder">暂无样例</p>;
+                        // 优先使用结构化数据
+                        if (problem.samples && problem.samples.length > 0) {
+                            sampleList = problem.samples.map((s: any) => ({
+                                input: s.inputText || '',
+                                output: s.outputText || ''
+                            }));
+                        } else {
+                            // 降级使用旧的解析逻辑
+                            const inputs = (problem.sampleInput || '').split('---').map(s => s.trim()).filter(s => s !== '');
+                            const outputs = (problem.sampleOutput || '').split('---').map(s => s.trim()).filter(s => s !== '');
+                            const count = Math.max(inputs.length, outputs.length);
+                            for (let i = 0; i < count; i++) {
+                                sampleList.push({
+                                    input: inputs[i] || '',
+                                    output: outputs[i] || ''
+                                });
+                            }
+                        }
 
-                        return Array.from({ length: count }).map((_, i) => (
+                        if (sampleList.length === 0) return <p className="placeholder">暂无样例</p>;
+
+                        return sampleList.map((s, i) => (
                             <div key={i} className="samples-wrapper">
                                 <div className="sample-title">样例 {i + 1}</div>
                                 <div className="sample-grid">
                                     <SampleBox
-                                        content={inputs[i] || ''}
+                                        content={s.input}
                                         onCopy={handleCopy}
                                         copyStatusKey={`in-${i}`}
                                         copyStatus={copyStatus}
                                     />
                                     <SampleBox
-                                        content={outputs[i] || ''}
+                                        content={s.output}
                                         onCopy={handleCopy}
                                         copyStatusKey={`out-${i}`}
                                         copyStatus={copyStatus}
@@ -401,16 +395,6 @@ export default function ProblemDetail() {
                         ));
                     })()}
                 </section>
-
-                {/* 样例说明 */}
-                {problem.sampleExplanation && (
-                    <section className="content-section">
-                        <h2>样例说明</h2>
-                        <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                            {problem.sampleExplanation}
-                        </ReactMarkdown>
-                    </section>
-                )}
 
                 {/* 讨论区 */}
                 <section className="content-section discussion-section">

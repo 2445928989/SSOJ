@@ -167,12 +167,13 @@ export default function App() {
 
                 .nav-loading-bar {
                     position: absolute;
-                    bottom: 0;
+                    top: 0;
                     left: 0;
-                    width: 100%;
-                    height: 2px;
+                    height: 3px;
                     background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-dark) 50%, var(--primary-color) 100%);
-                    transition: opacity 0.3s ease;
+                    transition: width 0.3s ease, opacity 0.3s ease;
+                    z-index: 1002;
+                    pointer-events: none;
                 }
 
                 .footer {

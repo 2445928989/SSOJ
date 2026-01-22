@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssoj.backend.dao.SampleCaseMapper">
+
+    <resultMap id="SampleCaseResultMap" type="com.ssoj.backend.entity.SampleCase">
+        <id property="id" column="id" />
+        <result property="problemId" column="problem_id" />
+        <result property="inputText" column="input_text" />
+        <result property="outputText" column="output_text" />
+        <result property="orderNum" column="order_num" />
+        <result property="createdAt" column="created_at" />
+    </resultMap>
+
+    <select id="findByProblemId" resultMap="SampleCaseResultMap"> SELECT * FROM sample_case WHERE
+        problem_id = #{problemId} ORDER BY order_num ASC </select>
+
+    <insert id="insert" parameterType="com.ssoj.backend.entity.SampleCase" useGeneratedKeys="true"
+        keyProperty="id"> INSERT INTO sample_case (problem_id, input_text, output_text, order_num)
+        VALUES (#{problemId}, #{inputText}, #{outputText}, #{orderNum}) </insert>
+
+    <insert id="batchInsert"> INSERT INTO sample_case (problem_id, input_text, output_text,
+        order_num) VALUES <foreach collection="samples" item="s" separator=","> (#{s.problemId},
+        #{s.inputText}, #{s.outputText}, #{s.orderNum}) </foreach>
+    </insert>
+
+    <delete id="deleteByProblemId"> DELETE FROM sample_case WHERE problem_id = #{problemId} </delete>
+</mapper>
