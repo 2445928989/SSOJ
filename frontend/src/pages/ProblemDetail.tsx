@@ -384,6 +384,17 @@ export default function ProblemDetail() {
                     })()}
                 </section>
 
+                {/* 样例解释与提示 */}
+                {problem.hint && (
+                    <section className="content-section">
+                        <div className="markdown-body">
+                            <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                                {problem.hint}
+                            </ReactMarkdown>
+                        </div>
+                    </section>
+                )}
+
                 {/* 讨论区 */}
                 <section className="content-section discussion-section">
                     <h2>讨论区</h2>

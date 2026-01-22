@@ -13,6 +13,7 @@ public class Problem {
     private String title;
     private String descriptionId; // MD 文件的 ID 映射
     private String description; // 仅用于 API 传输，不直接存储在 problem 表中
+    private String hint; // 样例解释或提示
     private String difficulty;
     private Double timeLimit;
     private Integer memoryLimit;

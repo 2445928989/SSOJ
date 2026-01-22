@@ -49,6 +49,7 @@ export default function ProblemManage() {
     const initialForm = {
         title: '',
         description: '',
+        hint: '',
         difficulty: 'EASY',
         timeLimit: 1.0,
         memoryLimit: 262144,
@@ -419,6 +420,14 @@ export default function ProblemManage() {
                                     </div>
                                 </div>
                             ))}
+                        </div>
+
+                        <div className="form-group">
+                            <label>样例解释 / 提示 (Markdown)</label>
+                            <div style={{ fontSize: '12px', color: '#718096', marginBottom: '8px' }}>
+                                此内容将显示在所有样例之后，用于解释样例或提供解题提示。
+                            </div>
+                            <textarea rows={5} value={form.hint} onChange={e => setForm({ ...form, hint: e.target.value })} placeholder="输入样例解释或提示内容..." />
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '15px', marginBottom: '15px' }}>

@@ -23,6 +23,7 @@ CREATE TABLE problem(
     title VARCHAR(100) NOT NULL UNIQUE,
     description TEXT,
     description_id VARCHAR(100) COMMENT 'MD 文件的 ID 映射',
+    hint MEDIUMTEXT COMMENT '样例解释或提示',
     difficulty VARCHAR(20) NOT NULL,
     time_limit DOUBLE DEFAULT 1.0 COMMENT '时间限制(秒)',
     memory_limit INT DEFAULT 262144 COMMENT '内存限制(KB)',

@@ -8,6 +8,7 @@
         <result property="title" column="title" />
         <result property="descriptionId" column="description_id" />
         <result property="description" column="description" />
+        <result property="hint" column="hint" />
         <result property="difficulty" column="difficulty" />
         <result property="timeLimit" column="time_limit" />
         <result property="memoryLimit" column="memory_limit" />
@@ -33,15 +34,15 @@
 
     <!-- 插入新题目 -->
     <insert id="insert" parameterType="com.ssoj.backend.entity.Problem"
-        useGeneratedKeys="true" keyProperty="id"> INSERT INTO problem ( title, description_id,
+        useGeneratedKeys="true" keyProperty="id"> INSERT INTO problem ( title, description_id, hint,
         difficulty, time_limit, memory_limit, author_id, number_of_submissions, number_of_accepted,
-        created_at, updated_at ) VALUES ( #{title}, #{descriptionId}, #{difficulty}, #{timeLimit},
-        #{memoryLimit}, #{authorId}, 0, 0, NOW(), NOW() ) </insert>
+        created_at, updated_at ) VALUES ( #{title}, #{descriptionId}, #{hint}, #{difficulty},
+        #{timeLimit}, #{memoryLimit}, #{authorId}, 0, 0, NOW(), NOW() ) </insert>
 
     <!-- 更新题目 -->
     <update id="update"> UPDATE problem SET title = #{title}, description_id = #{descriptionId},
-        difficulty = #{difficulty}, time_limit = #{timeLimit}, memory_limit = #{memoryLimit},
-        updated_at = NOW() WHERE id = #{id} </update>
+        hint = #{hint}, difficulty = #{difficulty}, time_limit = #{timeLimit}, memory_limit =
+        #{memoryLimit}, updated_at = NOW() WHERE id = #{id} </update>
 
     <!-- 删除题目 -->
     <delete id="deleteById"> DELETE FROM problem WHERE id = #{id} </delete>
