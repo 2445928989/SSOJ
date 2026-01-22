@@ -34,9 +34,15 @@
         WHERE id=#{id} </update>
 
     <!-- 只更新用户的个人资料字段 -->
-    <update id="updateProfile"> UPDATE user SET nickname=#{nickname}, phone=#{phone},
-        profile=#{profile}, avatar=#{avatar}, background_image=#{backgroundImage}, updated_at=NOW()
-        WHERE id=#{id} </update>
+    <update id="updateProfile"> UPDATE user <set>
+            <if test="nickname != null">nickname=#{nickname},</if>
+            <if test="phone != null">
+        phone=#{phone},</if>
+            <if test="profile != null">profile=#{profile},</if>
+            <if
+                test="avatar != null">avatar=#{avatar},</if>
+            <if test="backgroundImage != null">
+        background_image=#{backgroundImage},</if> updated_at=NOW() </set> WHERE id=#{id} </update>
 
     <delete id="deleteById"> DELETE FROM user WHERE id = #{id} </delete>
 
