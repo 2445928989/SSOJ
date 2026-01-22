@@ -349,7 +349,6 @@ export default function ProblemDetail() {
 
                 {/* 样例 */}
                 <section className="content-section">
-                    <h2 style={{ marginBottom: '1.5rem', borderLeft: '4px solid var(--primary-color)', paddingLeft: '1rem' }}>样例</h2>
                     {(() => {
                         let sampleList: { input: string, output: string }[] = [];
 
