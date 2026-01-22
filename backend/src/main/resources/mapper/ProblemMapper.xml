@@ -34,9 +34,9 @@
     <!-- 插入新题目 -->
     <insert id="insert" parameterType="com.ssoj.backend.entity.Problem"
         useGeneratedKeys="true" keyProperty="id"> INSERT INTO problem ( title, description_id,
-        difficulty, time_limit, memory_limit, author_id, number_of_submissions, 
-        number_of_accepted, created_at, updated_at ) VALUES ( #{title}, #{descriptionId}, 
-        #{difficulty}, #{timeLimit}, #{memoryLimit}, #{authorId}, 0, 0, NOW(), NOW() ) </insert>
+        difficulty, time_limit, memory_limit, author_id, number_of_submissions, number_of_accepted,
+        created_at, updated_at ) VALUES ( #{title}, #{descriptionId}, #{difficulty}, #{timeLimit},
+        #{memoryLimit}, #{authorId}, 0, 0, NOW(), NOW() ) </insert>
 
     <!-- 更新题目 -->
     <update id="update"> UPDATE problem SET title = #{title}, description_id = #{descriptionId},
