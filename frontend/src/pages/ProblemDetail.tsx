@@ -358,17 +358,6 @@ export default function ProblemDetail() {
                                 input: s.inputText || '',
                                 output: s.outputText || ''
                             }));
-                        } else {
-                            // 降级使用旧的解析逻辑
-                            const inputs = (problem.sampleInput || '').split('---').map(s => s.trim()).filter(s => s !== '');
-                            const outputs = (problem.sampleOutput || '').split('---').map(s => s.trim()).filter(s => s !== '');
-                            const count = Math.max(inputs.length, outputs.length);
-                            for (let i = 0; i < count; i++) {
-                                sampleList.push({
-                                    input: inputs[i] || '',
-                                    output: outputs[i] || ''
-                                });
-                            }
                         }
 
                         if (sampleList.length === 0) return <p className="placeholder">暂无样例</p>;

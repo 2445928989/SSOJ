@@ -109,13 +109,7 @@ export default function ProblemManage() {
             const finalForm = {
                 ...form,
                 categories,
-                samples: mappedSamples,
-                // 清空已废弃的分块字段，强制让管理者放入 description
-                inputFormat: '',
-                outputFormat: '',
-                sampleExplanation: '',
-                sampleInput: '',
-                sampleOutput: ''
+                samples: mappedSamples
             }
 
             let problemId = editingId
@@ -169,21 +163,14 @@ export default function ProblemManage() {
                         categories: p.categories || []
                     })
 
-                    // 优先使用结构化样例数组，如果没有则解析旧的字符串（用于懒迁移兼容）
+                    // 优先使用结构化样例数组
                     if (p.samples && p.samples.length > 0) {
                         setSamples(p.samples.map((s: any) => ({
                             input: s.inputText || '',
                             output: s.outputText || ''
                         })));
                     } else {
-                        const inList = (p.sampleInput || '').split('---').map((s: string) => s.trim());
-                        const outList = (p.sampleOutput || '').split('---').map((s: string) => s.trim());
-                        const count = Math.max(inList.length, outList.length, 1);
-                        const parsedSamples = Array.from({ length: count }).map((_, i) => ({
-                            input: inList[i] || '',
-                            output: outList[i] || ''
-                        }));
-                        setSamples(parsedSamples);
+                        setSamples([{ input: '', output: '' }]);
                     }
 
                     setTagInput((p.categories || []).join(', '))

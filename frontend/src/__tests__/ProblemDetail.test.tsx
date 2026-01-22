@@ -18,11 +18,10 @@ vi.mock('../api', () => {
                             numberOfAccepted: 10,
                             numberOfSubmissions: 20,
                             categories: ['数学'],
-                            description: '**加法**',
-                            inputFormat: '输入',
-                            outputFormat: '输出',
-                            sampleInput: '1 2',
-                            sampleOutput: '3'
+                            description: '**加法**\n\n### 输入格式\n输入\n\n### 输出格式\n输出',
+                            samples: [
+                                { inputText: '1 2', outputText: '3', orderNum: 0 }
+                            ]
                         }
                     })
                 }

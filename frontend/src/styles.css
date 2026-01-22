@@ -822,7 +822,7 @@ pre {
 }
 
 .markdown-body {
-    white-space: pre-wrap;
+    line-height: 1.6;
 }
 
 .markdown-body h1,
@@ -834,23 +834,24 @@ pre {
     border-bottom: none;
     text-decoration: none;
     padding-bottom: 0;
-    margin-top: 1.5em;
+    margin-top: 1.25em;
     margin-bottom: 0.5em;
 }
 
 .markdown-body ul,
 .markdown-body ol {
-    padding-left: 2em;
-    margin-bottom: 1em;
+    padding-left: 1.5em;
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
 }
 
 .markdown-body li {
-    margin-bottom: 0.5em;
+    margin-bottom: 0.25em;
     text-decoration: none;
 }
 
 .markdown-body p {
-    margin-bottom: 1em;
+    margin-bottom: 0.6em;
 }
 
 .markdown-body p:last-child {

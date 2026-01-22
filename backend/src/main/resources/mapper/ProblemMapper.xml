@@ -8,11 +8,6 @@
         <result property="title" column="title" />
         <result property="descriptionId" column="description_id" />
         <result property="description" column="description" />
-        <result property="inputFormat" column="input_format" />
-        <result property="outputFormat" column="output_format" />
-        <result property="sampleInput" column="sample_input" />
-        <result property="sampleOutput" column="sample_output" />
-        <result property="sampleExplanation" column="sample_explanation" />
         <result property="difficulty" column="difficulty" />
         <result property="timeLimit" column="time_limit" />
         <result property="memoryLimit" column="memory_limit" />
@@ -39,16 +34,12 @@
     <!-- 插入新题目 -->
     <insert id="insert" parameterType="com.ssoj.backend.entity.Problem"
         useGeneratedKeys="true" keyProperty="id"> INSERT INTO problem ( title, description_id,
-        input_format, output_format, sample_input, sample_output, sample_explanation, difficulty,
-        time_limit, memory_limit, author_id, number_of_submissions, number_of_accepted, created_at,
-        updated_at ) VALUES ( #{title}, #{descriptionId}, #{inputFormat}, #{outputFormat},
-        #{sampleInput}, #{sampleOutput}, #{sampleExplanation}, #{difficulty}, #{timeLimit},
-        #{memoryLimit}, #{authorId}, 0, 0, NOW(), NOW() ) </insert>
+        difficulty, time_limit, memory_limit, author_id, number_of_submissions, 
+        number_of_accepted, created_at, updated_at ) VALUES ( #{title}, #{descriptionId}, 
+        #{difficulty}, #{timeLimit}, #{memoryLimit}, #{authorId}, 0, 0, NOW(), NOW() ) </insert>
 
     <!-- 更新题目 -->
     <update id="update"> UPDATE problem SET title = #{title}, description_id = #{descriptionId},
-        input_format = #{inputFormat}, output_format = #{outputFormat}, sample_input =
-        #{sampleInput}, sample_output = #{sampleOutput}, sample_explanation = #{sampleExplanation},
         difficulty = #{difficulty}, time_limit = #{timeLimit}, memory_limit = #{memoryLimit},
         updated_at = NOW() WHERE id = #{id} </update>
 

@@ -25,11 +25,4 @@ public class Problem {
     private LocalDateTime updatedAt;
     private List<String> categories; // 题目的标签列表
     private List<SampleCase> samples; // 题目的样例列表
-
-    // 废弃字段（仅用于迁移兼容性，不再存储在数据库中）
-    private String inputFormat;
-    private String outputFormat;
-    private String sampleInput;
-    private String sampleOutput;
-    private String sampleExplanation;
 }

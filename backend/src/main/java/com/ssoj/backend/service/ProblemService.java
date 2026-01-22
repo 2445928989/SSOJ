@@ -68,37 +68,7 @@ public class ProblemService {
 
         // 2. 样例加载
         List<SampleCase> samples = sampleCaseMapper.findByProblemId(problem.getId());
-
-        // 如果数据库中有关联样例，则直接返回
-        if (!samples.isEmpty()) {
-            problem.setSamples(samples);
-        } else {
-            // 兼容性迁移：如果关联表为空，但旧字段有数据
-            if (problem.getSampleInput() != null && !problem.getSampleInput().isEmpty()) {
-                try {
-                    String[] inParts = problem.getSampleInput().split("---");
-                    String[] outParts = (problem.getSampleOutput() != null ? problem.getSampleOutput() : "")
-                            .split("---");
-                    int count = Math.max(inParts.length, outParts.length);
-                    List<SampleCase> migrateSamples = new ArrayList<>();
-                    for (int i = 0; i < count; i++) {
-                        SampleCase sc = new SampleCase();
-                        sc.setProblemId(problem.getId());
-                        sc.setInputText(i < inParts.length ? inParts[i].trim() : "");
-                        sc.setOutputText(i < outParts.length ? outParts[i].trim() : "");
-                        sc.setOrderNum(i);
-                        sampleCaseMapper.insert(sc);
-                        migrateSamples.add(sc);
-                    }
-                    problem.setSamples(migrateSamples);
-                } catch (Exception e) {
-                    System.err.println(
-                            "Auto samples migration failed for problem " + problem.getId() + ": " + e.getMessage());
-                }
-            } else {
-                problem.setSamples(new ArrayList<>());
-            }
-        }
+        problem.setSamples(samples != null ? samples : new ArrayList<>());
     }
 
     /**
